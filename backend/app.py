@@ -21,14 +21,16 @@ from pydantic import BaseModel
 
 from pci_sentinel import agents as agents_mod
 from pci_sentinel import chat as chat_mod
+from pci_sentinel import analytics as analytics_mod
+from pci_sentinel.llm_client import LLMClient
 from pci_sentinel.orchestrator import start_run, resume_run, store as _store
 from pci_sentinel.security import PanLeakError
 
-app = FastAPI(title="PCI-SENTINEL", version="0.2.0",
+app = FastAPI(title="PCI-SENTINEL", version="0.3.0",
               description="Explainable PCI data-flow mapping and scope-reduction engine.")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-_LAST = {"result": None}
+_LAST = {"result": None, "art": None, "scores": None, "pan_sources": None}
 
 
 def _full(r):
@@ -43,7 +45,9 @@ def _full(r):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "has_run": _LAST["result"] is not None}
+    llm = LLMClient()
+    return {"status": "ok", "has_run": _LAST["result"] is not None,
+            "llm_mode": "live" if llm.online else "deterministic-fallback"}
 
 
 @app.get("/api/agents")
@@ -65,6 +69,10 @@ def _handle(st):
     status = st.get("status")
     if status == "complete":
         _LAST["result"] = st["result"]
+        s = _store(st["thread_id"])           # capture artifacts for the optimizer / what-if
+        art = s.get("art")
+        _LAST["art"], _LAST["scores"] = art, s.get("scores")
+        _LAST["pan_sources"] = art.pan_sources if art else None
         return {"status": "complete", "thread_id": st["thread_id"], **_full(st["result"])}
     if status == "awaiting_approval":
         return {"status": "awaiting_approval", "thread_id": st["thread_id"],
@@ -127,6 +135,53 @@ def headline():
 @app.get("/api/explanation")
 def explanation():
     return {"explanation": _need().explanation}
+
+
+def _need_art():
+    if _LAST["art"] is None:
+        raise HTTPException(409, "No analysis artifacts. Run an analysis first.")
+    return _LAST["art"].G, _LAST["pan_sources"], _LAST["scores"]
+
+
+@app.get("/api/plan")
+def plan(target: float = 0.8, max_k: int = 8):
+    """Greedy minimum-intervention roadmap: fewest sources to tokenize for the most descope."""
+    G, ps, sc = _need_art()
+    return analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=target, max_k=max_k)
+
+
+class WhatIf(BaseModel):
+    sources: list = []
+
+
+@app.post("/api/whatif")
+def whatif(body: WhatIf):
+    """Impact of tokenizing an arbitrary set of sources (full descoped + retained sets)."""
+    G, ps, sc = _need_art()
+    return analytics_mod.what_if(G, ps, sc, body.sources)
+
+
+@app.get("/api/report/pdf")
+def report_pdf():
+    from fastapi.responses import Response
+    from pci_sentinel import reporting
+    r = _need(); G, ps, sc = _need_art()
+    plan = analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=0.8, max_k=8)
+    pdf = reporting.build_pdf(r, _LAST["art"], sc, plan)
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": "attachment; filename=pci-sentinel-report.pdf"})
+
+
+@app.get("/api/report/xlsx")
+def report_xlsx():
+    from fastapi.responses import Response
+    from pci_sentinel import reporting
+    r = _need(); G, ps, sc = _need_art()
+    plan = analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=0.8, max_k=8)
+    xlsx = reporting.build_xlsx(r, _LAST["art"], sc, plan)
+    return Response(content=xlsx,
+                    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={"Content-Disposition": "attachment; filename=pci-sentinel-data-pack.xlsx"})
 
 
 def _chat_target(thread_id):

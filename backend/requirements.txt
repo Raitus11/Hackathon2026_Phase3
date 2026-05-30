@@ -3,6 +3,12 @@ uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 networkx==3.4.2
 pydantic==2.10.4
-langgraph==1.2.2
+# Range chosen to coexist with a pre-existing langchain install (which pins langgraph<1.2.0).
+# This project imports ONLY langgraph (StateGraph/checkpoint/types); never langchain itself.
+# Verified against 1.1.10; the 1.1.x API used here is identical to 1.2.x.
+langgraph>=1.1.1,<1.2.0
 pytest==8.3.4
 httpx==0.28.1
+reportlab==4.4.10
+openpyxl==3.1.5
+matplotlib==3.10.8

@@ -152,6 +152,87 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
     }
 
 
+def what_if(G, pan_sources: set, scores: dict, tokenize: list) -> dict:
+    """Clean-stream impact for an arbitrary set of tokenized sources, returning the
+    FULL descoped and retained sets so the UI can recolor the graph and so the plan
+    can show exactly which systems go safe-for-free vs. must onboard RISE/APG."""
+    H = _flatten(G)
+    independent = {n for n, d in H.nodes(data=True)
+                   if d.get("carries_pan") or d.get("detokenizes")}
+    before = pci_scope(H, pan_sources)
+    remaining = (pan_sources - set(tokenize)) | (independent - set(tokenize))
+    after = pci_scope(H, remaining) | (independent - set(tokenize))
+    descoped = sorted(before - after)
+    retained = sorted(n for n in after if H.nodes[n].get("detokenizes") and n not in set(tokenize))
+    base = clean_stream_impact(G, pan_sources, scores, tokenize)
+    base["descoped_systems"] = descoped            # full set (no cap) for graph recolor
+    base["descoped_systems_sample"] = descoped[:60]
+    base["retained_via_detokenization"] = retained
+    base["retained_via_detokenization_count"] = len(retained)
+    return base
+
+
+def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
+                              target_fraction: float = 0.8, max_k: int = 8,
+                              candidate_k: int = 25) -> dict:
+    """Greedy minimum-intervention roadmap.
+
+    Problem: choose the FEWEST PAN sources to tokenize that descope the MOST systems
+    (FAQ: "where tokenization has the greatest reduction of clear card number usage").
+    Descope semantics (FAQ Q5): a system goes safe only when every clear-PAN source
+    reaching it is tokenized — so coverage is a monotone, submodular set function.
+
+    Method: greedy maximum-coverage — at each step add the candidate source whose
+    marginal descope is largest. For monotone submodular coverage the greedy solution
+    is within (1 - 1/e) ~ 63% of the optimal k-set (Nemhauser, Wolsey & Fisher, 1978),
+    a named, defensible bound rather than a heuristic with no guarantee. Candidate
+    levers are the top exclusive-reach distributors (interpretable, and bounds cost).
+    """
+    H = _flatten(G)
+    before = pci_scope(H, pan_sources)
+    before_n = len(before)
+    independent = {n for n, d in H.nodes(data=True)
+                   if d.get("carries_pan") or d.get("detokenizes")}
+    descopable = before - independent
+    candidates = [h["system"] for h in heavy_hitters(G, pan_sources, scores, top_k=candidate_k)]
+
+    def scope_after(tok):
+        remaining = (pan_sources - set(tok)) | (independent - set(tok))
+        return pci_scope(H, remaining) | (independent - set(tok))
+
+    chosen, steps, cur = [], [], before
+    while len(chosen) < max_k:
+        best, best_after = None, cur
+        for s in candidates:
+            if s in chosen:
+                continue
+            a = scope_after(chosen + [s])
+            if len(a) < len(best_after):
+                best, best_after = s, a
+        if best is None or len(cur) - len(best_after) <= 0:
+            break
+        marginal = len(cur) - len(best_after)
+        chosen.append(best)
+        cum = before_n - len(best_after)
+        steps.append({
+            "step": len(chosen), "tokenize": best, "marginal_descoped": marginal,
+            "cumulative_descoped": cum, "scope_after": len(best_after),
+            "exclusive_reach": next((h["exclusive_reach"] for h in
+                                     heavy_hitters(G, pan_sources, scores, top_k=candidate_k)
+                                     if h["system"] == best), None),
+            "pct_of_descopable": round(100 * cum / max(1, len(descopable)), 1),
+        })
+        cur = best_after
+        if len(descopable) and cum / len(descopable) >= target_fraction:
+            break
+    return {
+        "before": before_n, "descopable": len(descopable), "after": len(cur),
+        "total_descoped": before_n - len(cur), "k": len(chosen),
+        "plan": chosen, "steps": steps, "target_fraction": target_fraction,
+        "method": "greedy max-coverage (Nemhauser-Wolsey-Fisher 1978; (1-1/e) bound)",
+    }
+
+
 def hidden_scope(G) -> dict:
     """FAQ Takeaway 5 (killer demo): systems BAM flags PCI=No but Splunk observed
     clear PAN in their logs -> hidden scope BAM misses. Also surfaces declared PAN

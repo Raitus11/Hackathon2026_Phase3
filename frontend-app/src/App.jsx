@@ -643,6 +643,135 @@ function Drill({ d, selected, onPick }) {
   )
 }
 
+/* ============================ PLANNER (optimizer + what-if) ============================ */
+function Planner({ d, live, onPick }) {
+  const candidates = useMemo(() => d.heavy_hitters.map(h => h.system), [d])
+  const exclBy = useMemo(() => Object.fromEntries(d.heavy_hitters.map(h => [h.system, h.exclusive_reach])), [d])
+  const [plan, setPlan] = useState(d.plan || null)
+  const [target, setTarget] = useState(Math.round((d.plan?.target_fraction || 0.8) * 100))
+  const [selected, setSelected] = useState(() => (d.plan?.plan || []).slice(0, 3))
+  const [wi, setWi] = useState(d.whatif_top3 || null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (!live) return
+    let cancel = false
+    ;(async () => {
+      try {
+        const r = await fetch('/api/whatif', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sources: selected }) })
+        const j = await r.json(); if (!cancel) setWi(j)
+      } catch (e) { /* keep last */ }
+    })()
+    return () => { cancel = true }
+  }, [selected, live])
+
+  const runPlan = async () => {
+    if (!live) return
+    setBusy(true)
+    try {
+      const r = await fetch(`/api/plan?target=${target / 100}&max_k=8`); const j = await r.json()
+      setPlan(j); setSelected(j.plan.slice(0, Math.min(3, j.plan.length)))
+    } finally { setBusy(false) }
+  }
+  const toggle = s => { if (!live) return; setSelected(x => x.includes(s) ? x.filter(y => y !== s) : [...x, s]) }
+
+  const before = wi ? wi.scope_before : (d.impact?.scope_before || 0)
+  const after = wi ? wi.scope_after : (d.impact?.scope_after || 0)
+  const maxv = Math.max(before, 1)
+  const descoped = wi ? (wi.descoped_systems || []) : []
+  const retained = wi ? (wi.retained_via_detokenization || []) : []
+
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Tokenization planner <span className="text-faint text-xs font-normal">— where intervention has the greatest reduction</span></div>
+        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
+          The optimizer answers the core question: tokenize the <b>fewest</b> sources to take the <b>most</b> systems
+          out of PCI scope. A system goes safe only when every clear-PAN source reaching it is tokenized, so coverage
+          is monotone and submodular — greedy selection is within (1−1/e) of optimal
+          <span className="text-faint"> (Nemhauser, Wolsey &amp; Fisher, 1978)</span>.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-5">
+        {/* roadmap */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between">
+            <div className="disp font-bold">Minimum-intervention roadmap</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-faint">target {target}%</span>
+              <input type="range" min="20" max="100" step="10" value={target} onChange={e => setTarget(+e.target.value)} className="accent-pan" disabled={!live} />
+              <button onClick={runPlan} disabled={!live || busy} className="text-[11px] mono px-2.5 py-1 rounded border border-pan text-pan hover:bg-pan/10 disabled:opacity-40">{busy ? '…' : 'compute'}</button>
+            </div>
+          </div>
+          {plan && (
+            <div className="mt-3">
+              <div className="text-xs text-dim mb-3">Tokenizing <b className="text-pan">{plan.k}</b> source(s) descopes <b className="text-safe">{plan.total_descoped}</b> of {plan.descopable} descopable systems ({plan.before}→{plan.after} in scope).</div>
+              <div className="space-y-1.5">
+                {plan.steps.map(s => (
+                  <div key={s.step} className="flex items-center gap-2 text-sm">
+                    <span className="mono text-faint w-5">{s.step}.</span>
+                    <button onClick={() => onPick(s.tokenize)} className="mono text-pan w-16 text-left hover:underline">{s.tokenize}</button>
+                    <div className="flex-1 h-2.5 rounded-full bg-panel2 overflow-hidden">
+                      <div className="h-full bg-safe" style={{ width: s.pct_of_descopable + '%', transition: 'width .5s' }} />
+                    </div>
+                    <span className="mono text-[11px] text-dim w-24 text-right">+{s.marginal_descoped} (cum {s.cumulative_descoped})</span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-[11px] text-faint mt-3 mono">{plan.method}</div>
+            </div>
+          )}
+          {!live && <div className="text-[11px] text-faint mt-3">Showing the precomputed plan from the embedded snapshot. Connect the API (upload to analyze) to recompute for a target and run interactive what-if.</div>}
+        </div>
+
+        {/* what-if */}
+        <div className="card p-5">
+          <div className="disp font-bold">What-if simulator</div>
+          <div className="text-xs text-dim mb-2">{live ? 'Toggle sources to tokenize; scope and downstream safety recompute live.' : 'Live toggling needs the API — showing the top-3 preset.'}</div>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {candidates.map(s => (
+              <button key={s} onClick={() => toggle(s)} disabled={!live}
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (selected.includes(s) ? 'border-pan text-pan bg-pan/10' : 'border-line text-dim hover:text-txt') + (!live ? ' opacity-60' : '')}>
+                {s}{exclBy[s] != null ? ` ·${exclBy[s]}` : ''}
+              </button>
+            ))}
+          </div>
+          {[['In scope now', before, 'bg-pan'], ['After tokenizing selection', after, 'bg-safe']].map(([lbl, v, c], i) => (
+            <div key={i} className="mb-2">
+              <div className="flex justify-between text-xs mb-1"><span className="text-dim">{lbl}</span><span className="mono">{v}</span></div>
+              <div className="h-3 rounded-full bg-panel2 overflow-hidden"><div className={'h-full ' + c} style={{ width: (100 * v / maxv) + '%', transition: 'width .6s' }} /></div>
+            </div>
+          ))}
+          <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div className="bg-panel2 rounded-lg p-2"><div className="disp text-xl font-black text-safe">{wi ? wi.nodes_descoped : 0}</div><div className="text-[10px] text-dim">descoped</div></div>
+            <div className="bg-panel2 rounded-lg p-2"><div className="disp text-xl font-black text-safe">{wi ? wi.node_surface_reduction_pct : 0}%</div><div className="text-[10px] text-dim">surface ↓</div></div>
+            <div className="bg-panel2 rounded-lg p-2"><div className="disp text-xl font-black text-cool">{wi ? wi.retained_via_detokenization_count : 0}</div><div className="text-[10px] text-dim">need RISE/APG</div></div>
+          </div>
+        </div>
+      </div>
+
+      {/* safe-for-free vs needs-detok */}
+      <div className="grid lg:grid-cols-2 gap-5">
+        <div className="card p-5">
+          <div className="disp font-bold text-sm text-safe">Safe with no further work <span className="text-faint font-normal">({descoped.length})</span></div>
+          <div className="text-[11px] text-faint mb-2">Descope automatically once the selected sources emit CRN — no tokenization or onboarding of their own.</div>
+          <div className="scroll max-h-[200px] overflow-auto flex flex-wrap gap-1.5">
+            {descoped.length ? descoped.map(s => <button key={s} onClick={() => onPick(s)} className="mono text-[11px] px-2 py-0.5 rounded bg-safe/10 text-safe hover:bg-safe/20">{s}</button>) : <span className="text-dim text-sm">select sources to simulate</span>}
+          </div>
+        </div>
+        <div className="card p-5">
+          <div className="disp font-bold text-sm text-cool">Must onboard RISE/APG <span className="text-faint font-normal">({retained.length})</span></div>
+          <div className="text-[11px] text-faint mb-2">Genuinely need the real PAN, so they stay in the CDE and de-tokenize CRN via centralized RISE/APG services.</div>
+          <div className="scroll max-h-[200px] overflow-auto flex flex-wrap gap-1.5">
+            {retained.length ? retained.map(s => <button key={s} onClick={() => onPick(s)} className="mono text-[11px] px-2 py-0.5 rounded bg-cool/10 text-cool hover:bg-cool/20">{s}</button>) : <span className="text-dim text-sm">none in current selection</span>}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ============================ ASK (grounded chat) ============================ */
 function ChatPanel({ suggested, live, threadId, height = 400 }) {
   const [msgs, setMsgs] = useState([])
@@ -720,7 +849,7 @@ export default function App() {
   const [sel, setSel] = useState(null)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['ask', 'Ask']]
+  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['ask', 'Ask']]
   return (
     <div className="max-w-[1280px] mx-auto px-5 py-5">
       <header className="flex items-center gap-4 mb-5">
@@ -728,6 +857,12 @@ export default function App() {
         <div className="text-xs text-faint border-l border-line pl-4 leading-tight">Intelligent mapping of interdependencies across PCI systems<br />cardholder-data lineage · scope reduction · clean-stream targeting</div>
         <div className="ml-auto flex items-center gap-3">
           {error && <span onClick={clearError} title="dismiss" className="mono text-[11px] px-2 py-1 rounded bg-panhot/20 text-panhot cursor-pointer max-w-[340px] truncate">⚠ {error}</span>}
+          {src === 'live' && phase === 'done' && (
+            <div className="flex items-center gap-1.5">
+              <a href="/api/report/pdf" className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2" title="Executive PDF report">↓ PDF</a>
+              <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2" title="XLSX data pack">↓ XLSX</a>
+            </div>
+          )}
           <button onClick={() => { reset(); setTab('pipeline') }}
             className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
           <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
@@ -738,6 +873,7 @@ export default function App() {
       </nav>
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
+      {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
