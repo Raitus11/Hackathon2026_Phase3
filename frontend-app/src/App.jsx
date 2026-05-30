@@ -110,7 +110,8 @@ function useData() {
   }
 
   return { data, src, agents, suggested, uploading, error, phase, gate,
-           analyze, approve, clearError: () => setError(null) }
+           analyze, approve, reset: () => { setPhase('idle'); setGate(null) },
+           clearError: () => setError(null) }
 }
 
 /* ============================ small bits ============================ */
@@ -129,101 +130,188 @@ const kindColor = { control: 'text-cool', deterministic: 'text-safe', human: 'te
 const kindRing = { control: 'border-cool/40', deterministic: 'border-safe/40', human: 'border-pan/60', llm: 'border-panhot/50' }
 
 /* ============================ PIPELINE / landing ============================ */
-function Pipeline({ d, agents, phase, gate, uploading, onUpload, onApprove }) {
+const SHORT = { supervisor: 'Supervise', ingest: 'Ingest', validate_masking_leak: 'Validate',
+  build_graph: 'Graph', condense_to_dag: 'DAG', score: 'Score', analytics: 'Analyze',
+  human_gate: 'Gate', report: 'Report' }
+const dotBg = { control: 'bg-cool', deterministic: 'bg-safe', human: 'bg-pan', llm: 'bg-panhot' }
+const detectDS = f => { const m = (f.name || '').match(/ds[ _-]?([1-6])/i); return m ? 'DS' + m[1] : null }
+
+function Pipeline({ d, agents, phase, gate, uploading, onUpload, onApprove, onReset }) {
   const [requireApproval, setRequireApproval] = useState(false)
   const [revTop, setRevTop] = useState(gate?.gate?.recommend_top || 3)
+  const [files, setFiles] = useState([])
+  const [hover, setHover] = useState(null)
+  const [liveStep, setLiveStep] = useState(-1)
   const auditByStage = useMemo(() => Object.fromEntries((d?.audit || []).map(a => [a.stage, a])), [d])
   const gateIdx = agents.findIndex(a => a.kind === 'human')
   const fileRef = useRef()
+  const detected = useMemo(() => [...new Set(files.map(detectDS).filter(Boolean))].sort(), [files])
 
-  const stageState = (a, i) => {
+  // sequential stage-lighting while a run is in flight (cosmetic, snaps to truth on finish)
+  useEffect(() => {
+    if (phase === 'running') {
+      const cap = requireApproval ? gateIdx : agents.length - 1
+      setLiveStep(0)
+      let i = 0
+      const id = setInterval(() => { i += 1; setLiveStep(i); if (i >= cap) clearInterval(id) }, 280)
+      return () => clearInterval(id)
+    }
+    if (phase === 'gate') setLiveStep(gateIdx)
+    else if (phase === 'done') setLiveStep(agents.length)
+    else setLiveStep(-1)
+  }, [phase, requireApproval, gateIdx, agents.length])
+
+  const stageState = (i) => {
+    if (phase === 'running') return i < liveStep ? 'done' : i === liveStep ? 'active' : 'pending'
     if (phase === 'gate') return i < gateIdx ? 'done' : i === gateIdx ? 'active' : 'pending'
-    if (phase === 'running') return 'active'
     if (phase === 'done') return 'done'
     return 'idle'
   }
+  const hoveredAgent = agents.find(a => a.key === hover)
+  const running = phase === 'running' || phase === 'gate' || phase === 'done'
+
   return (
-    <div className="space-y-5">
-      <div className="card p-5">
-        <div className="disp font-bold text-lg">A hybrid-intelligence agentic pipeline</div>
-        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
-          PCI-SENTINEL maps how clear cardholder data (PAN) flows across enterprise systems so tokenization can be
-          targeted where it removes the most systems from PCI scope. Deterministic agents do every measurable thing —
-          masking, graph construction, cycle resolution, scoring, scope math — and verify each other. A human approves
-          before anything is reported. The LLM only narrates the already-computed numbers; it never decides.
+    <div className="space-y-4">
+      {/* hero */}
+      <div>
+        <h1 className="disp font-bold text-xl text-txt">Cardholder-data flow intelligence</h1>
+        <p className="text-sm text-dim mt-1.5 max-w-2xl leading-relaxed">
+          Maps how clear PAN moves across enterprise systems and pinpoints where tokenization removes the most
+          systems from PCI scope. Deterministic agents do every measured step; a human approves the result; the
+          LLM only explains it.
         </p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {['Deterministic core', 'Human-gated', 'LLM narrates — never decides', 'Masking enforced on ingest'].map(t =>
+            <span key={t} className="text-[11px] mono px-2.5 py-1 rounded-full border border-line text-dim">{t}</span>)}
+        </div>
       </div>
 
-      <div className="card p-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="disp font-bold">Agent pipeline <span className="text-faint text-xs font-normal">LangGraph · checkpointed · resumable</span></div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-dim cursor-pointer select-none">
-              <input type="checkbox" checked={requireApproval} onChange={e => setRequireApproval(e.target.checked)} />
-              require human approval before report
-            </label>
-            <input ref={fileRef} type="file" multiple accept=".csv" className="hidden"
-              onChange={e => { onUpload(e.target.files, requireApproval); e.target.value = '' }} />
-            <button disabled={uploading} onClick={() => fileRef.current.click()}
-              className={'mono text-xs px-4 py-2 rounded-lg font-semibold ' + (uploading ? 'bg-line text-faint' : 'bg-pan text-ink hover:brightness-110')}>
-              {uploading ? 'running…' : '↑ Upload CSVs & run'}
-            </button>
-          </div>
+      {/* compact flow strip */}
+      <div className="card px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] uppercase tracking-[.16em] text-faint">Agent pipeline · LangGraph</span>
+          <span className="text-[11px] mono text-faint">{phase === 'running' ? 'running…' : phase === 'gate' ? 'paused at gate' : phase === 'done' ? 'complete' : 'idle'}</span>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-3 mt-4">
+        <div className="flex items-center gap-0 flex-wrap">
           {agents.map((a, i) => {
-            const s = stageState(a, i), au = auditByStage[a.key]
-            const ring = s === 'active' ? 'border-pan animate-pulse' : s === 'done' ? kindRing[a.kind] : 'border-line'
+            const s = stageState(i), au = auditByStage[a.key]
+            const active = s === 'active', done = s === 'done'
             return (
-              <div key={a.key} className={'rounded-xl border p-3 bg-panel2/50 ' + ring}>
-                <div className="flex items-center justify-between">
-                  <span className={'mono text-[10px] uppercase tracking-wider ' + (kindColor[a.kind] || 'text-dim')}>{a.kind}</span>
-                  <span className="mono text-[10px] text-faint">{s === 'done' && au ? au.ms + 'ms' : s === 'active' ? '…' : s === 'gate' ? '' : ''}</span>
-                </div>
-                <div className="disp font-semibold text-sm mt-1 flex items-center gap-1.5">
-                  <span className={'inline-block w-2 h-2 rounded-full ' + (s === 'done' ? 'bg-safe' : s === 'active' ? 'bg-pan' : 'bg-line')} />
-                  {a.name}
-                </div>
-                <div className="text-[11px] text-dim mt-1 leading-snug">{a.role}</div>
-                <div className="text-[10px] text-faint mt-1.5 mono leading-snug">{a.method}</div>
-              </div>
+              <React.Fragment key={a.key}>
+                <button onMouseEnter={() => setHover(a.key)} onMouseLeave={() => setHover(null)}
+                  className={'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition ' +
+                    (active ? 'bg-pan/10' : 'hover:bg-panel2')}>
+                  <span className={'inline-block w-2 h-2 rounded-full ' +
+                    (done ? dotBg[a.kind] || 'bg-safe' : active ? 'bg-pan animate-pulse' : 'bg-line')} />
+                  <span className={'text-xs ' + (active ? 'text-pan' : done ? 'text-txt' : 'text-dim')}>{SHORT[a.key] || a.name}</span>
+                  {done && au && <span className="mono text-[9px] text-faint">{au.ms}ms</span>}
+                </button>
+                {i < agents.length - 1 && <span className={'text-xs px-0.5 transition ' + (stageState(i + 1) !== 'pending' && phase !== 'idle' ? 'text-pan' : 'text-faint/50')}>›</span>}
+              </React.Fragment>
             )
           })}
         </div>
+        <div className="text-[11px] text-dim mt-2 min-h-[16px] leading-snug">
+          {hoveredAgent
+            ? <span><b className="text-txt">{hoveredAgent.name}</b> — {hoveredAgent.role} <span className="text-faint">· {hoveredAgent.method}</span></span>
+            : <span className="text-faint">Hover a stage for detail. The run executes left → right and pauses at the gate when approval is required.</span>}
+        </div>
       </div>
 
-      {phase === 'gate' && gate && (
-        <div className="card p-5 border-pan/50">
-          <div className="disp font-bold text-pan">⏸ Human-in-the-loop — approval required</div>
-          <p className="text-sm text-dim mt-1">{gate.gate.ask}</p>
-          <div className="flex flex-wrap gap-6 mt-3 text-sm">
-            <div><span className="text-faint text-xs block">In-scope systems</span><span className="mono text-pan text-lg">{gate.gate.scope_size}</span></div>
-            <div><span className="text-faint text-xs block">Hidden PCI</span><span className="mono text-panhot text-lg">{gate.gate.hidden_pci}</span></div>
-            <div><span className="text-faint text-xs block">Recommended interventions (top {gate.gate.recommend_top})</span>
-              <span className="mono text-txt">{(gate.gate.recommended_interventions || []).join('  ')}</span></div>
+      {/* live agent activity feed */}
+      {running && (
+        <div className="card px-5 py-4">
+          <div className="text-[11px] uppercase tracking-[.16em] text-faint mb-2">Run activity</div>
+          <div className="space-y-1.5">
+            {agents.map((a, i) => {
+              const s = stageState(i)
+              if (s === 'pending') return null
+              const au = auditByStage[a.key]
+              return (
+                <div key={a.key} className="flex items-center gap-2 text-xs" style={{ animation: 'rise .3s ease backwards' }}>
+                  <span className={'w-4 text-center ' + (s === 'done' ? 'text-safe' : 'text-pan')}>{s === 'done' ? '✓' : '▸'}</span>
+                  <span className={'mono w-24 ' + (s === 'active' ? 'text-pan' : 'text-txt')}>{a.name.split(' ')[0]}</span>
+                  <span className="text-dim flex-1 truncate">{a.role}</span>
+                  {s === 'done' && au && <span className="mono text-faint">{au.ms}ms</span>}
+                  {s === 'active' && a.kind === 'human' && phase === 'gate' && <span className="text-pan">awaiting approval</span>}
+                  {s === 'active' && phase === 'running' && <span className="text-pan animate-pulse">running</span>}
+                </div>
+              )
+            })}
           </div>
-          <div className="flex items-center gap-3 mt-4 flex-wrap">
-            <button disabled={uploading} onClick={() => onApprove('approve')} className="mono text-xs px-4 py-2 rounded-lg bg-safe text-ink font-semibold hover:brightness-110">✓ Approve & report</button>
-            <div className="flex items-center gap-1">
-              <button disabled={uploading} onClick={() => onApprove('revise', String(revTop))} className="mono text-xs px-4 py-2 rounded-lg border border-pan text-pan hover:bg-pan/10">↻ Revise to top</button>
-              <input type="number" min="1" max="10" value={revTop} onChange={e => setRevTop(e.target.value)} className="w-14 bg-panel2 border border-line rounded px-2 py-1.5 mono text-xs text-txt" />
-            </div>
-            <button disabled={uploading} onClick={() => onApprove('abort')} className="mono text-xs px-4 py-2 rounded-lg border border-panhot text-panhot hover:bg-panhot/10">✕ Abort</button>
-          </div>
-          <div className="text-[11px] text-faint mt-3">This is a genuine LangGraph <span className="mono">interrupt</span> — the run is paused server-side and resumes only on your decision.</div>
         </div>
       )}
 
-      {phase === 'done' && (
-        <div className="card p-4 border-safe/40 flex items-center gap-3">
-          <span className="text-safe text-xl">✓</span>
-          <div className="text-sm text-dim">Analysis complete — {d.audit?.length || 0} agents ran, masking-leak check passed. Open <b className="text-txt">Overview</b>, the <b className="text-txt">Data-Flow Graph</b>, <b className="text-txt">Drill-down</b>, or <b className="text-txt">Ask</b>.</div>
-        </div>
-      )}
+      {/* upload / run */}
+      <div className="card p-5">
+        {phase === 'gate' && gate ? (
+          <div>
+            <div className="text-sm font-semibold text-pan flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-pan animate-pulse" />Awaiting your approval</div>
+            <p className="text-sm text-dim mt-1">{gate.gate.ask}</p>
+            <div className="flex flex-wrap gap-8 mt-4 text-sm">
+              <div><div className="text-faint text-[11px] uppercase tracking-wider">In scope</div><div className="disp text-2xl font-black text-pan">{gate.gate.scope_size}</div></div>
+              <div><div className="text-faint text-[11px] uppercase tracking-wider">Hidden PCI</div><div className="disp text-2xl font-black text-panhot">{gate.gate.hidden_pci}</div></div>
+              <div><div className="text-faint text-[11px] uppercase tracking-wider">Recommended (top {gate.gate.recommend_top})</div><div className="mono text-txt mt-1.5">{(gate.gate.recommended_interventions || []).join('  ')}</div></div>
+            </div>
+            <div className="flex items-center gap-2 mt-5 flex-wrap">
+              <button disabled={uploading} onClick={() => onApprove('approve')} className="text-xs px-4 py-2 rounded-lg bg-safe text-ink font-semibold hover:brightness-110">Approve &amp; report</button>
+              <div className="flex items-center gap-1.5 border border-line rounded-lg pl-3 pr-1 py-0.5">
+                <span className="text-xs text-dim">revise to top</span>
+                <input type="number" min="1" max="10" value={revTop} onChange={e => setRevTop(e.target.value)} className="w-12 bg-panel2 border border-line rounded px-2 py-1 mono text-xs text-txt" />
+                <button disabled={uploading} onClick={() => onApprove('revise', String(revTop))} className="text-xs px-2.5 py-1.5 rounded text-pan hover:bg-pan/10">↻</button>
+              </div>
+              <button disabled={uploading} onClick={() => onApprove('abort')} className="text-xs px-4 py-2 rounded-lg text-panhot hover:bg-panhot/10">Abort</button>
+            </div>
+            <div className="text-[11px] text-faint mt-3">A genuine LangGraph <span className="mono">interrupt</span> — paused server-side, resumes only on your decision.</div>
+          </div>
+        ) : phase === 'done' ? (
+          <div className="flex items-center gap-3">
+            <span className="w-7 h-7 rounded-full bg-safe/15 text-safe flex items-center justify-center">✓</span>
+            <div className="text-sm text-dim">Analysis complete — {d.audit?.length || 0} agents ran, masking-leak check passed. See <b className="text-txt">Overview</b>, <b className="text-txt">Data-Flow Graph</b>, <b className="text-txt">Drill-down</b>, or <b className="text-txt">Ask</b>.
+              <button onClick={() => { setFiles([]); onReset && onReset() }} className="ml-2 text-pan hover:underline">run again</button></div>
+          </div>
+        ) : (
+          <div>
+            <input ref={fileRef} type="file" multiple accept=".csv" className="hidden"
+              onChange={e => { setFiles(Array.from(e.target.files || [])); e.target.value = '' }} />
+            {files.length === 0 ? (
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-txt">Upload the data exports</div>
+                  <div className="text-xs text-dim mt-0.5">BAM dependency + system reports and the survey/Splunk signals (DS1–DS6, any order — auto-detected).</div>
+                </div>
+                <button onClick={() => fileRef.current.click()} className="text-xs px-4 py-2 rounded-lg border border-line text-pan hover:bg-panel2">Select CSV files</button>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="w-6 h-6 rounded-full bg-safe/15 text-safe flex items-center justify-center text-xs">✓</span>
+                  <span className="text-txt font-semibold">{files.length} file{files.length > 1 ? 's' : ''} received</span>
+                  {detected.length > 0 && <span className="text-dim text-xs">· detected {detected.join(', ')}</span>}
+                  <button onClick={() => fileRef.current.click()} className="text-xs text-faint hover:text-dim ml-1">change</button>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {files.map((f, i) => <span key={i} className="mono text-[10px] px-2 py-0.5 rounded bg-panel2 text-dim">{f.name}</span>)}
+                </div>
+                <div className="flex items-center gap-4 mt-4 flex-wrap">
+                  <button disabled={uploading} onClick={() => onUpload(files, requireApproval)}
+                    className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (uploading ? 'bg-line text-faint' : 'bg-pan text-ink hover:brightness-110')}>
+                    {uploading ? 'running…' : 'Run analysis →'}
+                  </button>
+                  <label className="flex items-center gap-2 text-xs text-dim cursor-pointer select-none">
+                    <input type="checkbox" checked={requireApproval} onChange={e => setRequireApproval(e.target.checked)} />
+                    pause for human approval before reporting
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+
 
 /* ============================ OVERVIEW (expert) ============================ */
 function Overview({ d, onPick }) {
@@ -602,14 +690,9 @@ function Ask({ d, suggested, live }) {
 
 /* ============================ APP ============================ */
 export default function App() {
-  const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, clearError } = useData()
+  const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, reset, clearError } = useData()
   const [tab, setTab] = useState('pipeline')
   const [sel, setSel] = useState(null)
-  const prevPhase = useRef(phase)
-  useEffect(() => {  // auto-advance to Overview when a run completes
-    if (prevPhase.current !== 'done' && phase === 'done') setTab('overview')
-    prevPhase.current = phase
-  }, [phase])
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
   const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['ask', 'Ask']]
@@ -620,13 +703,15 @@ export default function App() {
         <div className="text-xs text-faint border-l border-line pl-4 leading-tight">Intelligent mapping of interdependencies across PCI systems<br />cardholder-data lineage · scope reduction · clean-stream targeting</div>
         <div className="ml-auto flex items-center gap-3">
           {error && <span onClick={clearError} title="dismiss" className="mono text-[11px] px-2 py-1 rounded bg-panhot/20 text-panhot cursor-pointer max-w-[340px] truncate">⚠ {error}</span>}
+          <button onClick={() => { reset(); setTab('pipeline') }}
+            className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
           <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
         </div>
       </header>
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
         {tabs.map(([k, l]) => <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>)}
       </nav>
-      {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} onUpload={analyze} onApprove={approve} />}
+      {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
