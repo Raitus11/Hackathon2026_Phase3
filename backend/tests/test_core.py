@@ -136,3 +136,40 @@ def test_hitl_gate_interrupts_and_resumes():
     assert "__interrupt__" in out                      # paused at the gate
     resumed = app.invoke(Command(resume={"decision": "approve"}), cfg)
     assert resumed["status"] == "complete"
+
+
+# ---- V-014 viz edges are deduplicated (parallel edges collapsed) ----
+def test_viz_edges_deduped():
+    import glob
+    from pci_sentinel import pipeline
+    files = [(f, open(f, encoding="utf-8-sig").read()) for f in glob.glob("../sample_data/DS*.csv")]
+    r = pipeline.run(files)
+    pairs = [(e["source"], e["target"]) for e in r.viz["edges"]]
+    assert len(pairs) == len(set(pairs))                 # one visual edge per ordered pair
+    multi = [e for e in r.viz["edges"] if e.get("count", 1) > 1]
+    assert multi and all(e["count"] >= 2 for e in multi)  # parallels recorded as count
+
+
+# ---- V-015 scope split + hidden flag are internally consistent ----
+def test_scope_split_and_hidden_flag():
+    import glob
+    from pci_sentinel import pipeline
+    files = [(f, open(f, encoding="utf-8-sig").read()) for f in glob.glob("../sample_data/DS*.csv")]
+    r = pipeline.run(files)
+    h = r.headline
+    assert h["scope_metadata_confirmed"] + h["scope_inferred_only"] == h["systems_exposed_to_clear_pan"]
+    hidden_nodes = [n for n in r.viz["nodes"] if n["hidden_pci"]]
+    assert len(hidden_nodes) == h["hidden_pci_systems_bam_misses"]
+
+
+# ---- V-016 grounded chat answers deterministically, no model needed ----
+def test_chat_deterministic_grounded():
+    import glob
+    from pci_sentinel import pipeline, chat
+    files = [(f, open(f, encoding="utf-8-sig").read()) for f in glob.glob("../sample_data/DS*.csv")]
+    r = pipeline.run(files)
+    a = chat.answer(r, "How many systems are in scope, confirmed vs inferred?")
+    assert str(r.headline["systems_exposed_to_clear_pan"]) in a["answer"]
+    top = r.heavy_hitters[0]["system"]
+    a2 = chat.answer(r, f"What happens if we tokenize {top}?")
+    assert top in a2["answer"] and top in a2["grounded_on"]

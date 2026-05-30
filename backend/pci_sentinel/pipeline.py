@@ -57,10 +57,27 @@ def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset()):
             "scope_prov": (("inferred" if n in inferred_scope else "metadata") if in_scope else None),
             "super_node": dagr.node_to_super.get(n),
         })
-    edges = []
+    # Collapse parallel edges (the MultiDiGraph carries one edge per source dataset,
+    # so a pair present in DS1+DS2+DS3 appears 3x). One visual edge per (u,v):
+    # provenance is 'metadata' if ANY contributing edge is authoritative, else 'inferred'.
+    agg: dict = {}
     for u, v, d in art.G.edges(data=True):
-        edges.append({"source": u, "target": v, "provenance": d.get("provenance"),
-                      "signal": d.get("signal", ""), "dataset": d.get("source_dataset", "")})
+        key = (u, v)
+        e = agg.get(key)
+        prov = d.get("provenance")
+        ds = d.get("source_dataset") or d.get("dataset") or ""
+        if e is None:
+            agg[key] = {"source": u, "target": v, "provenance": prov,
+                        "signal": d.get("signal", ""), "datasets": [ds] if ds else [], "count": 1}
+        else:
+            e["count"] += 1
+            if ds and ds not in e["datasets"]:
+                e["datasets"].append(ds)
+            if prov == "metadata":           # any authoritative edge wins the provenance
+                e["provenance"] = "metadata"
+            if not e["signal"] and d.get("signal"):
+                e["signal"] = d.get("signal")
+    edges = [{**e, "dataset": ", ".join(e["datasets"])} for e in agg.values()]
     return {"nodes": nodes, "edges": edges,
             "dag": {"nodes": [{"id": s, **dd} for s, dd in dagr.DAG.nodes(data=True)],
                     "edges": [{"source": u, "target": v, "weight": dd.get("weight", 1)}

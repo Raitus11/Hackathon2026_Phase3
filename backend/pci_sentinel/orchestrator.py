@@ -19,7 +19,7 @@ from typing import TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.types import interrupt
+from langgraph.types import interrupt, Command
 
 from . import analytics, dag_transform, graph_build, ingest as ingest_mod
 from .pipeline import RunResult, _viz_payload, finalize
@@ -125,10 +125,15 @@ def human_gate(state, config):
     if state.get("auto_approve", True):
         return {"human_decision": "approve",
                 "audit": _log(state, "human_gate", time.perf_counter(), decision="approve(auto)")}
+    hh = state.get("heavy_hitters") or []
+    top = max(1, int(state.get("recommend_top", 3)))
     decision = interrupt({
-        "ask": "Approve analysis, revise (set recommend_top), or abort?",
+        "ask": "Review the analysis, then approve to report, revise the recommendation depth, or abort.",
         "scope_size": state.get("scope_size"),
-        "top_intervention": state["heavy_hitters"][0]["system"] if state.get("heavy_hitters") else None,
+        "hidden_pci": (state.get("hidden") or {}).get("hidden_pci_count"),
+        "recommend_top": top,
+        "recommended_interventions": [h["system"] for h in hh[:top]],
+        "top_intervention": hh[0]["system"] if hh else None,
     })
     d = decision if isinstance(decision, dict) else {"decision": str(decision)}
     return {"human_decision": d.get("decision", "approve"), "feedback": d.get("feedback", ""),
@@ -145,7 +150,8 @@ def revise_node(state, config):
     for tok in str(state.get("feedback", "")).split():
         if tok.isdigit():
             top = int(tok)
-    return {"recommend_top": top, "auto_approve": True,
+    # keep auto_approve False so the gate pauses again with the revised recommendation
+    return {"recommend_top": top, "auto_approve": False,
             "audit": _log(state, "revise", time.perf_counter(), new_recommend_top=top)}
 
 
@@ -193,10 +199,59 @@ def build_orchestrator():
     return g.compile(checkpointer=MemorySaver())
 
 
-def run_agentic(files, recommend_top: int = 3, auto_approve: bool = True, thread_id: str = "demo"):
-    app = build_orchestrator()
+# The compiled app (and its checkpointer) must persist across HTTP calls so an
+# interrupted run can be resumed in a later request. One process-wide instance.
+_APP = None
+
+
+def get_app():
+    global _APP
+    if _APP is None:
+        _APP = build_orchestrator()
+    return _APP
+
+
+def _shape(final, thread_id):
+    """Translate a LangGraph return into a transport-friendly status object."""
+    if "__interrupt__" in final:
+        gate = final["__interrupt__"][0].value
+        return {"status": "awaiting_approval", "thread_id": thread_id,
+                "gate": gate, "audit": final.get("audit", [])}
+    if final.get("status") == "aborted":
+        return {"status": "aborted", "thread_id": thread_id,
+                "error": final.get("error", "see audit"), "audit": final.get("audit", [])}
+    return {"status": "complete", "thread_id": thread_id,
+            "result": store(thread_id).get("result"),
+            "headline": final.get("headline"), "audit": final.get("audit", [])}
+
+
+def start_run(files, recommend_top: int = 3, auto_approve: bool = True, thread_id: str = "demo"):
+    """Begin a run. With auto_approve=False the graph pauses at the human gate and
+    returns status='awaiting_approval' with the gate payload + a thread_id to resume."""
+    _STORE.pop(thread_id, None)
+    app = get_app()
     cfg = {"configurable": {"thread_id": thread_id}}
     final = app.invoke({"files": files, "recommend_top": recommend_top,
                         "auto_approve": auto_approve, "audit": []}, cfg)
+    return _shape(final, thread_id)
+
+
+def resume_run(thread_id: str, decision: str, feedback: str = ""):
+    """Resume a paused run with a human decision (approve / revise / abort)."""
+    app = get_app()
+    cfg = {"configurable": {"thread_id": thread_id}}
+    final = app.invoke(Command(resume={"decision": decision, "feedback": feedback}), cfg)
+    return _shape(final, thread_id)
+
+
+def run_agentic(files, recommend_top: int = 3, auto_approve: bool = True, thread_id: str = "demo"):
+    """Back-compatible unattended entry (used by tests and the snapshot generator)."""
+    _STORE.pop(thread_id, None)
+    app = get_app()
+    cfg = {"configurable": {"thread_id": thread_id}}
+    final = app.invoke({"files": files, "recommend_top": recommend_top,
+                        "auto_approve": auto_approve, "audit": []}, cfg)
+    if "__interrupt__" in final:                       # resume immediately when unattended
+        final = app.invoke(Command(resume={"decision": "approve"}), cfg)
     final["result"] = store(thread_id).get("result")
     return final

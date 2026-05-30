@@ -53,6 +53,34 @@ class LLMClient:
         except Exception as e:  # noqa: BLE001 - never let narration break the run
             return self._offline(grounded_facts) + f"\n\n[note: live explanation unavailable: {e}]"
 
+    def chat(self, question: str, facts: dict, history=None) -> str:
+        """Answer a free-form question grounded ONLY in the computed facts."""
+        if not self.online:
+            return ("I can answer that precisely once an inference provider is configured. "
+                    "From the computed analysis I can already tell you about scope counts, the "
+                    "metadata-confirmed vs inferred-only split, the heavy-hitter PAN distributors, "
+                    "hidden-PCI systems, and the clean-stream impact of tokenizing a given system — "
+                    "try asking about one of those, or name a system ID.")
+        sys = ("You are a PCI scope analyst. Answer the question using ONLY the JSON facts provided "
+               "from a completed data-flow analysis. Cite system IDs where relevant. If the facts do "
+               "not contain the answer, say so plainly — never invent systems, numbers, or edges.")
+        msgs = [{"role": "system", "content": sys}]
+        for h in (history or [])[-6:]:
+            if h.get("role") in ("user", "assistant") and h.get("content"):
+                msgs.append({"role": h["role"], "content": str(h["content"])[:2000]})
+        msgs.append({"role": "user", "content": "FACTS:\n" + json.dumps(facts, indent=2) +
+                     "\n\nQUESTION: " + question})
+        payload = {"model": self.model, "messages": msgs, "temperature": 0.2}
+        req = urllib.request.Request(
+            f"{self.base_url}/chat/completions", data=json.dumps(payload).encode(),
+            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read())
+            return data["choices"][0]["message"]["content"]
+        except Exception as e:  # noqa: BLE001
+            return f"Could not reach the inference provider ({e}). Try a scope, heavy-hitter, hidden-PCI, or per-system question."
+
     @staticmethod
     def _offline(f: dict) -> str:
         hh = (f.get("top_heavy_hitter") or {})
