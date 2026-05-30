@@ -1,0 +1,14 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+html,body,#root{height:100%}
+body{background:#0a0e14;color:#e6edf6;font-family:"IBM Plex Sans",sans-serif;
+  background-image:radial-gradient(900px 500px at 80% -10%, rgba(91,141,239,.10), transparent),
+                   radial-gradient(700px 400px at 0% 110%, rgba(245,166,35,.07), transparent);}
+.mono{font-family:"IBM Plex Mono",monospace}.disp{font-family:"Archivo",sans-serif}
+.card{background:linear-gradient(180deg,#121b29,#0f1622);border:1px solid #1e2a3d;border-radius:14px}
+.tab{transition:.15s}.tab[data-on="1"]{color:#0a0e14;background:#f5a623}
+.kpi{animation:rise .5s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.scroll::-webkit-scrollbar{width:8px;height:8px}.scroll::-webkit-scrollbar-thumb{background:#1e2a3d;border-radius:8px}
+.node{cursor:pointer}.lk{stroke-linecap:round}
+table.dt td,table.dt th{padding:.4rem .6rem;border-bottom:1px solid #16212f;text-align:left}
+tr.hh:hover{background:#16212f;cursor:pointer}
