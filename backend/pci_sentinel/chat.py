@@ -64,7 +64,7 @@ def answer(result, question: str, history=None) -> dict:
 
     # --- deterministic intents ---------------------------------------------
     # 1) scope counts
-    if any(k in ql for k in ["in scope", "scope size", "how many", "confirmed", "inferred"]) and not ids:
+    if any(k in ql for k in ["scope", "how many", "confirmed", "inferred"]) and not ids:
         return {"answer":
                 f"{head.get('systems_exposed_to_clear_pan')} systems are in PCI scope. Of those, "
                 f"{br.get('metadata_confirmed')} are confirmed by authoritative BAM metadata and "
@@ -73,7 +73,7 @@ def answer(result, question: str, history=None) -> dict:
                 "grounded_on": ["headline", "scope_breakdown"]}
 
     # 2) heavy hitters
-    if any(k in ql for k in ["heavy hitter", "biggest", "distributor", "top ", "most pan", "leverage"]) and not ids:
+    if any(k in ql for k in ["heavy hitter", "hitter", "biggest", "distributor", "top ", "most pan", "leverage", "intervention", "tokeniz"]) and not ids:
         top = hh[:5]
         lines = "; ".join(f"{h['system']} (exclusive reach {h['exclusive_reach']}, reaches "
                           f"{h['downstream_reach']})" for h in top)
@@ -82,7 +82,7 @@ def answer(result, question: str, history=None) -> dict:
                 "grounded_on": [h["system"] for h in top]}
 
     # 3) hidden PCI
-    if any(k in ql for k in ["hidden", "splunk", "bam miss", "didn't know", "leak"]) and not ids:
+    if any(k in ql for k in ["hidden", "splunk", "bam miss", "didn't know", "leak", "unknown"]) and not ids:
         sample = (hidden.get("hidden_pci_systems") or [])[:10]
         return {"answer": f"{hidden.get('hidden_pci_count')} systems are hidden PCI — BAM records them as "
                           f"PCI=No, yet clear PAN was observed in their Splunk logs. Examples: "
@@ -130,7 +130,17 @@ def answer(result, question: str, history=None) -> dict:
                           f"reaches {n.get('reach')} downstream system(s).",
                 "grounded_on": [sid] + [e["source"] for e in ins[:6]]}
 
-    # --- LLM fallback (grounded, bounded) ----------------------------------
+    # --- fallback ----------------------------------------------------------
+    llm = LLMClient()
+    if not llm.online:
+        top = ", ".join(h["system"] for h in hh[:3])
+        return {"answer":
+                f"Here's what the analysis shows: {head.get('systems_exposed_to_clear_pan')} systems in PCI "
+                f"scope ({br.get('metadata_confirmed')} metadata-confirmed, {br.get('inferred_only')} "
+                f"inferred-only); {hidden.get('hidden_pci_count')} hidden-PCI systems (BAM misses); top PAN "
+                f"distributors {top}. Ask about scope, heavy hitters, hidden PCI, tokenization impact, or name "
+                f"a system ID (e.g. \"why is {br.get('inferred_only_sample',['a system'])[0]} in scope?\").",
+                "grounded_on": ["headline", "scope_breakdown"]}
     facts = {
         "headline": head, "scope_breakdown": br,
         "hidden_pci_count": hidden.get("hidden_pci_count"),
@@ -138,6 +148,5 @@ def answer(result, question: str, history=None) -> dict:
                           for h in hh[:10]],
         "impact": result.impact,
     }
-    llm = LLMClient()
     txt = llm.chat(q, facts, history or [])
     return {"answer": txt, "grounded_on": ["headline", "heavy_hitters", "impact"]}

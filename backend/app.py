@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 from pci_sentinel import agents as agents_mod
 from pci_sentinel import chat as chat_mod
-from pci_sentinel.orchestrator import start_run, resume_run
+from pci_sentinel.orchestrator import start_run, resume_run, store as _store
 from pci_sentinel.security import PanLeakError
 
 app = FastAPI(title="PCI-SENTINEL", version="0.2.0",
@@ -129,16 +129,27 @@ def explanation():
     return {"explanation": _need().explanation}
 
 
+def _chat_target(thread_id):
+    """Resolve what the analyst chats against: a thread's result/preview, else the last run."""
+    if thread_id:
+        s = _store(thread_id)
+        r = s.get("result") or s.get("preview")
+        if r is not None:
+            return r
+    return _need()
+
+
 @app.get("/api/suggested")
-def suggested():
-    return {"questions": chat_mod.suggested_questions(_need())}
+def suggested(thread_id: str = ""):
+    return {"questions": chat_mod.suggested_questions(_chat_target(thread_id or None))}
 
 
 class ChatBody(BaseModel):
     question: str
     history: list = []
+    thread_id: str = ""
 
 
 @app.post("/api/chat")
 def chat(body: ChatBody):
-    return chat_mod.answer(_need(), body.question, body.history)
+    return chat_mod.answer(_chat_target(body.thread_id or None), body.question, body.history)

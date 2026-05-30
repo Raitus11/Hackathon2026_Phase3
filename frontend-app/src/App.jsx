@@ -136,7 +136,7 @@ const SHORT = { supervisor: 'Supervise', ingest: 'Ingest', validate_masking_leak
 const dotBg = { control: 'bg-cool', deterministic: 'bg-safe', human: 'bg-pan', llm: 'bg-panhot' }
 const detectDS = f => { const m = (f.name || '').match(/ds[ _-]?([1-6])/i); return m ? 'DS' + m[1] : null }
 
-function Pipeline({ d, agents, phase, gate, uploading, onUpload, onApprove, onReset }) {
+function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onApprove, onReset }) {
   const [requireApproval, setRequireApproval] = useState(false)
   const [revTop, setRevTop] = useState(gate?.gate?.recommend_top || 3)
   const [files, setFiles] = useState([])
@@ -262,7 +262,12 @@ function Pipeline({ d, agents, phase, gate, uploading, onUpload, onApprove, onRe
               </div>
               <button disabled={uploading} onClick={() => onApprove('abort')} className="text-xs px-4 py-2 rounded-lg text-panhot hover:bg-panhot/10">Abort</button>
             </div>
-            <div className="text-[11px] text-faint mt-3">A genuine LangGraph <span className="mono">interrupt</span> — paused server-side, resumes only on your decision.</div>
+            <div className="text-[11px] text-faint mt-2">Revise changes how many top distributors are recommended for tokenization (top-N), re-runs the impact analysis, and returns here for your decision.</div>
+            <div className="text-[11px] text-faint mt-1">A genuine LangGraph <span className="mono">interrupt</span> — paused server-side, resumes only on your decision.</div>
+            <div className="mt-4 pt-4 border-t border-line">
+              <div className="text-[11px] uppercase tracking-[.16em] text-faint mb-2">Interrogate the analysis before deciding</div>
+              <ChatPanel suggested={suggested} live={true} threadId={gate.thread_id} height={200} />
+            </div>
           </div>
         ) : phase === 'done' ? (
           <div className="flex items-center gap-3">
@@ -639,7 +644,7 @@ function Drill({ d, selected, onPick }) {
 }
 
 /* ============================ ASK (grounded chat) ============================ */
-function Ask({ d, suggested, live }) {
+function ChatPanel({ suggested, live, threadId, height = 400 }) {
   const [msgs, setMsgs] = useState([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
@@ -650,9 +655,9 @@ function Ask({ d, suggested, live }) {
     const q = (text ?? input).trim(); if (!q || busy) return
     setInput(''); setMsgs(m => [...m, { role: 'user', content: q }]); setBusy(true)
     try {
-      if (!live) { setMsgs(m => [...m, { role: 'assistant', content: 'Live Q&A needs the API running (start the backend, then upload to analyze). The Overview, graph, and drill-down work fully offline from the embedded snapshot.', grounded: [] }]); return }
-      const hist = msgs.slice(-6)
-      const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q, history: hist }) })
+      if (!live) { setMsgs(m => [...m, { role: 'assistant', content: 'Live Q&A needs the API running (start the backend, then upload to analyze). Overview, graph, and drill-down work fully offline from the embedded snapshot.', grounded: [] }]); return }
+      const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, history: msgs.slice(-6), thread_id: threadId || '' }) })
       const j = await r.json()
       setMsgs(m => [...m, { role: 'assistant', content: j.answer, grounded: j.grounded_on || [] }])
     } catch (e) {
@@ -660,17 +665,11 @@ function Ask({ d, suggested, live }) {
     } finally { setBusy(false) }
   }
   return (
-    <div className="card p-5 flex flex-col" style={{ minHeight: 560 }}>
-      <div className="disp font-bold text-lg">Ask the analyst <span className="text-faint text-xs font-normal">— answers grounded in the computed analysis only</span></div>
-      <div className="text-xs text-dim mb-3">Common questions are answered deterministically from the graph/scores (no model — cannot hallucinate); open-ended ones use the LLM constrained to the computed facts.</div>
-      <div className="scroll flex-1 overflow-auto space-y-3 pr-1">
-        {msgs.length === 0 && (
-          <div className="flex flex-wrap gap-2">
-            {(suggested || []).map((s, i) => <button key={i} onClick={() => send(s)} className="text-left text-xs px-3 py-2 rounded-lg border border-line text-dim hover:border-pan hover:text-pan max-w-full">{s}</button>)}
-          </div>
-        )}
+    <div className="flex flex-col">
+      <div className="scroll overflow-auto space-y-3 pr-1" style={{ minHeight: height, maxHeight: height }}>
+        {msgs.length === 0 && <div className="text-xs text-faint">Pick a suggested question below, or type your own.</div>}
         {msgs.map((m, i) => (
-          <div key={i} className={'max-w-[85%] ' + (m.role === 'user' ? 'ml-auto' : '')}>
+          <div key={i} className={'max-w-[88%] ' + (m.role === 'user' ? 'ml-auto' : '')}>
             <div className={'rounded-xl px-3 py-2 text-sm ' + (m.role === 'user' ? 'bg-pan/15 text-txt' : 'bg-panel2 text-dim')}>{m.content}</div>
             {m.grounded && m.grounded.length > 0 && <div className="flex flex-wrap gap-1 mt-1">{m.grounded.slice(0, 8).map((gx, j) => <span key={j} className="mono text-[10px] px-1.5 py-0.5 rounded bg-line text-faint">{gx}</span>)}</div>}
           </div>
@@ -678,11 +677,37 @@ function Ask({ d, suggested, live }) {
         {busy && <div className="text-xs text-faint mono">analyst is thinking…</div>}
         <div ref={endRef} />
       </div>
-      <div className="flex gap-2 mt-3">
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {(suggested || []).slice(0, 5).map((s, i) => <button key={i} onClick={() => send(s)} className="text-left text-[11px] px-2.5 py-1 rounded-full border border-line text-dim hover:border-pan hover:text-pan">{s}</button>)}
+      </div>
+      <div className="flex gap-2 mt-2">
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
           placeholder="ask about scope, heavy hitters, a system ID, tokenization impact…"
           className="flex-1 bg-panel2 border border-line rounded-lg px-3 py-2 text-sm text-txt" />
         <button onClick={() => send()} disabled={busy} className="mono text-xs px-4 rounded-lg bg-pan text-ink font-semibold disabled:opacity-50">send</button>
+      </div>
+    </div>
+  )
+}
+
+function Ask({ suggested, live }) {
+  return (
+    <div className="grid lg:grid-cols-[1fr_290px] gap-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Ask the analyst <span className="text-faint text-xs font-normal">— grounded in the computed analysis only</span></div>
+        <div className="text-xs text-dim mb-3">Common questions are answered deterministically from the graph/scores (no model — cannot hallucinate); open-ended ones use the LLM constrained to the computed facts.</div>
+        <ChatPanel suggested={suggested} live={live} height={380} />
+      </div>
+      <div className="card p-5 self-start">
+        <div className="text-[11px] uppercase tracking-[.16em] text-faint mb-3">What I can answer</div>
+        <ul className="text-xs text-dim space-y-2.5">
+          <li><b className="text-txt">Scope</b> — totals and the metadata-confirmed vs inferred-only split.</li>
+          <li><b className="text-txt">Heavy hitters</b> — the biggest PAN distributors by exclusive reach.</li>
+          <li><b className="text-txt">Hidden PCI</b> — systems BAM missed but Splunk caught.</li>
+          <li><b className="text-txt">A system</b> — name an ID (e.g. 8CCF) for risk, scope basis, and lineage.</li>
+          <li><b className="text-txt">Tokenization</b> — "what if we tokenize X" and the descope it yields.</li>
+        </ul>
+        <div className="text-[11px] text-faint mt-4 leading-relaxed">Every answer cites the systems and metrics it used. {live ? '' : 'Connect the API (upload to analyze) for live Q&A.'}</div>
       </div>
     </div>
   )
@@ -711,12 +736,12 @@ export default function App() {
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
         {tabs.map(([k, l]) => <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>)}
       </nav>
-      {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} onUpload={analyze} onApprove={approve} onReset={reset} />}
+      {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
-      {tab === 'ask' && <Ask d={d} suggested={suggested} live={src === 'live'} />}
+      {tab === 'ask' && <Ask suggested={suggested} live={src === 'live'} />}
       <footer className="text-[11px] text-faint mt-8 leading-relaxed">
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.
         <b className="text-dim"> What it does not:</b> remediate controls, assert business need, or treat inferred signals as ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.

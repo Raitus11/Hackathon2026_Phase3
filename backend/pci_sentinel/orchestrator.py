@@ -127,6 +127,14 @@ def human_gate(state, config):
                 "audit": _log(state, "human_gate", time.perf_counter(), decision="approve(auto)")}
     hh = state.get("heavy_hitters") or []
     top = max(1, int(state.get("recommend_top", 3)))
+    # build a grounded preview so the reviewer can interrogate the analysis at the gate
+    try:
+        s = store(_tid(config))
+        s["preview"] = finalize(s["ing"], s["art"], s["dagr"], s["scores"], s["scope"],
+                                hh, state.get("impact", {}), state.get("hidden", {}),
+                                state.get("audit", []))
+    except Exception:
+        pass
     decision = interrupt({
         "ask": "Review the analysis, then approve to report, revise the recommendation depth, or abort.",
         "scope_size": state.get("scope_size"),
