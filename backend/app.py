@@ -48,6 +48,7 @@ async def analyze(files: list[UploadFile] = File(...), recommend_top: int = Quer
     return {
         "headline": r.headline, "hidden": r.hidden, "quality": r.quality,
         "graph_stats": r.graph_stats, "dag_stats": r.dag_stats, "scope_size": r.scope_size,
+        "scope_breakdown": r.scope_breakdown,
         "heavy_hitters": r.heavy_hitters, "impact": r.impact, "cycles": r.cycles,
         "unresolved_signals_sample": r.unresolved_signals, "explanation": r.explanation,
         "audit": r.audit,
@@ -79,7 +80,7 @@ def impact():
 @app.get("/api/headline")
 def headline():
     r = _need()
-    return {"headline": r.headline, "hidden": r.hidden}
+    return {"headline": r.headline, "hidden": r.hidden, "scope_breakdown": r.scope_breakdown}
 
 
 @app.get("/api/explanation")

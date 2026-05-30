@@ -31,6 +31,7 @@ class GraphArtifacts:
     G: nx.MultiDiGraph                       # full graph (metadata + inferred edges)
     G_meta: nx.DiGraph                       # authoritative-only simple digraph (for DAG transform)
     pan_sources: set = field(default_factory=set)
+    inferred_pan_sources: set = field(default_factory=set)  # PAN sources known ONLY via inferred signals (DS6)
     unresolved_signals: list = field(default_factory=list)
     stats: dict = field(default_factory=dict)
 
@@ -183,4 +184,5 @@ def build_graph(ingest) -> GraphArtifacts:
         self_loops=sorted(n for n in G.nodes if G.has_edge(n, n)),
     )
     return GraphArtifacts(G=G, G_meta=G_meta, pan_sources=pan_sources,
+                          inferred_pan_sources=inferred_pci,
                           unresolved_signals=unresolved, stats=stats)

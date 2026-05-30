@@ -57,10 +57,17 @@ class LLMClient:
     def _offline(f: dict) -> str:
         hh = (f.get("top_heavy_hitter") or {})
         imp = f.get("impact") or {}
+        meta = f.get("scope_metadata_confirmed")
+        inf = f.get("scope_inferred_only")
+        split = ""
+        if meta is not None and inf is not None:
+            split = (f" Of these, {meta} are confirmed by authoritative BAM metadata and "
+                     f"{inf} are inferred-only candidate scope surfaced from survey/Splunk "
+                     f"signals (kept separate, never treated as ground truth).")
         return (
             f"Current state: {f.get('scope_size', '?')} systems fall within PCI scope across "
             f"{f.get('dag_nodes', '?')} data-flow clusters; {f.get('cycle_clusters', 0)} circular "
-            f"dependency cluster(s) were resolved into the DAG. The highest-leverage true-source is "
+            f"dependency cluster(s) were resolved into the DAG.{split} The highest-leverage true-source is "
             f"{hh.get('system', 'n/a')}, which distributes PAN to {hh.get('exclusive_reach', 0)} systems "
             f"that depend on it exclusively. Tokenizing PAN at the recommended source(s) descopes "
             f"{imp.get('nodes_descoped', 0)} systems "

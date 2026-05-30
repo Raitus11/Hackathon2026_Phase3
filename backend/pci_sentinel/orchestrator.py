@@ -22,8 +22,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import interrupt
 
 from . import analytics, dag_transform, graph_build, ingest as ingest_mod
-from .llm_client import LLMClient
-from .pipeline import RunResult, _viz_payload
+from .pipeline import RunResult, _viz_payload, finalize
 from .scoring import compute_scores
 from .security import scan_for_leaks
 
@@ -155,29 +154,10 @@ def report_node(state, config):
     s = store(_tid(config))
     art, dagr, scores, scope = s["art"], s["dagr"], s["scores"], s["scope"]
     hh, impact, hidden = state["heavy_hitters"], state["impact"], state["hidden"]
-    llm = LLMClient()
-    grounded = {"scope_size": len(scope), "dag_nodes": dagr.stats["dag_nodes"],
-                "cycle_clusters": dagr.stats["cycle_clusters"],
-                "hidden_pci_systems_bam_misses": hidden["hidden_pci_count"],
-                "top_heavy_hitter": hh[0] if hh else {}, "impact": impact}
-    explanation = llm.explain(
-        "You are a PCI scope analyst. Explain the analysis to a mixed audience "
-        "using only the grounded facts.", grounded)
-    headline = {
-        "systems_exposed_to_clear_pan": len(scope),
-        "hidden_pci_systems_bam_misses": hidden["hidden_pci_count"],
-        "cycle_clusters_resolved": dagr.stats["cycle_clusters"],
-        "top_intervention": hh[0]["system"] if hh else None,
-        "scope_reduction_if_top3_tokenized_pct": impact.get("node_surface_reduction_pct", 0.0),
-    }
     audit = _log(state, "report", t)
-    s["result"] = RunResult(
-        quality=s["ing"].quality, graph_stats=art.stats, dag_stats=dagr.stats,
-        scope_size=len(scope), heavy_hitters=hh, impact=impact, cycles=dagr.cycles[:20],
-        unresolved_signals=art.unresolved_signals[:50], explanation=explanation,
-        audit=audit, viz=_viz_payload(art, dagr, scores, scope, hh),
-        headline=headline, hidden=hidden)
-    return {"status": "complete", "headline": headline, "audit": audit}
+    result = finalize(s["ing"], art, dagr, scores, scope, hh, impact, hidden, audit)
+    s["result"] = result
+    return {"status": "complete", "headline": result.headline, "audit": audit}
 
 
 def aborted_node(state, config):

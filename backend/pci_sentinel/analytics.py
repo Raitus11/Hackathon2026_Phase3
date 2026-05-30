@@ -25,6 +25,37 @@ def pci_scope(H: nx.DiGraph, pan_sources: set) -> set:
     return scope
 
 
+def scope_split(G_meta: nx.DiGraph, pan_sources: set, inferred_pan_sources: set,
+                full_scope: set):
+    """Partition the in-scope set by the strength of its evidence (rubric #5).
+
+    A system is METADATA-CONFIRMED in scope when it is reachable from a
+    BAM-declared PAN source through BAM-declared (authoritative) data-flow edges
+    only. Everything else in scope is INFERRED-ONLY: it appears in scope solely
+    because of a survey/Splunk signal (an inferred edge or an inferred PAN
+    source). We never launder inferred candidates into confirmed scope; the
+    split is reported so the headline number can be read honestly.
+
+    Returns (breakdown_dict, metadata_confirmed_set, inferred_only_set).
+    """
+    full = set(full_scope)
+    meta_sources = set(pan_sources) - set(inferred_pan_sources)
+    meta_scope: set = set()
+    for s in meta_sources:
+        meta_scope.add(s)
+        if s in G_meta:
+            meta_scope |= nx.descendants(G_meta, s)
+    meta_scope &= full                       # confirmed scope is a subset of total scope
+    inferred_only = full - meta_scope
+    breakdown = {
+        "scope_total": len(full),
+        "metadata_confirmed": len(meta_scope),
+        "inferred_only": len(inferred_only),
+        "inferred_only_sample": sorted(inferred_only)[:30],
+    }
+    return breakdown, meta_scope, inferred_only
+
+
 def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
     """Rank PAN-originating systems by how much of the in-scope surface they feed.
 
