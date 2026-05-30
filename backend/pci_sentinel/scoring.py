@@ -41,12 +41,25 @@ def descendants_count(H: nx.DiGraph, n) -> int:
     return len(nx.descendants(H, n))
 
 
+def _scaled_betweenness(H, N):
+    """Exact Brandes betweenness for small graphs; pivot-sampled approximation above
+    a threshold so scoring stays sub-second at enterprise scale. Sampled betweenness
+    (Brandes & Pich 2007) is an unbiased estimator using k source pivots — the same
+    quantity, estimated, not a different metric."""
+    if N <= 2:
+        return {n: 0.0 for n in H}
+    if N <= 600:
+        return nx.betweenness_centrality(H, normalized=True)
+    k = min(400, N)
+    return nx.betweenness_centrality(H, normalized=True, k=k, seed=7)
+
+
 def compute_scores(G) -> dict:
     H = _flatten(G)
     N = H.number_of_nodes()
     w = SETTINGS.weights
 
-    betw = nx.betweenness_centrality(H, normalized=True) if N > 2 else {n: 0.0 for n in H}
+    betw = _scaled_betweenness(H, N)
     reach = {n: descendants_count(H, n) for n in H}
     max_reach = max(N - 1, 1)
 

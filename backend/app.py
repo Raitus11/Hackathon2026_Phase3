@@ -39,7 +39,7 @@ def _full(r):
         "graph_stats": r.graph_stats, "dag_stats": r.dag_stats, "scope_size": r.scope_size,
         "scope_breakdown": r.scope_breakdown, "heavy_hitters": r.heavy_hitters,
         "impact": r.impact, "cycles": r.cycles, "unresolved_signals_sample": r.unresolved_signals,
-        "explanation": r.explanation, "audit": r.audit,
+        "explanation": r.explanation, "audit": r.audit, "structure": r.structure,
     }
 
 

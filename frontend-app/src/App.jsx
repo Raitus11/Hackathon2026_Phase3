@@ -378,6 +378,11 @@ function Overview({ d, onPick }) {
         </div>
       </div>
 
+      <div className="grid lg:grid-cols-2 gap-5">
+        <ScatterReachRisk d={d} onPick={onPick} />
+        <BarExclusiveReach d={d} onPick={onPick} />
+      </div>
+
       <div className="card p-5">
         <div className="disp font-bold text-lg mb-1">Grounded explanation <span className="text-faint text-xs font-normal">— LLM narrates only computed numbers</span></div>
         <p className="text-sm text-dim leading-relaxed">{d.explanation}</p>
@@ -772,6 +777,135 @@ function Planner({ d, live, onPick }) {
   )
 }
 
+/* ============================ CHARTS (pure SVG, no deps) ============================ */
+function ScatterReachRisk({ d, onPick }) {
+  const nodes = (d.viz?.nodes || []).filter(n => n.carries_pan || n.hidden_pci || (n.reach || 0) > 0)
+  const W = 560, H = 300, P = { l: 44, r: 16, t: 14, b: 36 }
+  const maxX = Math.max(1, ...nodes.map(n => n.reach || 0))
+  const maxY = Math.max(1, ...nodes.map(n => n.risk || 0))
+  const hh = new Set(d.heavy_hitters.slice(0, 8).map(h => h.system))
+  const x = v => P.l + (v / maxX) * (W - P.l - P.r)
+  const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
+  const color = n => n.hidden_pci ? 'var(--panhot)' : n.true_source ? 'var(--pan)' : n.carries_pan ? '#e3a83a' : 'var(--cool)'
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— downstream reach × risk</span></div>
+      <div className="text-xs text-dim mb-2">Each dot is a PAN-carrying system. Upper-right = high reach <i>and</i> high risk: the prime tokenization targets. Larger ring = bigger exclusive reach.</div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
+        {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
+          <g key={i}>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="var(--line)" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="var(--faint)">{Math.round(f * maxY)}</text>
+          </g>
+        ))}
+        <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="var(--dim)" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">downstream reach →</text>
+        {nodes.map((n, i) => {
+          const r = hh.has(n.id) ? 7 : 3.2
+          return <circle key={i} cx={x(n.reach || 0)} cy={y(n.risk || 0)} r={r}
+            fill={color(n)} fillOpacity={hh.has(n.id) ? 0.95 : 0.55}
+            stroke={hh.has(n.id) ? '#fff' : 'none'} strokeWidth={hh.has(n.id) ? 1 : 0}
+            style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
+            <title>{n.id} · reach {n.reach || 0} · risk {n.risk}</title>
+          </circle>
+        })}
+        {d.heavy_hitters.slice(0, 6).map((h, i) => {
+          const n = nodes.find(z => z.id === h.system); if (!n) return null
+          return <text key={i} x={x(n.reach || 0) + 9} y={y(n.risk || 0) + 3} fontSize="9" fill="var(--txt)" className="mono">{h.system}</text>
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function BarExclusiveReach({ d, onPick }) {
+  const rows = d.heavy_hitters.slice(0, 10)
+  const max = Math.max(1, ...rows.map(r => r.exclusive_reach))
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold">Exclusive reach <span className="text-faint text-xs font-normal">— systems descoped if this one source is tokenized</span></div>
+      <div className="text-xs text-dim mb-3">Downstream systems that fall out of scope if this source alone is tokenized (no other clear-PAN parent).</div>
+      <div className="space-y-1.5">
+        {rows.map((r, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+            <button onClick={() => onPick(r.system)} className="mono text-pan w-14 text-left hover:underline">{r.system}</button>
+            <div className="flex-1 h-4 rounded bg-panel2 overflow-hidden">
+              <div className="h-full bg-pan/70 flex items-center justify-end pr-1.5" style={{ width: Math.max(8, 100 * r.exclusive_reach / max) + '%', transition: 'width .5s' }}>
+                <span className="mono text-[10px] text-ink font-bold">{r.exclusive_reach}</span>
+              </div>
+            </div>
+            <span className="mono text-[10px] text-faint w-20 text-right">reach {r.downstream_reach}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ============================ METHODS (algorithms + structure metrics) ============================ */
+function Methods({ d }) {
+  const s = d.structure || {}
+  const algos = [
+    ['Cycle resolution', 'Tarjan strongly-connected-components → condensation', 'Tarjan 1972', 'Source relationships from BAM/ServiceNow contain cycles; SCC detection + supervertex contraction provably yields a DAG. The rule is explicit and explainable.'],
+    ['Reachability / scope', 'Transitive closure (DFS descendants)', 'classical', 'A system is in PCI scope if reachable from any clear-PAN source. Memoized per-source so scope evaluations are O(sources) set-unions.'],
+    ['Conduit importance', 'Betweenness centrality (exact; pivot-sampled at scale)', 'Freeman 1977; Brandes 2001; Brandes & Pich 2007', 'Systems that many PAN paths route through. Sampled estimator above ~600 nodes keeps scoring sub-second without changing the quantity measured.'],
+    ['Heavy-hitter ranking', 'Exclusive downstream reach (set difference)', 'own, interpretable', 'Systems descoped if this one source is tokenized and no other clear-PAN parent feeds them — the true tokenization levers.'],
+    ['Composite risk', 'Weighted sum: 0.40 sensitivity + 0.30 reach + 0.20 betweenness + 0.10 source', 'own, every term bounded & named', 'R(v)∈[0,100]. No magic constants; weights are config-tunable and each factor is individually defensible.'],
+    ['Minimum-intervention plan', 'Greedy maximum-coverage on a monotone submodular objective', 'Nemhauser, Wolsey & Fisher 1978 — (1−1/e) bound', 'Fewest sources to tokenize for the most descope. Greedy is provably within ~63% of the optimal k-set; we report the optimality ceiling.'],
+    ['Concentration', 'Gini coefficient + Herfindahl-Hirschman index', 'Gini 1912; Hirschman 1945', 'Quantifies how few systems carry the exposure — the mathematical justification for targeting heavy hitters.'],
+    ['Choke points', 'Articulation / cut vertices of the PAN subgraph', 'classical graph theory', 'Single points whose tokenization severs PAN to an entire branch.'],
+    ['Card-data safety', 'Luhn check on Luhn-valid synthetic data; first-6/last-4 masking', 'Luhn 1954; PCI-DSS', 'Masking enforced on ingest; an unmasked PAN fails the run. No real card data is ever stored, logged, or displayed.'],
+  ]
+  const Stat = ({ v, l, sub, c = 'text-pan' }) => (
+    <div className="bg-panel2 rounded-xl p-4">
+      <div className={'disp text-3xl font-black ' + c}>{v}</div>
+      <div className="text-xs text-txt mt-1">{l}</div>
+      {sub && <div className="text-[11px] text-faint mt-0.5">{sub}</div>}
+    </div>
+  )
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Methods &amp; algorithms <span className="text-faint text-xs font-normal">— what does the verifiable work</span></div>
+        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">Deterministic algorithms and classical statistics do every measured step; the LLM only narrates the already-computed numbers. Each metric is named, bounded, and traceable to a rule, a statistic, or a citation — nothing is a black box.</p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Stat v={s.reach_gini ?? '—'} l="Reach Gini coefficient" sub="0 = even · 1 = concentrated" />
+        <Stat v={(s.top5_reach_share_pct ?? '—') + '%'} l="Top-5 sources' share of all downstream exposure" c="text-panhot" />
+        <Stat v={s.propagation_depth ?? '—'} l="PAN propagation depth (hops)" sub="longest clear-PAN path" c="text-cool" />
+        <Stat v={s.choke_point_count ?? '—'} l="Choke points" sub="cut vertices in PAN flow" c="text-safe" />
+      </div>
+
+      <div className="card p-0 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead><tr className="text-left text-[11px] uppercase tracking-wider text-faint bg-panel2">
+            <th className="px-4 py-2.5">Capability</th><th className="px-4 py-2.5">Algorithm / solver</th>
+            <th className="px-4 py-2.5">Citation</th><th className="px-4 py-2.5">Why</th></tr></thead>
+          <tbody>
+            {algos.map((a, i) => (
+              <tr key={i} className="border-t border-line align-top">
+                <td className="px-4 py-3 text-txt font-semibold whitespace-nowrap">{a[0]}</td>
+                <td className="px-4 py-3 text-dim">{a[1]}</td>
+                <td className="px-4 py-3 text-faint mono text-[11px] whitespace-nowrap">{a[2]}</td>
+                <td className="px-4 py-3 text-dim text-[13px]">{a[3]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {s.choke_points && s.choke_points.length > 0 && (
+        <div className="card p-5">
+          <div className="disp font-bold text-sm">Choke points <span className="text-faint font-normal">— tokenizing one severs PAN to a whole branch</span></div>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {s.choke_points.map(c => <span key={c} className="mono text-[11px] px-2 py-0.5 rounded bg-safe/10 text-safe">{c}</span>)}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ============================ ASK (grounded chat) ============================ */
 function ChatPanel({ suggested, live, threadId, height = 400 }) {
   const [msgs, setMsgs] = useState([])
@@ -849,7 +983,7 @@ export default function App() {
   const [sel, setSel] = useState(null)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['ask', 'Ask']]
+  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
   return (
     <div className="max-w-[1280px] mx-auto px-5 py-5">
       <header className="flex items-center gap-4 mb-5">
@@ -877,6 +1011,7 @@ export default function App() {
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
+      {tab === 'methods' && <Methods d={d} />}
       {tab === 'ask' && <Ask suggested={suggested} live={src === 'live'} />}
       <footer className="text-[11px] text-faint mt-8 leading-relaxed">
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.

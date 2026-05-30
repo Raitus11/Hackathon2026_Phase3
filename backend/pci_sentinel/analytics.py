@@ -17,8 +17,23 @@ import networkx as nx
 from .scoring import _flatten
 
 
-def pci_scope(H: nx.DiGraph, pan_sources: set) -> set:
-    """Nodes in PCI scope = PAN sources plus all their data-flow descendants."""
+def pci_scope(H: nx.DiGraph, pan_sources: set, desc_cache: dict = None) -> set:
+    """Nodes in PCI scope = PAN sources plus all their data-flow descendants.
+
+    `desc_cache` optionally maps a source -> its descendant set (incl. itself),
+    so repeated scope evaluations (e.g. the greedy optimizer's hundreds of
+    what-if calls) become O(sources) set-unions instead of re-running a graph
+    traversal each time. Without it, behaviour is unchanged.
+    """
+    if desc_cache is not None:
+        scope = set()
+        for s in pan_sources:
+            d = desc_cache.get(s)
+            if d is None:
+                d = {s} | nx.descendants(H, s)
+                desc_cache[s] = d
+            scope |= d
+        return scope
     scope = set(pan_sources)
     for s in pan_sources:
         scope |= nx.descendants(H, s)
@@ -152,6 +167,81 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
     }
 
 
+def _gini(values):
+    """Gini coefficient (Gini 1912) of a non-negative distribution, in [0,1].
+    0 = perfectly even; ->1 = a few systems carry almost all the exposure."""
+    xs = sorted(float(v) for v in values)
+    n = len(xs)
+    tot = sum(xs)
+    if n == 0 or tot == 0:
+        return 0.0
+    cum = sum((i + 1) * x for i, x in enumerate(xs))
+    return round((2 * cum) / (n * tot) - (n + 1) / n, 3)
+
+
+def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict:
+    """Defensible, interpretable graph-theoretic structure metrics that quantify
+    WHY a few interventions dominate — every one is named and citable, none is a
+    black box.
+
+      * concentration (Gini + HHI of downstream reach) — proves the exposure is
+        carried by a handful of systems, justifying the heavy-hitter strategy.
+      * propagation_depth — longest PAN path through the acyclic data-flow graph
+        (how many hops clear PAN travels from a true source).
+      * pan_islands — weakly-connected components of the PAN-flow subgraph
+        (independent exposure clusters that can be reasoned about separately).
+      * choke_points — articulation/cut vertices of the PAN-flow subgraph whose
+        tokenization severs PAN to a whole branch (single points of propagation).
+    """
+    H = _flatten(G)
+    # PAN-flow subgraph: edges that originate from a PAN-carrying system
+    scope = pci_scope(H, pan_sources)
+    P = H.subgraph(scope).copy()
+
+    reaches = [scores.get(n, {}).get("downstream_reach", 0) for n in scope]
+    tot_reach = sum(reaches) or 1
+    shares = [r / tot_reach for r in reaches]
+    hhi = round(sum(s * s for s in shares), 4)              # Herfindahl-Hirschman
+    top5 = sum(sorted(reaches, reverse=True)[:5])
+    top5_share = round(100 * top5 / tot_reach, 1)
+
+    # propagation depth on the DAG view (PAN subgraph is acyclic post-condensation
+    # in practice; guard anyway)
+    # propagation depth = longest PAN path; condense any residual cycles first so a
+    # back-edge can't void the measure (depth is then in supernode hops, >= a lower
+    # bound on physical hops)
+    try:
+        if nx.is_directed_acyclic_graph(P):
+            depth = nx.dag_longest_path_length(P)
+        elif P.number_of_nodes():
+            depth = nx.dag_longest_path_length(nx.condensation(P))
+        else:
+            depth = 0
+    except Exception:
+        depth = None
+
+    islands = nx.number_weakly_connected_components(P) if P.number_of_nodes() else 0
+
+    # choke points: cut vertices on the undirected projection of the PAN subgraph
+    try:
+        choke = sorted(nx.articulation_points(P.to_undirected()),
+                       key=lambda n: -scores.get(n, {}).get("downstream_reach", 0))
+    except Exception:
+        choke = []
+
+    return {
+        "reach_gini": _gini(reaches),
+        "reach_hhi": hhi,
+        "top5_reach_share_pct": top5_share,
+        "propagation_depth": depth,
+        "pan_islands": islands,
+        "choke_points": choke[:12],
+        "choke_point_count": len(choke),
+        "pan_subgraph_nodes": P.number_of_nodes(),
+        "pan_subgraph_edges": P.number_of_edges(),
+    }
+
+
 def what_if(G, pan_sources: set, scores: dict, tokenize: list) -> dict:
     """Clean-stream impact for an arbitrary set of tokenized sources, returning the
     FULL descoped and retained sets so the UI can recolor the graph and so the plan
@@ -194,11 +284,31 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
     independent = {n for n, d in H.nodes(data=True)
                    if d.get("carries_pan") or d.get("detokenizes")}
     descopable = before - independent
-    candidates = [h["system"] for h in heavy_hitters(G, pan_sources, scores, top_k=candidate_k)]
+    hh_full = heavy_hitters(G, pan_sources, scores, top_k=candidate_k)   # computed once
+    candidates = [h["system"] for h in hh_full]
+    excl = {h["system"]: h["exclusive_reach"] for h in hh_full}
+    cand_set = set(candidates)
+
+    # Reachability cache + a precomputed FIXED scope from every source that is never
+    # a tokenization candidate (those never change across what-ifs). Each greedy
+    # evaluation then unions only the handful of active candidate descendant sets,
+    # not the whole source set — keeping hundreds of evals well under a second even
+    # at enterprise scale.
+    cache = {}
+    all_sources = pan_sources | independent
+    for s in all_sources:                       # warm the cache once (no misses in loop)
+        cache[s] = {s} | nx.descendants(H, s)
+    fixed_sources = all_sources - cand_set
+    fixed_scope = set().union(*[cache[s] for s in fixed_sources]) if fixed_sources else set()
 
     def scope_after(tok):
-        remaining = (pan_sources - set(tok)) | (independent - set(tok))
-        return pci_scope(H, remaining) | (independent - set(tok))
+        tok = set(tok)
+        active = [c for c in candidates if c not in tok]
+        scope = set(fixed_scope)
+        for c in active:
+            scope |= cache[c]
+        scope |= (independent - tok)            # tokenized independents drop out
+        return scope
 
     chosen, steps, cur = [], [], before
     while len(chosen) < max_k:
@@ -217,18 +327,20 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
         steps.append({
             "step": len(chosen), "tokenize": best, "marginal_descoped": marginal,
             "cumulative_descoped": cum, "scope_after": len(best_after),
-            "exclusive_reach": next((h["exclusive_reach"] for h in
-                                     heavy_hitters(G, pan_sources, scores, top_k=candidate_k)
-                                     if h["system"] == best), None),
+            "exclusive_reach": excl.get(best),
             "pct_of_descopable": round(100 * cum / max(1, len(descopable)), 1),
         })
         cur = best_after
         if len(descopable) and cum / len(descopable) >= target_fraction:
             break
+    total = before_n - len(cur)
     return {
         "before": before_n, "descopable": len(descopable), "after": len(cur),
-        "total_descoped": before_n - len(cur), "k": len(chosen),
+        "total_descoped": total, "k": len(chosen),
         "plan": chosen, "steps": steps, "target_fraction": target_fraction,
+        # greedy on a monotone submodular coverage objective is >= (1-1/e) of the
+        # optimal k-set, so the optimum descope with this many sources is bounded above.
+        "optimality_bound_ceiling": round(total / 0.6321) if total else 0,
         "method": "greedy max-coverage (Nemhauser-Wolsey-Fisher 1978; (1-1/e) bound)",
     }
 

@@ -33,6 +33,7 @@ class RunResult:
     viz: dict = field(default_factory=dict)
     headline: dict = field(default_factory=dict)
     hidden: dict = field(default_factory=dict)
+    structure: dict = field(default_factory=dict)
 
 
 def _audit(log, stage, t0, **extra):
@@ -122,7 +123,8 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit) -> RunRes
         heavy_hitters=hh, impact=impact, cycles=dagr.cycles[:20],
         unresolved_signals=art.unresolved_signals[:50], explanation=explanation,
         audit=audit, viz=_viz_payload(art, dagr, scores, scope, hh, inferred_only),
-        headline=headline, hidden=hidden)
+        headline=headline, hidden=hidden,
+        structure=analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh))
 
 
 def run(files: list, recommend_top: int = 3) -> RunResult:
