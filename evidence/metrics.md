@@ -1,25 +1,18 @@
 # PCI-SENTINEL — Evidence / Key Metrics (sample data)
 
-_Generated from the agentic pipeline run on the 6 sample CSVs._
+_Regenerated from the agentic pipeline run on the 6 sample CSVs._
 
 ## Headline
 - **systems_exposed_to_clear_pan**: 95
+- **scope_metadata_confirmed / inferred_only**: 44 / 51
 - **hidden_pci_systems_bam_misses**: 48
+- **hidden_propagating_count**: 4
 - **cycle_clusters_resolved**: 2
-- **top_intervention**: 8CCF
-- **scope_reduction_if_top3_tokenized_pct**: 6.3
+- **top_intervention (best single lever)**: 8CCF
+- **widest_distributor (by reach)**: 6CWC (reach 29)
+- **node_surface_reduction_if_top3_tokenized_pct**: 3.2
 
-## Graph
-- nodes: 239
-- metadata_edges: 338
-- metadata_edges_deduped: 234
-- inferred_edges: 57
-- unresolved_signals: 170
-- pan_source_nodes: 72
-- bam_nodes: 34
-- self_loops: ['8AFN', '8AQB']
-
-## DAG (from-graph → to-graph)
+## DAG (from-graph -> to-graph)
 - source_nodes: 239
 - source_edges: 283
 - dag_nodes: 233
@@ -28,46 +21,52 @@ _Generated from the agentic pipeline run on the 6 sample CSVs._
 - nodes_in_cycles: 8
 - is_acyclic: True
 
-## Clean-stream impact (tokenize top-3 true sources)
-- tokenized_systems: ['8CCF', '8DFB', '8EFW']
-- scope_before: 95
-- scope_after: 89
-- nodes_descoped: 6
-- retained_via_detokenization_count: 3
-- pan_edges_before: 77
-- pan_edges_after: 70
-- risk_before: 2517.1
-- risk_after: 2372.9
-- risk_reduction_pct: 5.7
-- node_surface_reduction_pct: 6.3
+## Clean-stream impact (tokenize recommended top-3 sources)
+- tokenized_levers: ['8CCF', '8DFB', '8EFW']
+- scope_before -> scope_after: 95 -> 92
+- nodes_descoped (downstream): 3
+- sources_downgraded tier4->3: 3 ['8CCF', '8DFB', '8EFW']
+- retained_via_detokenization (stay in CDE via RISE/APG): 3
+- node_surface_reduction_pct: 3.2
+- risk_reduction_pct: 1.1
 
-## Top heavy hitters (primary PAN distributors)
+## Minimum-intervention plan (greedy max-coverage; NWF 1978)
+- plan: ['8CCF', '8DFB', '8EFW']  (k=3)
+- total_descoped of descopable: 3 of 71  (95->92 in scope)
 
-| System | Excl. reach | Reach | Out-deg | Risk |
+## Top heavy hitters (ranked by downstream reach)
+
+| System | Reach | Solo descope | Out-deg | Risk |
 |---|---|---|---|---|
-| 8CCF | 2 | 28 | 3 | 53.53 |
-| 8DFB | 2 | 2 | 1 | 50.25 |
-| 8EFW | 2 | 1 | 1 | 40.13 |
-| 6CWC | 1 | 29 | 7 | 33.66 |
-| 8MEC | 1 | 27 | 1 | 53.4 |
-| 8CCCM | 1 | 3 | 1 | 40.38 |
-| 9CPC | 1 | 2 | 1 | 20.25 |
-| 8FVE | 1 | 1 | 1 | 50.13 |
-| 8LNQ | 1 | 1 | 1 | 40.13 |
-| 6IVC | 1 | 1 | 1 | 30.13 |
+| 6CWC | 29 | 0 | 7 | 56.36 |
+| 8CCF | 28 | 1 | 3 | 75.45 |
+| 8MEC | 27 | 0 | 1 | 74.55 |
+| 8DEM | 27 | 0 | 2 | 64.63 |
+| 8AQB | 26 | 0 | 19 | 83.64 |
+| 8BCC | 26 | 0 | 13 | 70.72 |
+| 8AFN | 26 | 0 | 3 | 67.42 |
+| 8BY | 26 | 0 | 2 | 63.92 |
+| 8CCCM | 3 | 0 | 1 | 42.74 |
+| 8DFB | 2 | 1 | 1 | 51.82 |
+
+## Hidden-scope evidence (propagating BAM misses)
+
+| System | Propagates to | Stated source | Finding |
+|---|---|---|---|
+| 6CWC | 29 | KTCZP | True PAN |
+| 9CPC | 2 | EC | True PAN |
+| 6IVC | 1 | 8BRC | True PAN |
+| JSVCH | 1 | — | True PAN |
 
 ## Pipeline audit (per-node timing)
 
-- supervisor: 0.0 ms
-- ingest: 8.6 ms
-- validate_masking_leak: 4.7 ms
-- build_graph: 3.7 ms
-- condense_to_dag: 3.2 ms
-- score: 12.9 ms
-- analytics: 26.9 ms
-- human_gate: 0.0 ms
-- report: 0.0 ms
+- ingest: 11.2 ms
+- validate_masking_leak: 6.0 ms
+- build_graph: 4.2 ms
+- condense_to_dag: 5.0 ms
+- score: 16.4 ms
+- analytics: 108.8 ms
 
 ## Grounded explanation
 
-Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. The highest-leverage true-source is 8CCF, which distributes PAN to 2 systems that depend on it exclusively. Tokenizing PAN at the recommended source(s) descopes 6 systems (6.3% of the in-scope surface) and lowers the aggregate risk score by 5.7% — the clean-stream effect.
+Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. Of these, 44 are confirmed by authoritative BAM metadata and 51 are inferred-only candidate scope surfaced from survey/Splunk signals (kept separate, never treated as ground truth). The widest PAN distributor is 6CWC, reaching 29 downstream systems; the highest-leverage single tokenization target is 8CCF. Because the same downstream systems are fed by several PAN sources, no single source frees many on its own — so the optimizer selects the minimal set. Tokenizing the recommended source(s) descopes 3 systems (3.2% of the in-scope surface), converts 3 source(s) from live PAN to non-transactable tokens, and lowers the aggregate risk score by 1.1% — the clean-stream effect.

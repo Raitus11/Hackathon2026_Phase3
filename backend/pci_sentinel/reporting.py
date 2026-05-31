@@ -167,11 +167,12 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
 
     # heavy hitters
     E.append(Paragraph("Primary PAN distributors (heavy hitters)", h2))
-    hh_rows = [["System", "Exclusive reach", "Downstream reach", "Out-degree", "Risk"]]
+    hh_rows = [["System", "Downstream reach", "Solo descope", "Out-degree", "Risk"]]
     for h in result.heavy_hitters[:10]:
-        hh_rows.append([h["system"], str(h["exclusive_reach"]), str(h["downstream_reach"]),
+        solo = h.get("solo_descope", h.get("exclusive_reach", 0))
+        hh_rows.append([h["system"], str(h["downstream_reach"]), str(solo),
                         str(h.get("out_degree", "—")), str(h["risk"])])
-    ht = Table(hh_rows, colWidths=[34 * mm, 30 * mm, 32 * mm, 26 * mm, 26 * mm])
+    ht = Table(hh_rows, colWidths=[34 * mm, 32 * mm, 30 * mm, 26 * mm, 26 * mm])
     ht.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")), ("TEXTCOLOR", (0, 0), (-1, 0), DIM),
         ("FONTSIZE", (0, 0), (-1, -1), 8), ("FONTNAME", (0, 1), (0, -1), "Courier-Bold"),
@@ -180,13 +181,18 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
         ("GRID", (0, 0), (-1, -1), 0.3, LINE), ("TOPPADDING", (0, 0), (-1, -1), 3),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
     E.append(ht)
+    E.append(Paragraph("Ranked by downstream reach (distribution blast radius). Solo descope = systems freed if only that source "
+                       "is tokenized; it is small everywhere because downstream systems are fed by several PAN sources, which is "
+                       "why the minimum-intervention set (above) matters more than any single source.", small))
 
     # hidden PCI
     E.append(Paragraph("Hidden PCI — clear PAN in non-PCI-flagged systems", h2))
+    prop = hidden.get("hidden_propagating_count", 0)
     hidden_ids = hidden.get("hidden_pci_systems", [])[:40]
     E.append(Paragraph(
         f"{hidden.get('hidden_pci_count')} system(s) are flagged PCI=No in BAM, yet clear PAN was observed in "
-        f"their Splunk logs — scope the authoritative metadata misses. " +
+        f"their Splunk logs — scope the authoritative metadata misses, of which {prop} actively propagate that "
+        f"PAN further downstream. " +
         (", ".join(hidden_ids) if hidden_ids else "none in sample") + ".", body))
 
     # methodology + honesty
@@ -261,13 +267,22 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
 
     # Heavy hitters
     sheet(wb.create_sheet("HeavyHitters"),
-          ["System", "Exclusive reach", "Downstream reach", "Out-degree", "Risk"],
-          [[h["system"], h["exclusive_reach"], h["downstream_reach"], h.get("out_degree"), h["risk"]]
-           for h in result.heavy_hitters], [12, 16, 16, 12, 8])
+          ["System", "Downstream reach", "Solo descope", "Out-degree", "Risk"],
+          [[h["system"], h["downstream_reach"], h.get("solo_descope", h.get("exclusive_reach", 0)),
+            h.get("out_degree"), h["risk"]]
+           for h in result.heavy_hitters], [12, 16, 14, 12, 8])
 
-    # Hidden PCI
-    sheet(wb.create_sheet("HiddenPCI"), ["System (PCI=No in BAM, PAN seen in Splunk)"],
-          [[s] for s in hidden.get("hidden_pci_systems", [])], [44])
+    # Hidden PCI — full evidence ledger (BAM miss + Splunk proof + propagation)
+    hd = hidden.get("hidden_detail")
+    if hd:
+        sheet(wb.create_sheet("HiddenPCI_Evidence"),
+              ["System", "Name", "Propagates to (downstream)", "Stated source (DS6)", "BAM flag", "Splunk finding"],
+              [[x["system"], x.get("name", ""), x.get("downstream_reach", 0),
+                x.get("stated_source", ""), "PCI=No", x.get("finding", "True PAN")] for x in hd],
+              [12, 26, 22, 18, 10, 16])
+    else:
+        sheet(wb.create_sheet("HiddenPCI"), ["System (PCI=No in BAM, PAN seen in Splunk)"],
+              [[s] for s in hidden.get("hidden_pci_systems", [])], [44])
 
     # Tokenization plan
     sheet(wb.create_sheet("TokenizationPlan"),

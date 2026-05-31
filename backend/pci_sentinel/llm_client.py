@@ -83,7 +83,8 @@ class LLMClient:
 
     @staticmethod
     def _offline(f: dict) -> str:
-        hh = (f.get("top_heavy_hitter") or {})
+        dist = f.get("top_distributor") or {}
+        lever = f.get("top_lever") or {}
         imp = f.get("impact") or {}
         meta = f.get("scope_metadata_confirmed")
         inf = f.get("scope_inferred_only")
@@ -92,13 +93,16 @@ class LLMClient:
             split = (f" Of these, {meta} are confirmed by authoritative BAM metadata and "
                      f"{inf} are inferred-only candidate scope surfaced from survey/Splunk "
                      f"signals (kept separate, never treated as ground truth).")
+        downgraded = imp.get("sources_downgraded_count", len(imp.get("sources_downgraded", [])))
         return (
             f"Current state: {f.get('scope_size', '?')} systems fall within PCI scope across "
             f"{f.get('dag_nodes', '?')} data-flow clusters; {f.get('cycle_clusters', 0)} circular "
-            f"dependency cluster(s) were resolved into the DAG.{split} The highest-leverage true-source is "
-            f"{hh.get('system', 'n/a')}, which distributes PAN to {hh.get('exclusive_reach', 0)} systems "
-            f"that depend on it exclusively. Tokenizing PAN at the recommended source(s) descopes "
-            f"{imp.get('nodes_descoped', 0)} systems "
-            f"({imp.get('node_surface_reduction_pct', 0)}% of the in-scope surface) and lowers the "
-            f"aggregate risk score by {imp.get('risk_reduction_pct', 0)}% — the clean-stream effect."
+            f"dependency cluster(s) were resolved into the DAG.{split} The widest PAN distributor is "
+            f"{dist.get('system', 'n/a')}, reaching {dist.get('downstream_reach', 0)} downstream systems; "
+            f"the highest-leverage single tokenization target is {lever.get('system', 'n/a')}. Because the "
+            f"same downstream systems are fed by several PAN sources, no single source frees many on its own — "
+            f"so the optimizer selects the minimal set. Tokenizing the recommended source(s) descopes "
+            f"{imp.get('nodes_descoped', 0)} systems ({imp.get('node_surface_reduction_pct', 0)}% of the "
+            f"in-scope surface), converts {downgraded} source(s) from live PAN to non-transactable tokens, "
+            f"and lowers the aggregate risk score by {imp.get('risk_reduction_pct', 0)}% — the clean-stream effect."
         )

@@ -283,6 +283,85 @@ def _gini(values):
     return round((2 * cum) / (n * tot) - (n + 1) / n, 3)
 
 
+def weight_sensitivity(scores: dict, top_n: int = 8) -> dict:
+    """Robustness of the heavy-hitter ranking to the risk weights.
+
+    The composite risk uses weights 0.40/0.30/0.20/0.10 (sensitivity/reach/
+    betweenness/source). A fair challenge is whether the ranking is an artifact of
+    those constants. We recompute each PAN-carrying system's risk from its
+    already-stored, graph-derived factors (no graph re-traversal) under several
+    alternative weightings, and measure how far the ordering moves. Spearman rank
+    correlation near 1.0 and stable top-5 membership mean the conclusions do not
+    depend on the specific weights — they fall out of the data-flow structure."""
+    universe = [n for n, s in scores.items() if s.get("carries_pan")]
+    if len(universe) < 2:
+        return {}
+
+    def risk_under(w, n):
+        f = scores[n]["factors"]
+        return (w[0] * f["sensitivity_norm"] + w[1] * f["reach_norm"]
+                + w[2] * f["betweenness_norm"] + w[3] * f["source_flag"])
+
+    def ranking(w):  # PAN carriers ordered by risk desc (ties broken by id for determinism)
+        return sorted(universe, key=lambda n: (-risk_under(w, n), n))
+
+    bw = SETTINGS.weights
+    scenarios_def = [
+        ("Base (0.40/0.30/0.20/0.10)", (bw.sensitivity, bw.reach, bw.betweenness, bw.source)),
+        ("Equal", (0.25, 0.25, 0.25, 0.25)),
+        ("Sensitivity-heavy", (0.55, 0.20, 0.15, 0.10)),
+        ("Reach-heavy", (0.20, 0.55, 0.15, 0.10)),
+        ("Betweenness-heavy", (0.20, 0.20, 0.50, 0.10)),
+        ("Source-heavy", (0.25, 0.25, 0.20, 0.30)),
+    ]
+    base_order = ranking(scenarios_def[0][1])
+    base_rank = {n: i for i, n in enumerate(base_order)}
+    tracked = base_order[:top_n]
+    base_top5 = set(base_order[:5])
+
+    def spearman(order):  # rho over the tracked set, ranks within that set
+        idx = {n: i for i, n in enumerate(order)}
+        a = {n: r for r, n in enumerate(sorted(tracked, key=lambda x: base_rank[x]))}
+        b = {n: r for r, n in enumerate(sorted(tracked, key=lambda x: idx[x]))}
+        m = len(tracked)
+        if m < 2:
+            return 1.0
+        d2 = sum((a[n] - b[n]) ** 2 for n in tracked)
+        return round(1 - 6 * d2 / (m * (m * m - 1)), 3)
+
+    scen_out, rhos, min_overlap = [], [], 5
+    rank_by_scenario = {}
+    for i, (name, w) in enumerate(scenarios_def):
+        order = ranking(w)
+        rank_by_scenario[name] = {n: j + 1 for j, n in enumerate(order)}
+        if i == 0:
+            rho = 1.0
+        else:
+            rho = spearman(order); rhos.append(rho)
+            min_overlap = min(min_overlap, len(base_top5 & set(order[:5])))
+        scen_out.append({
+            "name": name,
+            "weights": {"sensitivity": round(w[0], 2), "reach": round(w[1], 2),
+                        "betweenness": round(w[2], 2), "source": round(w[3], 2)},
+            "top5": order[:5], "rho": rho,
+        })
+
+    tracked_rows = []
+    for n in tracked:
+        ranks = [rank_by_scenario[name][n] for name, _ in scenarios_def]
+        tracked_rows.append({"system": n, "base_rank": base_rank[n] + 1,
+                             "min_rank": min(ranks), "max_rank": max(ranks)})
+
+    return {
+        "scenarios": scen_out,
+        "mean_rank_correlation": round(sum(rhos) / len(rhos), 3) if rhos else 1.0,
+        "min_rank_correlation": min(rhos) if rhos else 1.0,
+        "top5_overlap_min": min_overlap,
+        "tracked": tracked_rows,
+        "universe_size": len(universe),
+    }
+
+
 def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict:
     """Defensible, interpretable graph-theoretic structure metrics that quantify
     WHY a few interventions dominate — every one is named and citable, none is a
@@ -341,6 +420,7 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
         "choke_point_count": len(choke),
         "pan_subgraph_nodes": P.number_of_nodes(),
         "pan_subgraph_edges": P.number_of_edges(),
+        "weight_sensitivity": weight_sensitivity(scores),
     }
 
 

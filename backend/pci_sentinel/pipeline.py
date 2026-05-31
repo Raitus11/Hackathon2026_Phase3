@@ -111,12 +111,18 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     }
 
     llm = LLMClient()
+    lever_sys = analytics.top_intervention(hh)
+    lever_rec = next((h for h in hh if h["system"] == lever_sys), (hh[0] if hh else {}))
     grounded = {"scope_size": len(scope), "dag_nodes": dagr.stats["dag_nodes"],
                 "cycle_clusters": dagr.stats["cycle_clusters"],
                 "scope_metadata_confirmed": breakdown["metadata_confirmed"],
                 "scope_inferred_only": breakdown["inferred_only"],
                 "hidden_pci_systems_bam_misses": hidden["hidden_pci_count"],
-                "top_heavy_hitter": hh[0] if hh else {}, "impact": impact}
+                # two distinct axes — keep them separate so narration can't conflate them:
+                "top_distributor": ({"system": hh[0]["system"], "downstream_reach": hh[0]["downstream_reach"]} if hh else {}),
+                "top_lever": ({"system": lever_rec.get("system"),
+                               "solo_descope": lever_rec.get("solo_descope", lever_rec.get("exclusive_reach", 0))} if lever_rec else {}),
+                "impact": impact}
     explanation = llm.explain(
         "You are a PCI scope analyst. Explain the data-flow analysis to a mixed "
         "technical/non-technical audience using only the grounded facts.", grounded)

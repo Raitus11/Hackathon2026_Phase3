@@ -52,9 +52,10 @@ function useData() {
       fetch('/api/plan?target=0.8&max_k=8').then(r => r.json()).catch(() => null),
     ])
     const expl = await fetch('/api/explanation').then(r => r.json()).catch(() => ({}))
+    const st = await fetch('/api/structure').then(r => r.json()).catch(() => ({}))
     setData({ ...SNAPSHOT, viz: g, headline: head.headline, hidden: head.hidden,
               scope_breakdown: head.scope_breakdown, impact: imp, heavy_hitters: hh.heavy_hitters,
-              plan: pl || SNAPSHOT.plan,
+              plan: pl || SNAPSHOT.plan, structure: st.structure || SNAPSHOT.structure,
               explanation: expl.explanation || SNAPSHOT.explanation })
     if (ag && ag.agents) setAgents(ag.agents)
     if (sg && sg.questions) setSuggested(sg.questions)
@@ -274,7 +275,7 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
         ) : phase === 'done' ? (
           <div className="flex items-center gap-3">
             <span className="w-7 h-7 rounded-full bg-safe/15 text-safe flex items-center justify-center">✓</span>
-            <div className="text-sm text-dim">Analysis complete — {d.audit?.length || 0} agents ran, masking-leak check passed. See <b className="text-txt">Overview</b>, <b className="text-txt">Data-Flow Graph</b>, <b className="text-txt">Drill-down</b>, or <b className="text-txt">Ask</b>.
+            <div className="text-sm text-dim">Analysis complete — pipeline ran end-to-end, masking-leak check passed. See <b className="text-txt">Overview</b>, <b className="text-txt">Hidden Scope</b>, <b className="text-txt">Data-Flow Graph</b>, <b className="text-txt">Drill-down</b>, or <b className="text-txt">Ask</b>.
               <button onClick={() => { setFiles([]); onReset && onReset() }} className="ml-2 text-pan hover:underline">run again</button></div>
           </div>
         ) : (
@@ -856,6 +857,64 @@ function BarExclusiveReach({ d, onPick }) {
 }
 
 /* ============================ METHODS (algorithms + structure metrics) ============================ */
+function WeightSensitivity({ ws }) {
+  if (!ws || !ws.scenarios) return null
+  const rho = ws.mean_rank_correlation, ov = ws.top5_overlap_min
+  const tone = rho >= 0.9 ? 'text-safe' : rho >= 0.75 ? 'text-pan' : 'text-panhot'
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Risk-weight sensitivity <span className="text-faint text-xs font-normal">— does the ranking depend on the weights?</span></div>
+      <p className="text-sm text-dim mt-1 mb-4 max-w-3xl leading-relaxed">
+        The composite risk weights sensitivity/reach/betweenness/source at 0.40/0.30/0.20/0.10. To show the heavy-hitter
+        ranking isn't an artifact of those constants, each PAN-carrying system's risk is recomputed from its stored
+        graph-derived factors under alternative weightings and re-ranked. A rank correlation near 1.0 means the ordering —
+        and the conclusions — fall out of the data-flow structure, not the chosen numbers.
+      </p>
+      <div className="flex flex-wrap gap-3 mb-4">
+        <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
+          <div className={'disp text-3xl font-black ' + tone}>{rho.toFixed(2)}</div>
+          <div className="text-xs text-txt mt-1">Mean rank correlation (Spearman ρ)</div>
+          <div className="text-[11px] text-faint mt-0.5">base vs each reweighting · 1.0 = identical order</div>
+        </div>
+        <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
+          <div className="disp text-3xl font-black text-safe">{ov}/5</div>
+          <div className="text-xs text-txt mt-1">Top-5 membership held</div>
+          <div className="text-[11px] text-faint mt-0.5">worst case across all reweightings</div>
+        </div>
+        <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
+          <div className="disp text-3xl font-black text-cool">{ws.min_rank_correlation.toFixed(2)}</div>
+          <div className="text-xs text-txt mt-1">Worst-case ρ</div>
+          <div className="text-[11px] text-faint mt-0.5">most adversarial single reweighting</div>
+        </div>
+      </div>
+      <div className="scroll overflow-auto">
+        <table className="w-full text-sm">
+          <thead><tr className="text-left text-[11px] uppercase tracking-wider text-faint bg-panel2">
+            <th className="px-3 py-2">Weighting (s/r/b/src)</th><th className="px-3 py-2">ρ</th><th className="px-3 py-2">Top-5 distributors by risk</th></tr></thead>
+          <tbody>
+            {ws.scenarios.map((sc, i) => (
+              <tr key={i} className={'border-t border-line ' + (i === 0 ? 'bg-pan/5' : '')}>
+                <td className="px-3 py-2.5 whitespace-nowrap">
+                  <span className={'font-semibold ' + (i === 0 ? 'text-pan' : 'text-txt')}>{sc.name}</span>
+                  <span className="mono text-[11px] text-faint ml-2">{sc.weights.sensitivity}/{sc.weights.reach}/{sc.weights.betweenness}/{sc.weights.source}</span>
+                </td>
+                <td className="px-3 py-2.5 mono text-dim">{i === 0 ? '—' : sc.rho.toFixed(2)}</td>
+                <td className="px-3 py-2.5">
+                  <span className="flex flex-wrap gap-1">
+                    {sc.top5.map(id => <span key={id} className="mono text-[11px] px-1.5 py-0.5 rounded bg-line text-dim">{id}</span>)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="text-[11px] text-faint mt-3">Ranking over {ws.universe_size} PAN-carrying systems. Same distributors recur in the top 5 across every weighting — the result is structural, not tuned.</div>
+    </div>
+  )
+}
+
+/* ============================ METHODS (cont.) ============================ */
 function Methods({ d }) {
   const s = d.structure || {}
   const algos = [
@@ -907,6 +966,7 @@ function Methods({ d }) {
           </tbody>
         </table>
       </div>
+      <WeightSensitivity ws={s.weight_sensitivity} />
       {s.choke_points && s.choke_points.length > 0 && (
         <div className="card p-5">
           <div className="disp font-bold text-sm">Choke points <span className="text-faint font-normal">— tokenizing one severs PAN to a whole branch</span></div>

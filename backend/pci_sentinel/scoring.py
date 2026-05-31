@@ -7,11 +7,13 @@ four normalized, individually-defensible factors:
         What cardholder data the system declares (DS4). Untokenized PAN / track /
         PIN / detokenization => tier 4; CRN-only / PCI => tier 3; inferred PAN
         (DS6) => tier 2. (PCI-DSS data-element risk ordering.)
-  2. reach_norm        = |descendants(v)| / (N-1)
+  2. reach_norm        = |descendants(v)| / max_reach
         Downstream blast radius: how many systems v can propagate PAN to in the
-        data-flow graph (transitive closure). Larger reach => larger exposure.
-  3. betweenness_norm  = normalized betweenness centrality (Freeman 1977;
-        Brandes 2001 algorithm). Conduit role — systems many PAN paths route through.
+        data-flow graph (transitive closure), scaled to the most-reaching system so
+        the weight reflects real influence. Larger reach => larger exposure.
+  3. betweenness_norm  = betweenness centrality / max_betweenness (Freeman 1977;
+        Brandes 2001 algorithm), scaled to the most-central system. Conduit role —
+        systems many PAN paths route through.
   4. source_flag       = 1 if v is a true PAN source (in-degree 0 in data-flow AND
         carries/originates PAN), else 0. True sources are where tokenization yields
         the clean-stream effect, so they carry intervention leverage.
@@ -61,13 +63,19 @@ def compute_scores(G) -> dict:
 
     betw = _scaled_betweenness(H, N)
     reach = {n: descendants_count(H, n) for n in H}
-    max_reach = max(N - 1, 1)
+    # Scale each varying factor to its observed [0,1] range so the published weights
+    # reflect actual influence on the score. Without this, reach (|descendants|/(N-1))
+    # occupies only a tiny sub-range on a large estate and a nominal 0.30 weight moves
+    # the score by a few points at most; max-scaling makes "the widest distributor"
+    # carry the full reach weight, relative to the most-reaching system in the data.
+    max_reach = max(max(reach.values(), default=0), 1)
+    max_betw = max(max(betw.values(), default=0.0), 1e-9)
 
     scores = {}
     for n, d in H.nodes(data=True):
         sens = d.get("sensitivity_tier", 0) / 4.0
         rn = reach[n] / max_reach
-        bn = betw.get(n, 0.0)
+        bn = betw.get(n, 0.0) / max_betw
         is_src = 1.0 if (H.in_degree(n) == 0 and (d.get("carries_pan") or d.get("inferred_pan"))) else 0.0
         raw = w.sensitivity * sens + w.reach * rn + w.betweenness * bn + w.source * is_src
         scores[n] = {

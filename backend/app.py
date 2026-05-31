@@ -138,6 +138,12 @@ def explanation():
     return {"explanation": _need().explanation}
 
 
+@app.get("/api/structure")
+def structure():
+    """Graph-structure metrics incl. risk-weight sensitivity (for the Methods view)."""
+    return {"structure": _need().structure}
+
+
 def _need_art():
     if _LAST["art"] is None:
         raise HTTPException(409, "No analysis artifacts. Run an analysis first.")
