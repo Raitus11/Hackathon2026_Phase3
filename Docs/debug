@@ -1,0 +1,12 @@
+cd C:\Users\U669117\source\repos\Hackathon2026PCI\PCISentinel\backend
+
+python -u -c "
+from pci_sentinel.orchestrator import run_agentic
+import glob, os
+files=[(os.path.basename(p), open(p, encoding='utf-8-sig').read()) for p in sorted(glob.glob('../sample_data/*.csv'))]
+st = run_agentic(files, recommend_top=8)
+r = st['result']
+import json
+print('PLAN:', json.dumps(r.impact, indent=2))
+for s in (r.__dict__.get('plan') or {}).get('plan', []): print('  lever:', s)
+"
