@@ -1,0 +1,14 @@
+cd D:\Hackathon2026_Phase3\code\pci-sentinel-complete\pci-sentinel\backend
+python -u -c "
+from pci_sentinel import ingest as ig
+import glob, os
+files=[]
+for p in sorted(glob.glob('../sample_data/*.csv')):
+    files.append((os.path.basename(p), open(p, encoding='utf-8-sig').read()))
+out = ig.ingest_files(files)
+print('quality:', out.quality)
+print('edge_rows:', len(out.edge_rows))
+print('bam_rows:', len(out.bam_rows))
+print('splunk_rows:', len(out.splunk_rows))
+print('sample edge row:', out.edge_rows[0] if out.edge_rows else 'NONE')
+"
