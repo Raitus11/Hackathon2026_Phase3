@@ -120,7 +120,9 @@ lines.append("_Solo descope = systems freed if only that one source is tokenized
              "which is exactly why a minimum-intervention set matters more than any single source._")
 lines.append("")
 lines.append("## Tokenization leverage (minimum-intervention optimizer)")
-lines.append(f"- Greedy maximum-coverage (Nemhauser, Wolsey & Fisher 1978, (1−1/e) bound).")
+lines.append(f"- Greedy max-marginal full-descope over the true PAN sources (transparent heuristic; "
+             f"the freed-systems objective is supermodular under conjunctive true-source coverage, "
+             f"so the (1−1/e) submodular guarantee does not apply and is not claimed).")
 lines.append(f"- Tokenizing **{g(plan, 'k')}** source system(s) descopes "
              f"**{g(plan, 'total_descoped')}** of {g(plan, 'descopable')} descopable systems "
              f"({g(plan, 'before')} → {g(plan, 'after')} in PCI scope).")

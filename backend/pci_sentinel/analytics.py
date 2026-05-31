@@ -16,14 +16,33 @@
                      tier 4 (transactable PAN) to tier 3 (non-transactable CRN),
                      per the data dictionary ("convert to Tokenized PAN to REDUCE
                      risk"; CRN "is not transactable"). The systems that actually
-                     descope are the downstream nodes fed ONLY by the tokenized
-                     source(s). Reports current vs target scope, node/edge surface
-                     reduction, source tier-downgrades, and risk reduction.
+                     descope are the downstream nodes whose every TRUE PAN SOURCE
+                     has been tokenized (clean-stream effect, FAQ Q5).
 
-Modelling note (defensible + conservative, backed by the organizer data
-dictionary): full-track-data, PIN/CVV, and detokenizing systems are "always a
-CDE candidate — tokenization of the PAN does not remove the risk of this data
-element", so they never descope and never have their tier downgraded here.
+Clean-stream / true-source model (the correctness core of this module)
+----------------------------------------------------------------------
+FAQ Q5: "A system becomes safe when it is only ever in receipt of the CRN from
+ALL of its upstream sources." The decisive distinction is between a system that
+*originates* clear PAN and one that merely *carries* PAN it received:
+
+  * TRUE PAN SOURCE (origin) — introduces clear PAN into the flow. Tokenizing it
+    makes it emit CRN; the clean stream then propagates to everything fed solely
+    by tokenized origins.
+  * Pass-through carrier — flagged `carries_pan` in BAM only because it RECEIVED
+    PAN. Once its true source emits CRN, it relays CRN. It must NOT be treated as
+    an independent, un-cleanable PAN source, or the clean stream can never cross
+    it and tokenizing the real source descopes nobody.
+  * Always-CDE origin — detokenizers (RISE/APG regenerate PAN from CRN) and
+    full-track / PIN holders. The data dictionary: "always a CDE candidate —
+    tokenization of the PAN does not remove the risk of this data element." They
+    re-introduce clear PAN regardless of upstream tokenization and cannot be
+    tokenized away, so they are permanent origins.
+
+`_true_pan_sources` computes the origin set cycle-safely via SCC condensation —
+the same Tarjan->condensation rule used to build the DAG — so reciprocal/cyclic
+BAM relationships cannot misclassify an origin. A downstream system descopes iff
+ALL of its true-source-origin ancestors are tokenized (true-source-ancestors-only,
+NOT every PAN-carrying ancestor).
 """
 from __future__ import annotations
 
@@ -54,6 +73,56 @@ def pci_scope(H: nx.DiGraph, pan_sources: set, desc_cache: dict = None) -> set:
     for s in pan_sources:
         scope |= nx.descendants(H, s)
     return scope
+
+
+def _always_cde(node_attrs: dict) -> bool:
+    """Per data dictionary: full-track data, PIN/CVV, and detokenizers are
+    'always a CDE candidate — tokenization of the PAN does not remove the risk of
+    this data element'. Such systems never descope and never tier-downgrade."""
+    return bool(node_attrs.get("full_track") or node_attrs.get("pin")
+                or node_attrs.get("detokenizes"))
+
+
+def _true_pan_sources(H: nx.DiGraph, pan_sources: set) -> set:
+    """TRUE PAN ORIGINS: systems that introduce clear PAN into the flow rather than
+    receiving it. This is the set whose tokenization yields the clean-stream effect.
+
+    Cycle-safe by construction: we condense H to its DAG of strongly-connected
+    components (Tarjan, via networkx.condensation — the same rule the pipeline uses
+    to build the analysis DAG), then a PAN-carrying component is an ORIGIN iff no
+    OTHER PAN-carrying component is its ancestor. Reciprocal/cyclic BAM links can
+    therefore never make an origin look like a pass-through (or vice-versa).
+
+    Always-CDE carriers (detokenizers, full-track, PIN) re-introduce clear PAN
+    regardless of any upstream tokenization, so they are unconditionally origins.
+
+    Returns the set of origin NODES (a subset of `pan_sources`).
+    """
+    carriers = {n for n in pan_sources if n in H}
+    if not carriers:
+        return set()
+
+    C = nx.condensation(H)                       # DAG of SCCs; node attr 'members'
+    comp_has_carrier = {}
+    for i, data in C.nodes(data=True):
+        comp_has_carrier[i] = bool(set(data["members"]) & carriers)
+
+    # Single O(V+E) topological pass: does a carrier-bearing component sit upstream?
+    has_carrier_ancestor = {i: False for i in C.nodes()}
+    for i in nx.topological_sort(C):
+        upstream_carrier = comp_has_carrier[i] or has_carrier_ancestor[i]
+        if upstream_carrier:
+            for j in C.successors(i):
+                has_carrier_ancestor[j] = True
+
+    origins: set = set()
+    for i in C.nodes():
+        if comp_has_carrier[i] and not has_carrier_ancestor[i]:
+            origins |= (set(C.nodes[i]["members"]) & carriers)
+
+    # always-CDE carriers re-source PAN regardless of upstream -> permanent origins
+    always = {n for n in carriers if _always_cde(H.nodes[n])}
+    return origins | always
 
 
 def scope_split(G_meta: nx.DiGraph, pan_sources: set, inferred_pan_sources: set,
@@ -87,19 +156,24 @@ def scope_split(G_meta: nx.DiGraph, pan_sources: set, inferred_pan_sources: set,
     return breakdown, meta_scope, inferred_only
 
 
-def _exclusive_reach(H, s, pan_sources):
-    """Systems that descope if THIS source alone is tokenized: nodes reachable
-    from `s` and from NO other PAN source. Excludes `s` itself — a tokenized
-    source stays in the CDE as the tokenization point (it still ingests real PAN
-    to convert it), so it is not 'descoped'. This guarantees, by construction,
-    solo_descope <= downstream_reach for every system."""
-    desc = nx.descendants(H, s)
-    reachable_wo = set()
-    for o in pan_sources:
-        if o == s:
-            continue
-        reachable_wo |= nx.descendants(H, o) | {o}
-    return (desc - {s}) - reachable_wo
+def _origin_reach_count(H, origins, desc_cache=None):
+    """For every node, how many TRUE PAN ORIGINS reach it (origin itself counts).
+    A node's count == the number of distinct true-source ancestors it has — the
+    quantity that determines whether tokenizing a set of origins fully frees it.
+    Returns (reach_count: Counter, desc_cache)."""
+    from collections import Counter
+    if desc_cache is None:
+        desc_cache = {}
+    reach_count = Counter()
+    for s in origins:
+        d = desc_cache.get(s)
+        if d is None:
+            d = nx.descendants(H, s)
+            desc_cache[s] = d
+        for n in d:
+            reach_count[n] += 1
+        reach_count[s] += 1                  # an origin reaches itself
+    return reach_count, desc_cache
 
 
 def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
@@ -111,43 +185,46 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
     different questions:
       * downstream_reach — blast radius: how many systems this source can expose.
       * solo_descope (== exclusive_reach) — how many descope if ONLY this source
-        is tokenized. On densely-shared PAN flow this is small for everyone, which
-        is precisely why the minimal-SET optimizer (see minimal_tokenization_plan)
-        is the right tool rather than picking one source.
+        is tokenized, measured against the TRUE PAN ORIGIN set (so exclusivity
+        means "no OTHER true source reaches the node", not "no other PAN carrier").
+        On densely-shared PAN flow this is small for everyone, which is precisely
+        why the minimal-SET optimizer (see minimal_tokenization_plan) and the
+        exposure-level metrics (see source_exposure_impact) matter more than
+        picking one source.
 
-    Performance: descendants of each PAN source are computed ONCE and cached, then
-    a single reach-count pass determines exclusivity. This is O(S·E) overall rather
-    than the naive O(S²·E) (which recomputed every other source's descendants for
-    each source). Results are identical — pure memoization.
+    `is_true_source` marks which distributors are actual tokenization levers
+    (origins). A high-reach pass-through carrier is a big distributor but NOT a
+    lever — tokenizing it cleans nothing, because it only relays PAN it received.
     """
     import logging
-    from collections import Counter
     log = logging.getLogger(__name__)
     H = _flatten(G)
     sources = [s for s in pan_sources if s in H]
-    log.info(f"       [heavy_hitters] Processing {len(sources)} PAN sources (caching descendants once)...")
+    origins = _true_pan_sources(H, set(pan_sources))
+    log.info(f"       [heavy_hitters] {len(sources)} PAN sources, {len(origins)} true origins; caching descendants...")
 
-    # 1) Compute each source's descendants ONCE.
+    # descendants of each PAN source once (for reach + the distributor table)
     desc_cache = {}
     for idx, s in enumerate(sources, 1):
         desc_cache[s] = nx.descendants(H, s)
         if idx % 50 == 0 or idx == len(sources):
             log.info(f"       [heavy_hitters] cached descendants {idx}/{len(sources)}")
 
-    # 2) Single reach-count pass: how many sources reach each node (incl. source itself).
-    #    A node is exclusive to s iff exactly one source reaches it AND s reaches it.
-    reach_count = Counter()
-    for s in sources:
-        for n in desc_cache[s]:
-            reach_count[n] += 1
-        reach_count[s] += 1            # the source reaches itself
-    log.info(f"       [heavy_hitters] reach-count pass complete over {len(reach_count)} nodes")
+    # exclusivity is measured against TRUE ORIGINS only (clean-stream correct)
+    origin_reach, _ = _origin_reach_count(H, origins, desc_cache=dict(desc_cache))
+    log.info(f"       [heavy_hitters] origin reach-count over {len(origin_reach)} nodes")
 
-    # 3) Build rows. exclusive = nodes in desc(s) (excluding s) reached by only one source.
     out = []
     for s in sources:
         desc = desc_cache[s]
-        exclusive = {n for n in desc if n != s and reach_count[n] == 1}
+        is_origin = s in origins
+        # solo descope only makes sense for an origin: nodes it reaches that are
+        # reached by exactly one origin (that origin being s). A pass-through has
+        # no solo descope by construction (it is not a lever).
+        if is_origin:
+            exclusive = {n for n in desc if n != s and origin_reach[n] == 1}
+        else:
+            exclusive = set()
         out.append({
             "system": s,
             "downstream_reach": len(desc),
@@ -157,10 +234,9 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
             "risk": scores.get(s, {}).get("risk", 0.0),
             "betweenness": scores.get(s, {}).get("betweenness", 0.0),
             "carries_pan": True,
+            "is_true_source": bool(is_origin),   # is this distributor an actual lever?
         })
-    # primary-distributor ranking: reach first (organizer definition), then solo
-    # descope leverage, then composite risk.
-    log.info(f"       [heavy_hitters] ✓ complete, sorting {len(out)} sources...")
+    log.info(f"       [heavy_hitters] sorting {len(out)} sources by reach...")
     out.sort(key=lambda x: (x["downstream_reach"], x["solo_descope"], x["risk"]), reverse=True)
     return out[:top_k]
 
@@ -168,11 +244,14 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
 def top_intervention(hh: list) -> str | None:
     """The single best FIRST tokenization lever = the source whose SOLO descope is
     largest (== greedy step 1), tie-broken by reach. Distinct from the top
-    distributor (largest reach), which the heavy-hitter table is sorted by."""
-    if not hh:
+    distributor (largest reach), which the heavy-hitter table is sorted by.
+    Only true sources can be levers, so we ignore pass-through carriers."""
+    levers = [h for h in hh if h.get("is_true_source", True)]
+    pool = levers or hh
+    if not pool:
         return None
-    best = max(hh, key=lambda h: (h.get("solo_descope", h.get("exclusive_reach", 0)),
-                                  h.get("downstream_reach", 0)))
+    best = max(pool, key=lambda h: (h.get("solo_descope", h.get("exclusive_reach", 0)),
+                                    h.get("downstream_reach", 0)))
     return best["system"]
 
 
@@ -180,23 +259,25 @@ def recommended_levers(G, pan_sources: set, scores: dict, n: int = 3) -> list:
     """The top-n tokenization LEVERS to recommend = the first n picks of the greedy
     minimum-intervention plan (max marginal descope at each step). This is the
     correct 'what should we tokenize first' set — distinct from the heavy-hitter
-    table's distributor ranking (by reach). Falls back to top solo-descope sources
-    if the plan returns fewer than n (e.g. when marginal descope hits zero)."""
+    table's distributor ranking (by reach). Falls back to the top sources by
+    exposure benefit (feeds_removed, then solo descope) if the plan returns fewer
+    than n (e.g. when marginal FULL descope hits zero but exposure benefit does not)."""
     import logging
     log = logging.getLogger(__name__)
-    log.info(f"       [recommended_levers] Computing minimal tokenization plan (greedy set-cover, this may take 1-2 min)...")
+    log.info(f"       [recommended_levers] computing minimal tokenization plan (greedy set-cover)...")
     plan = minimal_tokenization_plan(G, pan_sources, scores, target_fraction=1.0,
                                      max_k=max(1, n))
-    log.info(f"       [recommended_levers] Plan complete, extracting top-{n} picks...")
     picks = list(plan.get("plan", []))
     if len(picks) < n:
-        # pad with the next-best solo-descope sources not already chosen
-        log.info(f"       [recommended_levers] Plan returned {len(picks)} picks, padding with heavy-hitter fallback...")
-        hh = heavy_hitters(G, pan_sources, scores, top_k=len(pan_sources) or 1)
-        for h in sorted(hh, key=lambda x: (x["solo_descope"], x["downstream_reach"]),
-                        reverse=True):
-            if h["system"] not in picks:
-                picks.append(h["system"])
+        # pad with the next-best sources by EXPOSURE benefit (feeds_removed), not full
+        # descope — so a recommendation always names the highest-leverage origins even
+        # when single-source full descope is zero (the dense-convergence case).
+        log.info(f"       [recommended_levers] plan returned {len(picks)}; padding by exposure benefit...")
+        exp = source_exposure_impact(G, pan_sources, scores).get("per_source", [])
+        for row in sorted(exp, key=lambda r: (r["feeds_removed"], r["solo_descope"]),
+                          reverse=True):
+            if row["system"] not in picks:
+                picks.append(row["system"])
             if len(picks) >= n:
                 break
     return picks[:n]
@@ -218,24 +299,26 @@ def trace_lineage(G, target: str, pan_sources: set, max_paths: int = 5) -> dict:
             "pan_paths": paths}
 
 
-def _always_cde(node_attrs: dict) -> bool:
-    """Per data dictionary: full-track data, PIN/CVV, and detokenizers are
-    'always a CDE candidate — tokenization of the PAN does not remove the risk of
-    this data element'. Such systems never descope and never tier-downgrade."""
-    return bool(node_attrs.get("full_track") or node_attrs.get("pin")
-                or node_attrs.get("detokenizes"))
+def _scope_after_tokenizing(H, pan_sources, tokenize, before, origins=None):
+    """Scope after tokenizing `tokenize`, under clean-stream semantics (FAQ Q5).
 
+    A downstream system descopes when ALL of its TRUE-PAN-SOURCE (origin) ancestors
+    are tokenized — NOT when every PAN-carrying intermediary is. Intermediaries
+    carry PAN only because they received it; once their true source emits CRN they
+    relay CRN, so the clean stream propagates THROUGH them. This is the fix for the
+    previously-too-strict predicate that treated every `carries_pan` node as an
+    un-cleanable independent source (which structurally pinned descope at ~0).
 
-def _scope_after_tokenizing(H, pan_sources, tokenize, before):
-    """Scope after tokenizing `tokenize`. Tokenized sources REMAIN in scope (they
-    stay in the CDE as tokenization points); only downstream nodes fed solely by
-    them descope. Independent PAN carriers / detokenizers stay regardless."""
+    Tokenized origins REMAIN in the CDE as tokenization points. Always-CDE origins
+    (detok / full-track / PIN) are part of `origins`, are never in `tokenize`, and
+    therefore keep re-sourcing PAN to their descendants.
+    """
     tok = set(tokenize)
-    independent = {n for n, d in H.nodes(data=True)
-                   if d.get("carries_pan") or d.get("detokenizes")}
-    remaining = (pan_sources - tok) | (independent - tok)
-    after = pci_scope(H, remaining) | (independent - tok)
-    after |= (tok & before)                     # tokenization points stay in the CDE
+    if origins is None:
+        origins = _true_pan_sources(H, set(pan_sources))
+    remaining_origins = origins - tok
+    after = pci_scope(H, remaining_origins)      # remaining origins + their descendants
+    after |= (tok & before)                      # tokenization points stay in the CDE
     return after
 
 
@@ -243,30 +326,41 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
     """Simulate tokenizing PAN at the systems in `tokenize`.
 
     Descope semantics (FAQ Q5 + data dictionary): a downstream system goes safe
-    only when EVERY clear-PAN source reaching it is tokenized. The tokenized
-    sources themselves stay in the CDE (they convert PAN->CRN), but drop from
-    tier 4 (transactable PAN) to tier 3 (non-transactable CRN) UNLESS they also
-    hold full-track / PIN / detokenize (which keep them at tier 4).
+    only when EVERY TRUE PAN SOURCE reaching it is tokenized. The tokenized sources
+    themselves stay in the CDE (they convert PAN->CRN), but drop from tier 4
+    (transactable PAN) to tier 3 (non-transactable CRN) UNLESS they also hold
+    full-track / PIN / detokenize (which keep them at tier 4).
+
+    Beyond full descope, we also report EXPOSURE-level benefit (which is non-zero
+    even when full descope is not): feeds_removed (systems that lose a clear-PAN
+    feed) and parent_reduction (systems whose true-source-parent count drops but
+    that remain in scope via another source).
     """
     H = _flatten(G)
     w = SETTINGS.weights
     tok = set(tokenize)
+    origins = _true_pan_sources(H, set(pan_sources))
     before = pci_scope(H, pan_sources)
-    after = _scope_after_tokenizing(H, pan_sources, tok, before)
+    after = _scope_after_tokenizing(H, pan_sources, tok, before, origins=origins)
     descoped = before - after
+
+    # exposure-level benefit: union of descendants of the tokenized origins, within scope
+    tok_origins = tok & origins
+    fed_by_tok = set()
+    for t in tok_origins:
+        fed_by_tok |= ({t} | nx.descendants(H, t))
+    feeds_removed = (fed_by_tok & before) - tok          # systems that lose a clear-PAN feed
+    parent_reduction = feeds_removed - descoped          # narrowed but still in scope
 
     def pan_edges(scope):
         return sum(1 for u, v in H.edges() if u in scope)
 
     def downgraded_risk(n):
-        """Risk of n after tokenization. Descoped nodes are handled by exclusion
-        from `after`; a tokenized PURE-PAN source drops tier 4->3."""
         base = scores.get(n, {}).get("risk", 0.0)
         if n in tok:
             d = H.nodes[n]
             tier = scores.get(n, {}).get("sensitivity_tier", 0)
             if tier > SETTINGS.tier_high and not _always_cde(d):
-                # only the sensitivity term changes (PAN tier -> CRN tier)
                 return round(base - 100.0 * w.sensitivity
                              * ((tier - SETTINGS.tier_high) / 4.0), 2)
         return base
@@ -279,8 +373,6 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
         n for n in in_after_tok
         if downgraded_risk(n) < scores.get(n, {}).get("risk", 0.0))
     sources_retained_tier4 = sorted(n for n in in_after_tok if n not in sources_downgraded)
-    # FAQ Q7/Takeaway 7: systems that genuinely need PAN de-tokenize via centralized
-    # RISE/APG services, so they remain in CDE scope even after upstream tokenization.
     retained_detok = sorted(n for n in after
                             if H.nodes[n].get("detokenizes") and n not in tok)
     return {
@@ -289,6 +381,10 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
         "scope_after": len(after),
         "nodes_descoped": len(descoped),
         "descoped_systems_sample": sorted(descoped)[:25],
+        # exposure-level benefit (non-zero even when full descope is 0)
+        "feeds_removed": len(feeds_removed),
+        "feeds_removed_sample": sorted(feeds_removed)[:25],
+        "parent_reduction": len(parent_reduction),
         "sources_downgraded": sources_downgraded,            # tier 4 -> 3 (PAN -> CRN)
         "sources_downgraded_count": len(sources_downgraded),
         "sources_retained_tier4": sources_retained_tier4,    # track/PIN/detok stay tier 4
@@ -301,6 +397,268 @@ def clean_stream_impact(G, pan_sources: set, scores: dict, tokenize: list) -> di
         "risk_reduction_pct": round(100 * (risk_before - risk_after) / risk_before, 1) if risk_before else 0.0,
         "node_surface_reduction_pct": round(100 * len(descoped) / len(before), 1) if before else 0.0,
     }
+
+
+def source_exposure_impact(G, pan_sources: set, scores: dict, top_k: int = 25) -> dict:
+    """Per-true-source EXPOSURE impact — the 'block-this-source, measure-the-benefit'
+    table the FAQ asks for. For every true PAN origin T we report:
+
+      * downstream_reach  — systems T can feed clear PAN to (blast radius).
+      * solo_descope      — systems fully freed if ONLY T is tokenized (T is their
+                            single true source).  ( == exclusive_reach )
+      * feeds_removed      — systems that lose a clear-PAN feed when T -> CRN
+                            (every system T reaches in scope). Non-zero, meaningful.
+      * parent_reduction   — systems whose true-source-parent count drops by >=1 but
+                            that remain in scope via another source
+                            ( == feeds_removed - solo_descope ).
+
+    Decomposition that holds by construction:  feeds_removed = solo_descope + parent_reduction.
+    This is what turns the honest 0%-full-descope result into a ranked, non-zero
+    intervention story.
+    """
+    H = _flatten(G)
+    before = pci_scope(H, pan_sources)
+    origins = _true_pan_sources(H, set(pan_sources))
+    origin_reach, desc_cache = _origin_reach_count(H, origins)
+
+    rows = []
+    for s in origins:
+        desc = desc_cache.get(s) or nx.descendants(H, s)
+        fed = ({s} | desc) & before
+        feeds_removed = fed - {s}                                  # systems losing T's feed
+        solo = {n for n in desc if n != s and origin_reach[n] == 1}
+        rows.append({
+            "system": s,
+            "downstream_reach": len(desc),
+            "solo_descope": len(solo),
+            "feeds_removed": len(feeds_removed),
+            "parent_reduction": len(feeds_removed) - len(solo),
+            "risk": scores.get(s, {}).get("risk", 0.0),
+            "is_true_source": True,
+        })
+    rows.sort(key=lambda r: (r["feeds_removed"], r["solo_descope"], r["downstream_reach"]),
+              reverse=True)
+    return {
+        "true_source_count": len(origins),
+        "scope_before": len(before),
+        "per_source": rows[:top_k],
+        "per_source_full_count": len(rows),
+    }
+
+
+def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25) -> list:
+    """Greedy cumulative descope curve: tokenize true sources in greedy max-marginal
+    order and record, at each step, how many systems are FULLY descoped and how many
+    have lost a clear-PAN feed (exposure narrowed). THIS is the headline finding — it
+    shows full descope only ramps once most of the source front is tokenized, which is
+    *why* single-source tokenization frees ~0 (told as insight, not failure)."""
+    H = _flatten(G)
+    before = pci_scope(H, pan_sources)
+    before_n = len(before)
+    origins = _true_pan_sources(H, set(pan_sources))
+    # candidate ordering = origins by reach (interpretable, bounds cost)
+    cache = {s: ({s} | nx.descendants(H, s)) for s in origins}
+    candidates = sorted(origins, key=lambda s: -len(cache[s]))[:max_k]
+
+    def scope_after(tok):
+        rem = origins - set(tok)
+        scope = set()
+        for s in rem:
+            scope |= cache[s]
+        scope |= (set(tok) & before)
+        return scope
+
+    chosen, curve, cur = [], [], before
+    fed_cum = set()
+    while len(chosen) < max_k:
+        best, best_after, best_marginal = None, cur, 0
+        for s in candidates:
+            if s in chosen:
+                continue
+            a = scope_after(chosen + [s])
+            marg = len(cur) - len(a)
+            if marg > best_marginal or (best is None and marg >= 0):
+                best, best_after, best_marginal = s, a, marg
+        if best is None:
+            break
+        chosen.append(best)
+        fed_cum |= (cache[best] & before)
+        cur = best_after
+        curve.append({
+            "k": len(chosen),
+            "tokenized": list(chosen),
+            "last_source": best,
+            "cumulative_descoped": before_n - len(cur),
+            "marginal_descoped": best_marginal,
+            "cumulative_feeds_removed": len(fed_cum - set(chosen)),
+        })
+        if len(cur) == 0:
+            break
+    return curve
+
+
+def block_set_comparison(G, pan_sources: set, scores: dict, sets: dict) -> dict:
+    """Compare candidate block-sets side by side (FAQ: 'block this / block that and
+    compare'). `sets` maps a label -> list of source systems. For each set we report
+    full descope, clear-PAN feeds removed, parent-count reductions, and risk delta."""
+    out = {}
+    for label, members in sets.items():
+        imp = clean_stream_impact(G, pan_sources, scores, list(members))
+        out[label] = {
+            "tokenize": list(members),
+            "fully_descoped": imp["nodes_descoped"],
+            "feeds_removed": imp["feeds_removed"],
+            "parent_reduction": imp["parent_reduction"],
+            "risk_reduction_pct": imp["risk_reduction_pct"],
+            "scope_before": imp["scope_before"],
+            "scope_after": imp["scope_after"],
+        }
+    return out
+
+
+def what_if(G, pan_sources: set, scores: dict, tokenize: list) -> dict:
+    """Clean-stream impact for an arbitrary set of tokenized sources, returning the
+    FULL descoped and retained sets so the UI can recolor the graph and the plan
+    can show exactly which systems go safe-for-free vs. must onboard RISE/APG.
+    Also returns the exposure-level benefit so blocking ALWAYS shows non-zero value."""
+    H = _flatten(G)
+    origins = _true_pan_sources(H, set(pan_sources))
+    before = pci_scope(H, pan_sources)
+    after = _scope_after_tokenizing(H, pan_sources, set(tokenize), before, origins=origins)
+    descoped = sorted(before - after)
+    retained = sorted(n for n in after
+                      if H.nodes[n].get("detokenizes") and n not in set(tokenize))
+    base = clean_stream_impact(G, pan_sources, scores, tokenize)
+    base["descoped_systems"] = descoped            # full set (no cap) for graph recolor
+    base["descoped_systems_sample"] = descoped[:60]
+    base["retained_via_detokenization"] = retained
+    base["retained_via_detokenization_count"] = len(retained)
+    return base
+
+
+def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
+                              target_fraction: float = 0.8, max_k: int = 8,
+                              candidate_k: int = 25) -> dict:
+    """Greedy minimum-intervention roadmap.
+
+    Problem: choose the FEWEST true PAN sources to tokenize that descope the MOST
+    systems (FAQ: "where tokenization has the greatest reduction of clear card number
+    usage"). Descope semantics (FAQ Q5): a system goes safe only when EVERY TRUE PAN
+    SOURCE reaching it is tokenized — a conjunctive ("AND") coverage condition.
+
+    Method & honesty about the bound: each step adds the candidate source with the
+    largest marginal FULL descope. Note the objective is NOT submodular: because a
+    system frees only when ALL its true sources are tokenized, marginal returns
+    INCREASE as the source front gets covered (the freed-systems objective is
+    supermodular), so the (1-1/e) greedy guarantee of Nemhauser-Wolsey-Fisher (1978)
+    does NOT apply here. We therefore report greedy as a transparent, interpretable
+    heuristic and present the honest result — together with the cumulative descope
+    curve and the per-source exposure metrics, which carry the intervention story
+    when full descope ramps slowly under dense multi-source convergence.
+
+    Candidate levers are the top-reach TRUE SOURCES (origins) only — tokenizing a
+    pass-through carrier cleans nothing, so it is never a candidate.
+    """
+    H = _flatten(G)
+    before = pci_scope(H, pan_sources)
+    before_n = len(before)
+    origins = _true_pan_sources(H, set(pan_sources))
+    independent = {n for n, d in H.nodes(data=True) if _always_cde(d)}
+    descopable = before - independent
+
+    # candidates = top-reach ORIGINS (levers), computed once
+    cache = {s: ({s} | nx.descendants(H, s)) for s in origins}
+    candidates = sorted(origins, key=lambda s: -len(cache[s]))[:candidate_k]
+    # solo descope per candidate (against the origin set) for reporting
+    origin_reach, _ = _origin_reach_count(H, origins, desc_cache={s: (cache[s] - {s}) for s in origins})
+    solo = {}
+    for s in candidates:
+        solo[s] = sum(1 for n in cache[s] if n != s and origin_reach[n] == 1)
+
+    def scope_after(tok):
+        rem = origins - set(tok)
+        scope = set()
+        for s in rem:
+            scope |= cache[s]
+        scope |= (set(tok) & before)         # tokenization points stay in the CDE
+        return scope
+
+    chosen, steps, cur = [], [], before
+    import logging
+    log = logging.getLogger(__name__)
+    log.info(f"       [plan] greedy set-cover: {len(candidates)} origin candidates, "
+             f"{before_n} in scope, max_k={max_k}")
+    while len(chosen) < max_k:
+        best, best_after = None, cur
+        for s in candidates:
+            if s in chosen:
+                continue
+            a = scope_after(chosen + [s])
+            if len(a) < len(best_after):
+                best, best_after = s, a
+        if best is None or len(cur) - len(best_after) <= 0:
+            log.info(f"       [plan] no further marginal full-descope; stopping greedy")
+            break
+        marginal = len(cur) - len(best_after)
+        chosen.append(best)
+        cum = before_n - len(best_after)
+        steps.append({
+            "step": len(chosen), "tokenize": best, "marginal_descoped": marginal,
+            "cumulative_descoped": cum, "scope_after": len(best_after),
+            "solo_descope": solo.get(best), "exclusive_reach": solo.get(best),
+            "pct_of_descopable": round(100 * cum / max(1, len(descopable)), 1),
+        })
+        cur = best_after
+        if len(descopable) and cum / len(descopable) >= target_fraction:
+            log.info(f"       [plan] reached target fraction, stopping")
+            break
+
+    total = before_n - len(cur)
+    # cumulative curve (fills the TokenizationPlan tab + is the headline visual,
+    # even when greedy full-descope halts early)
+    curve = cumulative_descope_curve(G, pan_sources, scores, max_k=candidate_k)
+    log.info(f"       [plan] complete: {len(chosen)} steps, {total} systems fully descoped")
+    return {
+        "before": before_n, "descopable": len(descopable), "after": len(cur),
+        "total_descoped": total, "k": len(chosen),
+        "plan": chosen, "steps": steps, "target_fraction": target_fraction,
+        "true_source_count": len(origins),
+        "cumulative_curve": curve,
+        # Honest method statement: greedy is a heuristic here (objective is supermodular,
+        # so no (1-1/e) guarantee). The exposure metrics carry the story.
+        "method": "greedy max-marginal full-descope (heuristic; objective is supermodular "
+                   "under conjunctive true-source coverage, so no (1-1/e) guarantee)",
+    }
+
+
+def hidden_scope(G) -> dict:
+    """FAQ Takeaway 5 (killer demo): systems BAM flags PCI=No but Splunk observed
+    clear PAN in their logs -> hidden scope BAM misses. Uses the CURRENT BAM PCI
+    flag (DS4), so systems BAM has since caught are not counted (DS6's flag is a
+    point-in-time snapshot). Also surfaces declared PAN carriers for the headline
+    'systems exposed to clear PAN' metric, and a per-system evidence detail (the
+    Splunk finding, the app's stated source, and how far the leaked PAN then
+    propagates) so each BAM miss is auditable, not just counted."""
+    H = _flatten(G)
+    hidden, detail = [], []
+    for n, d in G.nodes(data=True):
+        if d.get("pan_in_logs_observed") and not d.get("pci_flag"):
+            hidden.append(n)
+            reach = len(nx.descendants(H, n)) if n in H else 0
+            detail.append({
+                "system": n,
+                "name": d.get("app_name", ""),
+                "downstream_reach": reach,            # how far the leaked PAN can travel onward
+                "stated_source": d.get("splunk_stated_source", ""),
+                "finding": d.get("splunk_finding", "") or "True PAN in logs",
+            })
+    hidden.sort()
+    detail.sort(key=lambda x: (-x["downstream_reach"], x["system"]))
+    declared = sorted(n for n, d in G.nodes(data=True) if d.get("carries_pan"))
+    return {"hidden_pci_systems": hidden, "hidden_pci_count": len(hidden),
+            "hidden_detail": detail,
+            "hidden_propagating_count": sum(1 for x in detail if x["downstream_reach"] > 0),
+            "declared_pan_systems_count": len(declared)}
 
 
 def _gini(values):
@@ -409,7 +767,6 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
         tokenization severs PAN to a whole branch (single points of propagation).
     """
     H = _flatten(G)
-    # PAN-flow subgraph: edges that originate from a PAN-carrying system
     scope = pci_scope(H, pan_sources)
     P = H.subgraph(scope).copy()
 
@@ -420,9 +777,6 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
     top5 = sum(sorted(reaches, reverse=True)[:5])
     top5_share = round(100 * top5 / tot_reach, 1)
 
-    # propagation depth = longest PAN path; condense any residual cycles first so a
-    # back-edge can't void the measure (depth is then in supernode hops, >= a lower
-    # bound on physical hops)
     try:
         if nx.is_directed_acyclic_graph(P):
             depth = nx.dag_longest_path_length(P)
@@ -435,7 +789,6 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
 
     islands = nx.number_weakly_connected_components(P) if P.number_of_nodes() else 0
 
-    # choke points: cut vertices on the undirected projection of the PAN subgraph
     try:
         choke = sorted(nx.articulation_points(P.to_undirected()),
                        key=lambda n: -scores.get(n, {}).get("downstream_reach", 0))
@@ -454,146 +807,3 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
         "pan_subgraph_edges": P.number_of_edges(),
         "weight_sensitivity": weight_sensitivity(scores),
     }
-
-
-def what_if(G, pan_sources: set, scores: dict, tokenize: list) -> dict:
-    """Clean-stream impact for an arbitrary set of tokenized sources, returning the
-    FULL descoped and retained sets so the UI can recolor the graph and the plan
-    can show exactly which systems go safe-for-free vs. must onboard RISE/APG."""
-    H = _flatten(G)
-    before = pci_scope(H, pan_sources)
-    after = _scope_after_tokenizing(H, pan_sources, set(tokenize), before)
-    descoped = sorted(before - after)
-    retained = sorted(n for n in after
-                      if H.nodes[n].get("detokenizes") and n not in set(tokenize))
-    base = clean_stream_impact(G, pan_sources, scores, tokenize)
-    base["descoped_systems"] = descoped            # full set (no cap) for graph recolor
-    base["descoped_systems_sample"] = descoped[:60]
-    base["retained_via_detokenization"] = retained
-    base["retained_via_detokenization_count"] = len(retained)
-    return base
-
-
-def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
-                              target_fraction: float = 0.8, max_k: int = 8,
-                              candidate_k: int = 25) -> dict:
-    """Greedy minimum-intervention roadmap.
-
-    Problem: choose the FEWEST PAN sources to tokenize that descope the MOST systems
-    (FAQ: "where tokenization has the greatest reduction of clear card number usage").
-    Descope semantics (FAQ Q5): a system goes safe only when every clear-PAN source
-    reaching it is tokenized — so coverage is a monotone, submodular set function.
-    Tokenized sources themselves stay in the CDE (tokenization points), consistent
-    with clean_stream_impact.
-
-    Method: greedy maximum-coverage — at each step add the candidate source whose
-    marginal descope is largest. For monotone submodular coverage the greedy solution
-    is within (1 - 1/e) ~ 63% of the optimal k-set (Nemhauser, Wolsey & Fisher, 1978),
-    a named, defensible bound rather than a heuristic with no guarantee. Candidate
-    levers are the top-reach distributors (interpretable, and bounds cost).
-    """
-    H = _flatten(G)
-    before = pci_scope(H, pan_sources)
-    before_n = len(before)
-    independent = {n for n, d in H.nodes(data=True)
-                   if d.get("carries_pan") or d.get("detokenizes")}
-    descopable = before - independent
-    hh_full = heavy_hitters(G, pan_sources, scores, top_k=candidate_k)   # computed once (reach-ranked)
-    candidates = [h["system"] for h in hh_full]
-    solo = {h["system"]: h["solo_descope"] for h in hh_full}
-    cand_set = set(candidates)
-
-    # Reachability cache + a precomputed FIXED scope from every source that is never
-    # a tokenization candidate (those never change across what-ifs). Each greedy
-    # evaluation then unions only the handful of active candidate descendant sets,
-    # not the whole source set — keeping hundreds of evals well under a second even
-    # at enterprise scale.
-    cache = {}
-    all_sources = pan_sources | independent
-    for s in all_sources:                       # warm the cache once (no misses in loop)
-        cache[s] = {s} | nx.descendants(H, s)
-    fixed_sources = all_sources - cand_set
-    fixed_scope = set().union(*[cache[s] for s in fixed_sources]) if fixed_sources else set()
-
-    def scope_after(tok):
-        tok = set(tok)
-        active = [c for c in candidates if c not in tok]
-        scope = set(fixed_scope)
-        for c in active:
-            scope |= cache[c]
-        scope |= (independent - tok)            # tokenized independents stop sourcing PAN
-        scope |= (tok & before)                 # but tokenization points themselves stay in CDE
-        return scope
-
-    chosen, steps, cur = [], [], before
-    import logging
-    log = logging.getLogger(__name__)
-    log.info(f"       [plan] Starting greedy set-cover: {len(candidates)} candidates, {before_n} systems in scope, max_k={max_k}")
-    while len(chosen) < max_k:
-        log.info(f"       [plan] Iteration {len(chosen)+1}: evaluating {len([c for c in candidates if c not in chosen])} candidates...")
-        best, best_after = None, cur
-        for idx, s in enumerate(candidates):
-            if s in chosen:
-                continue
-            a = scope_after(chosen + [s])
-            if len(a) < len(best_after):
-                best, best_after = s, a
-        if best is None or len(cur) - len(best_after) <= 0:
-            log.info(f"       [plan] Stopping: no marginal improvement")
-            break
-        marginal = len(cur) - len(best_after)
-        chosen.append(best)
-        cum = before_n - len(best_after)
-        log.info(f"       [plan] Step {len(chosen)}: chose {best}, marginal={marginal}, cumulative={cum}")
-        steps.append({
-            "step": len(chosen), "tokenize": best, "marginal_descoped": marginal,
-            "cumulative_descoped": cum, "scope_after": len(best_after),
-            "solo_descope": solo.get(best),
-            "exclusive_reach": solo.get(best),       # back-compat alias
-            "pct_of_descopable": round(100 * cum / max(1, len(descopable)), 1),
-        })
-        cur = best_after
-        if len(descopable) and cum / len(descopable) >= target_fraction:
-            log.info(f"       [plan] Reached target fraction, stopping")
-            break
-    log.info(f"       [plan] ✓ Plan complete: {len(chosen)} steps, {before_n - len(cur)} systems descoped")
-    total = before_n - len(cur)
-    return {
-        "before": before_n, "descopable": len(descopable), "after": len(cur),
-        "total_descoped": total, "k": len(chosen),
-        "plan": chosen, "steps": steps, "target_fraction": target_fraction,
-        # greedy on a monotone submodular coverage objective is >= (1-1/e) of the
-        # optimal k-set, so the optimum descope with this many sources is bounded above.
-        "optimality_bound_ceiling": round(total / 0.6321) if total else 0,
-        "method": "greedy max-coverage (Nemhauser-Wolsey-Fisher 1978; (1-1/e) bound)",
-    }
-
-
-def hidden_scope(G) -> dict:
-    """FAQ Takeaway 5 (killer demo): systems BAM flags PCI=No but Splunk observed
-    clear PAN in their logs -> hidden scope BAM misses. Uses the CURRENT BAM PCI
-    flag (DS4), so systems BAM has since caught are not counted (DS6's flag is a
-    point-in-time snapshot). Also surfaces declared PAN carriers for the headline
-    'systems exposed to clear PAN' metric, and a per-system evidence detail (the
-    Splunk finding, the app's stated source, and how far the leaked PAN then
-    propagates) so each BAM miss is auditable, not just counted."""
-    H = _flatten(G)
-    hidden, detail = [], []
-    for n, d in G.nodes(data=True):
-        if d.get("pan_in_logs_observed") and not d.get("pci_flag"):
-            hidden.append(n)
-            reach = len(nx.descendants(H, n)) if n in H else 0
-            detail.append({
-                "system": n,
-                "name": d.get("app_name", ""),
-                "downstream_reach": reach,            # how far the leaked PAN can travel onward
-                "stated_source": d.get("splunk_stated_source", ""),
-                "finding": d.get("splunk_finding", "") or "True PAN in logs",
-            })
-    hidden.sort()
-    detail.sort(key=lambda x: (-x["downstream_reach"], x["system"]))
-    declared = sorted(n for n, d in G.nodes(data=True) if d.get("carries_pan"))
-    return {"hidden_pci_systems": hidden, "hidden_pci_count": len(hidden),
-            "hidden_detail": detail,
-            "hidden_propagating_count": sum(1 for x in detail if x["downstream_reach"] > 0),
-            "declared_pan_systems_count": len(declared)}

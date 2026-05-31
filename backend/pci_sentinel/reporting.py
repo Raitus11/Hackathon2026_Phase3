@@ -16,6 +16,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 
+from . import analytics
+
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -131,16 +133,30 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     # tokenization leverage
     E.append(Paragraph("Where tokenization has the greatest leverage", h2))
     E.append(Paragraph(
-        f"A minimum-intervention optimizer (greedy maximum-coverage; Nemhauser, Wolsey &amp; Fisher 1978, "
-        f"(1−1/e) bound) finds that tokenizing <b>{plan.get('k')}</b> source system(s) descopes "
+        f"A minimum-intervention optimizer (greedy max-marginal full-descope over the true PAN sources) "
+        f"finds that tokenizing <b>{plan.get('k')}</b> source system(s) fully descopes "
         f"<b>{plan.get('total_descoped')}</b> of {plan.get('descopable')} descopable systems "
-        f"({plan.get('before')} → {plan.get('after')} in PCI scope). Each system goes safe only when every "
-        f"clear-PAN source reaching it emits CRN.", body))
-    rows = [["#", "Tokenize source", "Marginal descoped", "Cumulative", "Scope after", "% of descopable"]]
-    for s in plan.get("steps", []):
-        rows.append([str(s["step"]), s["tokenize"], f"+{s['marginal_descoped']}",
-                     str(s["cumulative_descoped"]), str(s["scope_after"]), f"{s['pct_of_descopable']}%"])
-    pt = Table(rows, colWidths=[8 * mm, 34 * mm, 30 * mm, 24 * mm, 24 * mm, 28 * mm])
+        f"({plan.get('before')} → {plan.get('after')} in PCI scope). A system goes fully safe only when every "
+        f"true PAN source reaching it emits CRN — a conjunctive condition, so full descope ramps only once most "
+        f"of the source front is tokenized (the curve below). Greedy is used as a transparent heuristic: the "
+        f"freed-systems objective is supermodular under this AND-coverage, so the (1−1/e) submodular guarantee "
+        f"does not apply and is not claimed.", body))
+    # Cumulative descope curve (always populated, even when single-source full descope is 0).
+    # Falls back to greedy steps if the curve is unavailable.
+    curve = plan.get("cumulative_curve") or []
+    if curve:
+        rows = [["k", "Tokenize source", "Marginal descoped", "Cumulative descoped",
+                 "Cumulative feeds removed"]]
+        for c in curve[:12]:
+            rows.append([str(c["k"]), c["last_source"], f"+{c['marginal_descoped']}",
+                         str(c["cumulative_descoped"]), str(c["cumulative_feeds_removed"])])
+        pt = Table(rows, colWidths=[8 * mm, 34 * mm, 30 * mm, 30 * mm, 34 * mm])
+    else:
+        rows = [["#", "Tokenize source", "Marginal descoped", "Cumulative", "Scope after", "% of descopable"]]
+        for s in plan.get("steps", []):
+            rows.append([str(s["step"]), s["tokenize"], f"+{s['marginal_descoped']}",
+                         str(s["cumulative_descoped"]), str(s["scope_after"]), f"{s['pct_of_descopable']}%"])
+        pt = Table(rows, colWidths=[8 * mm, 34 * mm, 30 * mm, 24 * mm, 24 * mm, 28 * mm])
     pt.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")),
         ("TEXTCOLOR", (0, 0), (-1, 0), DIM), ("FONTSIZE", (0, 0), (-1, -1), 8),
@@ -153,9 +169,12 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     # clean-stream
     E.append(Paragraph("Clean-stream impact (recommended top-3 sources)", h2))
     E.append(Paragraph(
-        f"Tokenizing the recommended source(s) descopes <b>{imp.get('nodes_descoped')}</b> systems "
+        f"Tokenizing the recommended source(s) fully descopes <b>{imp.get('nodes_descoped')}</b> systems "
         f"({imp.get('node_surface_reduction_pct')}% of the in-scope surface) and lowers aggregate exposure "
-        f"risk by {imp.get('risk_reduction_pct')}%. {imp.get('retained_via_detokenization_count', 0)} system(s) "
+        f"risk by {imp.get('risk_reduction_pct')}%. Even where a system is not fully freed, the benefit is "
+        f"non-zero: <b>{imp.get('feeds_removed', 0)}</b> system(s) lose a clear-PAN feed and "
+        f"<b>{imp.get('parent_reduction', 0)}</b> have their true-source-parent count reduced (exposure "
+        f"narrowed). {imp.get('retained_via_detokenization_count', 0)} system(s) "
         f"genuinely need PAN and remain in the CDE, de-tokenizing via centralized RISE/APG services.", body))
 
     # embedded graph
@@ -254,12 +273,14 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
 
     # Systems
     rows = []
-    scope = set(result.viz_scope_ids()) if hasattr(result, "viz_scope_ids") else set()
     for n in result.viz.get("nodes", []):
-        rows.append([n["id"], n.get("risk"), n.get("sensitivity_tier"), n.get("downstream_reach"),
+        # NOTE: read the keys _viz_payload actually emits (tier/reach/scope_prov/true_source),
+        # not the analytics-internal names — that mismatch is what left these columns blank.
+        rows.append([n["id"], n.get("risk"), n.get("tier"), n.get("reach"),
                      "yes" if n.get("carries_pan") else "no", "yes" if n.get("in_scope") else "no",
-                     n.get("scope_basis", ""), "yes" if n.get("hidden_pci") else "no",
-                     "yes" if n.get("is_true_source") else "no"])
+                     (n.get("scope_prov") or ("out of scope" if not n.get("in_scope") else "")),
+                     "yes" if n.get("hidden_pci") else "no",
+                     "yes" if n.get("true_source") else "no"])
     rows.sort(key=lambda r: -(r[1] or 0))
     sheet(wb.create_sheet("Systems"),
           ["System", "Risk", "Sensitivity tier", "Downstream reach", "Carries PAN", "In scope",
@@ -285,12 +306,33 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
         sheet(wb.create_sheet("HiddenPCI"), ["System (PCI=No in BAM, PAN seen in Splunk)"],
               [[s] for s in hidden.get("hidden_pci_systems", [])], [44])
 
-    # Tokenization plan
-    sheet(wb.create_sheet("TokenizationPlan"),
-          ["Step", "Tokenize source", "Marginal descoped", "Cumulative descoped", "Scope after", "% of descopable"],
-          [[s["step"], s["tokenize"], s["marginal_descoped"], s["cumulative_descoped"],
-            s["scope_after"], s["pct_of_descopable"]] for s in plan.get("steps", [])],
-          [8, 16, 18, 20, 12, 16])
+    # Tokenization plan — cumulative descope curve (always populated, even when the
+    # greedy full-descope plan halts at 0; an empty sheet reads as 'didn't finish').
+    curve = plan.get("cumulative_curve") or []
+    if curve:
+        sheet(wb.create_sheet("TokenizationPlan"),
+              ["k", "Tokenize source", "Marginal descoped", "Cumulative descoped",
+               "Cumulative feeds removed"],
+              [[c["k"], c["last_source"], c["marginal_descoped"], c["cumulative_descoped"],
+                c["cumulative_feeds_removed"]] for c in curve],
+              [6, 18, 18, 20, 24])
+    else:
+        sheet(wb.create_sheet("TokenizationPlan"),
+              ["Step", "Tokenize source", "Marginal descoped", "Cumulative descoped", "Scope after", "% of descopable"],
+              [[s["step"], s["tokenize"], s["marginal_descoped"], s["cumulative_descoped"],
+                s["scope_after"], s["pct_of_descopable"]] for s in plan.get("steps", [])],
+              [8, 16, 18, 20, 12, 16])
+
+    # Source exposure — per-true-source block-this/measure-the-benefit table (§3).
+    # Non-zero even when full descope is 0: feeds_removed = solo_descope + parent_reduction.
+    exp = analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=50)
+    sheet(wb.create_sheet("SourceExposure"),
+          ["True source", "Downstream reach", "Solo descope (fully freed)",
+           "Feeds removed", "Parent-count reduction", "Risk"],
+          [[row["system"], row["downstream_reach"], row["solo_descope"],
+            row["feeds_removed"], row["parent_reduction"], row["risk"]]
+           for row in exp.get("per_source", [])],
+          [14, 16, 22, 14, 22, 8])
 
     out = io.BytesIO(); wb.save(out); out.seek(0)
     return out.read()
