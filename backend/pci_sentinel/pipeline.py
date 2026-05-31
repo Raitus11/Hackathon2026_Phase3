@@ -34,6 +34,7 @@ class RunResult:
     headline: dict = field(default_factory=dict)
     hidden: dict = field(default_factory=dict)
     structure: dict = field(default_factory=dict)
+    plan: dict = field(default_factory=dict)
 
 
 def _audit(log, stage, t0, **extra):
@@ -86,7 +87,7 @@ def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset()):
             "heavy_hitters": hh}
 
 
-def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit) -> RunResult:
+def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None) -> RunResult:
     """Single source of truth for assembling the final RunResult.
 
     Both the linear pipeline and the LangGraph orchestrator call this so the
@@ -102,7 +103,10 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit) -> RunRes
         "scope_inferred_only": breakdown["inferred_only"],
         "hidden_pci_systems_bam_misses": hidden["hidden_pci_count"],
         "cycle_clusters_resolved": dagr.stats["cycle_clusters"],
-        "top_intervention": hh[0]["system"] if hh else None,
+        # top distributor (widest reach) is hh[0]; the top INTERVENTION is the best
+        # solo-descope lever (== greedy step 1), which is a different question.
+        "top_distributor": hh[0]["system"] if hh else None,
+        "top_intervention": analytics.top_intervention(hh),
         "scope_reduction_if_top3_tokenized_pct": impact.get("node_surface_reduction_pct", 0.0),
     }
 
@@ -124,7 +128,8 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit) -> RunRes
         unresolved_signals=art.unresolved_signals[:50], explanation=explanation,
         audit=audit, viz=_viz_payload(art, dagr, scores, scope, hh, inferred_only),
         headline=headline, hidden=hidden,
-        structure=analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh))
+        structure=analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh),
+        plan=plan or {})
 
 
 def run(files: list, recommend_top: int = 3) -> RunResult:
@@ -155,10 +160,14 @@ def run(files: list, recommend_top: int = 3) -> RunResult:
     H = analytics._flatten(art.G)
     scope = analytics.pci_scope(H, art.pan_sources)
     hh = analytics.heavy_hitters(art.G, art.pan_sources, scores, top_k=10)
-    recommend = [h["system"] for h in hh[:recommend_top]]
+    # recommendation = best greedy tokenization levers (NOT the reach-ranked
+    # distributor table), so the gate/impact recommend the highest-leverage targets.
+    recommend = analytics.recommended_levers(art.G, art.pan_sources, scores, recommend_top)
     impact = analytics.clean_stream_impact(art.G, art.pan_sources, scores, recommend)
+    plan = analytics.minimal_tokenization_plan(art.G, art.pan_sources, scores,
+                                               target_fraction=0.8, max_k=8)
     hidden = analytics.hidden_scope(art.G)
     _audit(log, "analytics", t, scope=len(scope), heavy_hitters=len(hh),
            hidden_pci=hidden["hidden_pci_count"])
 
-    return finalize(ing, art, dagr, scores, scope, hh, impact, hidden, log)
+    return finalize(ing, art, dagr, scores, scope, hh, impact, hidden, log, plan=plan)

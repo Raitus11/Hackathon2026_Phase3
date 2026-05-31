@@ -1,10 +1,13 @@
 {
   "headline": {
     "systems_exposed_to_clear_pan": 95,
+    "scope_metadata_confirmed": 44,
+    "scope_inferred_only": 51,
     "hidden_pci_systems_bam_misses": 48,
     "cycle_clusters_resolved": 2,
+    "top_distributor": "6CWC",
     "top_intervention": "8CCF",
-    "scope_reduction_if_top3_tokenized_pct": 6.3
+    "scope_reduction_if_top3_tokenized_pct": 3.2
   },
   "hidden": {
     "hidden_pci_systems": [
@@ -97,94 +100,141 @@
     "is_acyclic": true
   },
   "scope_size": 95,
+  "scope_breakdown": {
+    "scope_total": 95,
+    "metadata_confirmed": 44,
+    "inferred_only": 51,
+    "inferred_only_sample": [
+      "6CWC",
+      "6IVC",
+      "6PNX",
+      "6PNXAZ",
+      "6PNXRO",
+      "6PNXUI",
+      "8BTH",
+      "8DEKT",
+      "8EIV",
+      "8NC1",
+      "8NYD",
+      "8TCLL",
+      "8TCU",
+      "9CPC",
+      "HCV369",
+      "HMR",
+      "HNULL",
+      "HOGCN",
+      "HTOKM",
+      "IODMM",
+      "JAED",
+      "JAGC",
+      "JAOCP",
+      "JBFN",
+      "JBYP",
+      "JCOC",
+      "JEQPM",
+      "JEQZT",
+      "JEQZY",
+      "JFO"
+    ]
+  },
   "heavy_hitters": [
-    {
-      "system": "8CCF",
-      "downstream_reach": 28,
-      "exclusive_reach": 2,
-      "out_degree": 3,
-      "risk": 53.53,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
-    {
-      "system": "8DFB",
-      "downstream_reach": 2,
-      "exclusive_reach": 2,
-      "out_degree": 1,
-      "risk": 50.25,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
-    {
-      "system": "8EFW",
-      "downstream_reach": 1,
-      "exclusive_reach": 2,
-      "out_degree": 1,
-      "risk": 40.13,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
     {
       "system": "6CWC",
       "downstream_reach": 29,
-      "exclusive_reach": 1,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
       "out_degree": 7,
       "risk": 33.66,
       "betweenness": 0.0,
       "carries_pan": true
     },
     {
+      "system": "8CCF",
+      "downstream_reach": 28,
+      "exclusive_reach": 1,
+      "solo_descope": 1,
+      "out_degree": 3,
+      "risk": 53.53,
+      "betweenness": 0.0,
+      "carries_pan": true
+    },
+    {
       "system": "8MEC",
       "downstream_reach": 27,
-      "exclusive_reach": 1,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
       "out_degree": 1,
       "risk": 53.4,
       "betweenness": 0.0,
       "carries_pan": true
     },
     {
+      "system": "8DEM",
+      "downstream_reach": 27,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
+      "out_degree": 2,
+      "risk": 43.41,
+      "betweenness": 0.0001,
+      "carries_pan": true
+    },
+    {
+      "system": "8AQB",
+      "downstream_reach": 26,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
+      "out_degree": 19,
+      "risk": 43.82,
+      "betweenness": 0.0269,
+      "carries_pan": true
+    },
+    {
+      "system": "8BCC",
+      "downstream_reach": 26,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
+      "out_degree": 13,
+      "risk": 43.47,
+      "betweenness": 0.0095,
+      "carries_pan": true
+    },
+    {
+      "system": "8AFN",
+      "downstream_reach": 26,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
+      "out_degree": 3,
+      "risk": 43.38,
+      "betweenness": 0.0051,
+      "carries_pan": true
+    },
+    {
+      "system": "8BY",
+      "downstream_reach": 26,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
+      "out_degree": 2,
+      "risk": 43.28,
+      "betweenness": 0.0004,
+      "carries_pan": true
+    },
+    {
       "system": "8CCCM",
       "downstream_reach": 3,
-      "exclusive_reach": 1,
+      "exclusive_reach": 0,
+      "solo_descope": 0,
       "out_degree": 1,
       "risk": 40.38,
       "betweenness": 0.0,
       "carries_pan": true
     },
     {
-      "system": "9CPC",
+      "system": "8DFB",
       "downstream_reach": 2,
       "exclusive_reach": 1,
+      "solo_descope": 1,
       "out_degree": 1,
-      "risk": 20.25,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
-    {
-      "system": "8FVE",
-      "downstream_reach": 1,
-      "exclusive_reach": 1,
-      "out_degree": 1,
-      "risk": 50.13,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
-    {
-      "system": "8LNQ",
-      "downstream_reach": 1,
-      "exclusive_reach": 1,
-      "out_degree": 1,
-      "risk": 40.13,
-      "betweenness": 0.0,
-      "carries_pan": true
-    },
-    {
-      "system": "6IVC",
-      "downstream_reach": 1,
-      "exclusive_reach": 1,
-      "out_degree": 1,
-      "risk": 30.13,
+      "risk": 50.25,
       "betweenness": 0.0,
       "carries_pan": true
     }
@@ -196,16 +246,20 @@
       "8EFW"
     ],
     "scope_before": 95,
-    "scope_after": 89,
-    "nodes_descoped": 6,
+    "scope_after": 92,
+    "nodes_descoped": 3,
     "descoped_systems_sample": [
       "8A",
       "8AFK",
-      "8CCF",
-      "8DFB",
-      "8EFW",
       "HMR"
     ],
+    "sources_downgraded": [
+      "8CCF",
+      "8DFB",
+      "8EFW"
+    ],
+    "sources_downgraded_count": 3,
+    "sources_retained_tier4": [],
     "retained_via_detokenization": [
       "8BCKS",
       "8CEMS",
@@ -213,11 +267,11 @@
     ],
     "retained_via_detokenization_count": 3,
     "pan_edges_before": 77,
-    "pan_edges_after": 70,
+    "pan_edges_after": 75,
     "risk_before": 2517.1,
-    "risk_after": 2372.9,
-    "risk_reduction_pct": 5.7,
-    "node_surface_reduction_pct": 6.3
+    "risk_after": 2486.8,
+    "risk_reduction_pct": 1.2,
+    "node_surface_reduction_pct": 3.2
   },
   "cycles": [
     {
@@ -563,16 +617,11 @@
       "signal": "DS5_survey_upstream"
     }
   ],
-  "explanation": "Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. The highest-leverage true-source is 8CCF, which distributes PAN to 2 systems that depend on it exclusively. Tokenizing PAN at the recommended source(s) descopes 6 systems (6.3% of the in-scope surface) and lowers the aggregate risk score by 5.7% \u2014 the clean-stream effect.",
+  "explanation": "Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. Of these, 44 are confirmed by authoritative BAM metadata and 51 are inferred-only candidate scope surfaced from survey/Splunk signals (kept separate, never treated as ground truth). The highest-leverage true-source is 6CWC, which distributes PAN to 0 systems that depend on it exclusively. Tokenizing PAN at the recommended source(s) descopes 3 systems (3.2% of the in-scope surface) and lowers the aggregate risk score by 1.2% \u2014 the clean-stream effect.",
   "audit": [
     {
-      "stage": "supervisor",
-      "ms": 0.0,
-      "files": 6
-    },
-    {
       "stage": "ingest",
-      "ms": 9.1,
+      "ms": 10.7,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -588,12 +637,12 @@
     },
     {
       "stage": "validate_masking_leak",
-      "ms": 4.8,
+      "ms": 6.1,
       "clean": true
     },
     {
       "stage": "build_graph",
-      "ms": 4.0,
+      "ms": 4.1,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -608,7 +657,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 3.0,
+      "ms": 5.0,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -619,24 +668,15 @@
     },
     {
       "stage": "score",
-      "ms": 12.8,
+      "ms": 15.8,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 27.5,
+      "ms": 95.2,
       "scope": 95,
-      "recommend_top": 3,
+      "heavy_hitters": 10,
       "hidden_pci": 48
-    },
-    {
-      "stage": "human_gate",
-      "ms": 0.0,
-      "decision": "approve(auto)"
-    },
-    {
-      "stage": "report",
-      "ms": 0.0
     }
   ],
   "viz": {
@@ -650,6 +690,9 @@
         "risk": 43.38,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC21"
       },
       {
@@ -661,6 +704,9 @@
         "risk": 43.82,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC21"
       },
       {
@@ -672,6 +718,9 @@
         "risk": 40.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC0"
       },
       {
@@ -683,6 +732,9 @@
         "risk": 43.47,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC21"
       },
       {
@@ -694,6 +746,9 @@
         "risk": 40.16,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC2"
       },
       {
@@ -705,6 +760,9 @@
         "risk": 33.46,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC21"
       },
       {
@@ -716,6 +774,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC22"
       },
       {
@@ -727,6 +788,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC23"
       },
       {
@@ -738,6 +802,9 @@
         "risk": 43.28,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC21"
       },
       {
@@ -749,6 +816,9 @@
         "risk": 40.38,
         "reach": 3,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC25"
       },
       {
@@ -760,6 +830,9 @@
         "risk": 53.53,
         "reach": 28,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC27"
       },
       {
@@ -771,6 +844,9 @@
         "risk": 30.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC29"
       },
       {
@@ -782,6 +858,9 @@
         "risk": 40.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC24"
       },
       {
@@ -793,6 +872,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC30"
       },
       {
@@ -804,6 +886,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC31"
       },
       {
@@ -815,6 +900,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC32"
       },
       {
@@ -826,6 +914,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC33"
       },
       {
@@ -837,6 +928,9 @@
         "risk": 43.41,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC34"
       },
       {
@@ -848,6 +942,9 @@
         "risk": 50.25,
         "reach": 2,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC37"
       },
       {
@@ -859,6 +956,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC38"
       },
       {
@@ -870,6 +970,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC39"
       },
       {
@@ -881,6 +984,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC40"
       },
       {
@@ -892,6 +998,9 @@
         "risk": 40.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC28"
       },
       {
@@ -903,6 +1012,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC41"
       },
       {
@@ -914,6 +1026,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC42"
       },
       {
@@ -925,6 +1040,9 @@
         "risk": 50.13,
         "reach": 1,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC43"
       },
       {
@@ -936,6 +1054,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC44"
       },
       {
@@ -947,6 +1068,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC45"
       },
       {
@@ -958,6 +1082,9 @@
         "risk": 40.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC46"
       },
       {
@@ -969,6 +1096,9 @@
         "risk": 53.4,
         "reach": 27,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC47"
       },
       {
@@ -980,6 +1110,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC48"
       },
       {
@@ -991,6 +1124,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC49"
       },
       {
@@ -1002,6 +1138,9 @@
         "risk": 40.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC35"
       },
       {
@@ -1013,6 +1152,9 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC50"
       },
       {
@@ -1024,6 +1166,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC51"
       },
       {
@@ -1035,6 +1180,9 @@
         "risk": 3.91,
         "reach": 31,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC53"
       },
       {
@@ -1046,6 +1194,9 @@
         "risk": 3.66,
         "reach": 29,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC56"
       },
       {
@@ -1057,6 +1208,9 @@
         "risk": 3.53,
         "reach": 28,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC57"
       },
       {
@@ -1068,6 +1222,9 @@
         "risk": 3.78,
         "reach": 30,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC58"
       },
       {
@@ -1079,6 +1236,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC59"
       },
       {
@@ -1090,6 +1250,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC60"
       },
       {
@@ -1101,6 +1264,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC61"
       },
       {
@@ -1112,6 +1278,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC62"
       },
       {
@@ -1123,6 +1292,9 @@
         "risk": 3.78,
         "reach": 30,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC65"
       },
       {
@@ -1134,6 +1306,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC66"
       },
       {
@@ -1145,6 +1320,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC67"
       },
       {
@@ -1156,6 +1334,9 @@
         "risk": 4.16,
         "reach": 33,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC69"
       },
       {
@@ -1167,6 +1348,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC70"
       },
       {
@@ -1178,6 +1362,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC71"
       },
       {
@@ -1189,6 +1376,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC72"
       },
       {
@@ -1200,6 +1390,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC73"
       },
       {
@@ -1211,6 +1404,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC74"
       },
       {
@@ -1222,6 +1418,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC75"
       },
       {
@@ -1233,6 +1432,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC76"
       },
       {
@@ -1244,6 +1446,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC77"
       },
       {
@@ -1255,6 +1460,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC78"
       },
       {
@@ -1266,6 +1474,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC79"
       },
       {
@@ -1277,6 +1488,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC80"
       },
       {
@@ -1288,6 +1502,9 @@
         "risk": 3.53,
         "reach": 28,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC81"
       },
       {
@@ -1299,6 +1516,9 @@
         "risk": 33.66,
         "reach": 29,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC83"
       },
       {
@@ -1310,6 +1530,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC84"
       },
       {
@@ -1321,6 +1544,9 @@
         "risk": 3.41,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC63"
       },
       {
@@ -1332,6 +1558,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC85"
       },
       {
@@ -1343,6 +1572,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC86"
       },
       {
@@ -1354,6 +1586,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC87"
       },
       {
@@ -1365,6 +1600,9 @@
         "risk": 3.66,
         "reach": 29,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC88"
       },
       {
@@ -1376,6 +1614,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC89"
       },
       {
@@ -1387,6 +1628,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC90"
       },
       {
@@ -1398,6 +1642,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC91"
       },
       {
@@ -1409,6 +1656,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC92"
       },
       {
@@ -1420,6 +1670,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC93"
       },
       {
@@ -1431,6 +1684,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC94"
       },
       {
@@ -1442,6 +1698,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC95"
       },
       {
@@ -1453,6 +1712,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC96"
       },
       {
@@ -1464,6 +1726,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC97"
       },
       {
@@ -1475,6 +1740,9 @@
         "risk": 0.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC98"
       },
       {
@@ -1486,6 +1754,9 @@
         "risk": 0.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC99"
       },
       {
@@ -1497,6 +1768,9 @@
         "risk": 0.38,
         "reach": 3,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC101"
       },
       {
@@ -1508,6 +1782,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC102"
       },
       {
@@ -1519,6 +1796,9 @@
         "risk": 0.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC103"
       },
       {
@@ -1530,6 +1810,9 @@
         "risk": 0.38,
         "reach": 3,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC105"
       },
       {
@@ -1541,6 +1824,9 @@
         "risk": 0.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC68"
       },
       {
@@ -1552,6 +1838,9 @@
         "risk": 0.5,
         "reach": 4,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC106"
       },
       {
@@ -1563,6 +1852,9 @@
         "risk": 20.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC104"
       },
       {
@@ -1574,6 +1866,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC107"
       },
       {
@@ -1585,6 +1880,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC108"
       },
       {
@@ -1596,6 +1894,9 @@
         "risk": 3.53,
         "reach": 28,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC110"
       },
       {
@@ -1607,6 +1908,9 @@
         "risk": 3.66,
         "reach": 29,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC113"
       },
       {
@@ -1618,6 +1922,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC114"
       },
       {
@@ -1629,6 +1936,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC115"
       },
       {
@@ -1640,6 +1950,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC116"
       },
       {
@@ -1651,6 +1964,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC117"
       },
       {
@@ -1662,6 +1978,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC118"
       },
       {
@@ -1673,6 +1992,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC119"
       },
       {
@@ -1684,6 +2006,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC120"
       },
       {
@@ -1695,6 +2020,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC121"
       },
       {
@@ -1706,6 +2034,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC122"
       },
       {
@@ -1717,6 +2048,9 @@
         "risk": 3.53,
         "reach": 28,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC124"
       },
       {
@@ -1728,6 +2062,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC125"
       },
       {
@@ -1739,6 +2076,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC126"
       },
       {
@@ -1750,6 +2090,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC54"
       },
       {
@@ -1761,6 +2104,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC127"
       },
       {
@@ -1772,6 +2118,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC128"
       },
       {
@@ -1783,6 +2132,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC129"
       },
       {
@@ -1794,6 +2146,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC130"
       },
       {
@@ -1805,6 +2160,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC131"
       },
       {
@@ -1816,6 +2174,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC132"
       },
       {
@@ -1827,6 +2188,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC133"
       },
       {
@@ -1838,6 +2202,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC134"
       },
       {
@@ -1849,6 +2216,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC135"
       },
       {
@@ -1860,6 +2230,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC136"
       },
       {
@@ -1871,6 +2244,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC137"
       },
       {
@@ -1882,6 +2258,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC138"
       },
       {
@@ -1893,6 +2272,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC139"
       },
       {
@@ -1904,6 +2286,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC140"
       },
       {
@@ -1915,6 +2300,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC141"
       },
       {
@@ -1926,6 +2314,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC142"
       },
       {
@@ -1937,6 +2328,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC143"
       },
       {
@@ -1948,6 +2342,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC144"
       },
       {
@@ -1959,6 +2356,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC145"
       },
       {
@@ -1970,6 +2370,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC146"
       },
       {
@@ -1981,6 +2384,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC147"
       },
       {
@@ -1992,6 +2398,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC148"
       },
       {
@@ -2003,6 +2412,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC149"
       },
       {
@@ -2014,6 +2426,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC150"
       },
       {
@@ -2025,6 +2440,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC151"
       },
       {
@@ -2036,6 +2454,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC152"
       },
       {
@@ -2047,6 +2468,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC153"
       },
       {
@@ -2058,6 +2482,9 @@
         "risk": 30.13,
         "reach": 1,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC154"
       },
       {
@@ -2069,6 +2496,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC155"
       },
       {
@@ -2080,6 +2510,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC5"
       },
       {
@@ -2091,6 +2524,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC156"
       },
       {
@@ -2102,6 +2538,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC157"
       },
       {
@@ -2113,6 +2552,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC158"
       },
       {
@@ -2124,6 +2566,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC159"
       },
       {
@@ -2135,6 +2580,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC160"
       },
       {
@@ -2146,6 +2594,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC161"
       },
       {
@@ -2157,6 +2608,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC162"
       },
       {
@@ -2168,6 +2622,9 @@
         "risk": 30.13,
         "reach": 1,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC163"
       },
       {
@@ -2179,6 +2636,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC164"
       },
       {
@@ -2190,6 +2650,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC165"
       },
       {
@@ -2201,6 +2664,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC166"
       },
       {
@@ -2212,6 +2678,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC167"
       },
       {
@@ -2223,6 +2692,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC168"
       },
       {
@@ -2234,6 +2706,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC36"
       },
       {
@@ -2245,6 +2720,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC1"
       },
       {
@@ -2256,6 +2734,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC169"
       },
       {
@@ -2267,6 +2748,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC15"
       },
       {
@@ -2278,6 +2762,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC3"
       },
       {
@@ -2289,6 +2776,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC170"
       },
       {
@@ -2300,6 +2790,9 @@
         "risk": 0.25,
         "reach": 2,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC171"
       },
       {
@@ -2311,6 +2804,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC28"
       },
       {
@@ -2322,6 +2818,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC4"
       },
       {
@@ -2333,6 +2832,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC16"
       },
       {
@@ -2344,6 +2846,9 @@
         "risk": 3.53,
         "reach": 28,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC172"
       },
       {
@@ -2355,6 +2860,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC6"
       },
       {
@@ -2366,6 +2874,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC10"
       },
       {
@@ -2377,6 +2888,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC7"
       },
       {
@@ -2388,6 +2902,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC8"
       },
       {
@@ -2399,6 +2916,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC173"
       },
       {
@@ -2410,6 +2930,9 @@
         "risk": 0.13,
         "reach": 1,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC174"
       },
       {
@@ -2421,6 +2944,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC9"
       },
       {
@@ -2432,6 +2958,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC12"
       },
       {
@@ -2443,6 +2972,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC17"
       },
       {
@@ -2454,6 +2986,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "metadata",
         "super_node": "SCC11"
       },
       {
@@ -2465,6 +3000,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC175"
       },
       {
@@ -2476,6 +3014,9 @@
         "risk": 3.4,
         "reach": 27,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC176"
       },
       {
@@ -2487,6 +3028,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC20"
       },
       {
@@ -2498,6 +3042,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC52"
       },
       {
@@ -2509,6 +3056,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC18"
       },
       {
@@ -2520,6 +3070,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "metadata",
         "super_node": "SCC13"
       },
       {
@@ -2531,6 +3084,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "inferred",
         "super_node": "SCC19"
       },
       {
@@ -2542,6 +3098,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC177"
       },
       {
@@ -2553,6 +3112,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC178"
       },
       {
@@ -2564,6 +3126,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC179"
       },
       {
@@ -2575,6 +3140,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC180"
       },
       {
@@ -2586,6 +3154,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC181"
       },
       {
@@ -2597,6 +3168,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC111"
       },
       {
@@ -2608,6 +3182,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC182"
       },
       {
@@ -2619,6 +3196,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC183"
       },
       {
@@ -2630,6 +3210,9 @@
         "risk": 0.5,
         "reach": 4,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC184"
       },
       {
@@ -2641,6 +3224,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC123"
       },
       {
@@ -2652,6 +3238,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC55"
       },
       {
@@ -2663,6 +3252,9 @@
         "risk": 3.32,
         "reach": 26,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "inferred",
         "super_node": "SCC21"
       },
       {
@@ -2674,6 +3266,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "inferred",
         "super_node": "SCC14"
       },
       {
@@ -2685,6 +3280,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC112"
       },
       {
@@ -2696,6 +3294,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC185"
       },
       {
@@ -2707,6 +3308,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC186"
       },
       {
@@ -2718,6 +3322,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC187"
       },
       {
@@ -2729,6 +3336,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC109"
       },
       {
@@ -2740,6 +3350,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC188"
       },
       {
@@ -2751,6 +3364,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC189"
       },
       {
@@ -2762,6 +3378,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC190"
       },
       {
@@ -2773,6 +3392,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC191"
       },
       {
@@ -2784,6 +3406,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC192"
       },
       {
@@ -2795,6 +3420,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": "inferred",
         "super_node": "SCC26"
       },
       {
@@ -2806,6 +3434,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC193"
       },
       {
@@ -2817,6 +3448,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC194"
       },
       {
@@ -2828,6 +3462,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC195"
       },
       {
@@ -2839,6 +3476,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC82"
       },
       {
@@ -2850,6 +3490,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC196"
       },
       {
@@ -2861,6 +3504,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC197"
       },
       {
@@ -2872,6 +3518,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC198"
       },
       {
@@ -2883,6 +3532,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC199"
       },
       {
@@ -2894,6 +3546,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC200"
       },
       {
@@ -2905,6 +3560,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC201"
       },
       {
@@ -2916,6 +3574,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC202"
       },
       {
@@ -2927,6 +3588,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC203"
       },
       {
@@ -2938,6 +3602,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC204"
       },
       {
@@ -2949,6 +3616,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC205"
       },
       {
@@ -2960,6 +3630,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC206"
       },
       {
@@ -2971,6 +3644,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC207"
       },
       {
@@ -2982,6 +3658,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC208"
       },
       {
@@ -2993,6 +3672,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC209"
       },
       {
@@ -3004,6 +3686,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC210"
       },
       {
@@ -3015,6 +3700,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC211"
       },
       {
@@ -3026,6 +3714,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC212"
       },
       {
@@ -3037,6 +3728,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC213"
       },
       {
@@ -3048,6 +3742,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC214"
       },
       {
@@ -3059,6 +3756,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC215"
       },
       {
@@ -3070,6 +3770,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC216"
       },
       {
@@ -3081,6 +3784,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC217"
       },
       {
@@ -3092,6 +3798,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC218"
       },
       {
@@ -3103,6 +3812,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC219"
       },
       {
@@ -3114,6 +3826,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC220"
       },
       {
@@ -3125,6 +3840,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC100"
       },
       {
@@ -3136,6 +3854,9 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": false,
+        "hidden_pci": false,
+        "scope_prov": null,
         "super_node": "SCC221"
       },
       {
@@ -3147,6 +3868,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC222"
       },
       {
@@ -3158,6 +3882,9 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC64"
       },
       {
@@ -3169,6 +3896,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC223"
       },
       {
@@ -3180,6 +3910,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC224"
       },
       {
@@ -3191,6 +3924,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC225"
       },
       {
@@ -3202,6 +3938,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC226"
       },
       {
@@ -3213,6 +3952,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC227"
       },
       {
@@ -3224,6 +3966,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC228"
       },
       {
@@ -3235,6 +3980,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC229"
       },
       {
@@ -3246,6 +3994,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC230"
       },
       {
@@ -3257,6 +4008,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC231"
       },
       {
@@ -3268,6 +4022,9 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "pan_in_logs_observed": true,
+        "hidden_pci": true,
+        "scope_prov": "inferred",
         "super_node": "SCC232"
       }
     ],
@@ -3277,13 +4034,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AFN",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -3291,13 +4045,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8AFN",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -3305,6 +4056,10 @@
         "target": "8ARK",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3312,48 +4067,23 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 6,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "8AQB",
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3361,48 +4091,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8AQB",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 7,
         "dataset": "DS1"
       },
       {
@@ -3410,6 +4102,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3417,20 +4113,10 @@
         "target": "8ACD",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8ACD",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8ADW",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3438,6 +4124,10 @@
         "target": "8ADW",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3445,27 +4135,10 @@
         "target": "8AGQ",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 4,
         "dataset": "DS3"
       },
       {
@@ -3473,6 +4146,10 @@
         "target": "8AGV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3480,20 +4157,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AGC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AGC",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 3,
         "dataset": "DS3"
       },
       {
@@ -3501,20 +4168,10 @@
         "target": "8AO1",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 3,
         "dataset": "DS3"
       },
       {
@@ -3522,6 +4179,10 @@
         "target": "8APX",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3529,6 +4190,10 @@
         "target": "8AKZ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3536,6 +4201,10 @@
         "target": "8KP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3543,6 +4212,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3550,48 +4223,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8AQB",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 7,
         "dataset": "DS3"
       },
       {
@@ -3599,6 +4234,10 @@
         "target": "8AUQ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3606,13 +4245,8 @@
         "target": "8BTH",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
-      },
-      {
-        "source": "8AQB",
-        "target": "8BTH",
-        "provenance": "inferred",
-        "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 2,
         "dataset": ""
       },
       {
@@ -3620,6 +4254,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -3627,6 +4263,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -3634,20 +4272,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -3655,27 +4283,23 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 4,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "8BCC",
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3683,6 +4307,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3690,6 +4318,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -3697,13 +4329,10 @@
         "target": "8AGQ",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3711,6 +4340,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3718,20 +4351,10 @@
         "target": "8AO1",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BCC",
-        "target": "8AKZ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3739,6 +4362,10 @@
         "target": "8AKZ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3746,6 +4373,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3753,6 +4384,10 @@
         "target": "8AVB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3760,6 +4395,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -3767,6 +4404,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -3774,6 +4413,10 @@
         "target": "8ACQ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3781,27 +4424,22 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8BFL",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
+        "datasets": [
+          "DS1",
+          "DS3"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS3"
       },
       {
         "source": "8BKV",
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -3809,6 +4447,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -3816,20 +4458,10 @@
         "target": "8ADW",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8ADW",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3837,34 +4469,10 @@
         "target": "8AGQ",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 6,
         "dataset": "DS3"
       },
       {
@@ -3872,13 +4480,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AGC",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3886,6 +4491,10 @@
         "target": "8AGF",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3893,20 +4502,10 @@
         "target": "8ANF",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8ANF",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3914,6 +4513,10 @@
         "target": "8AO1",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -3921,20 +4524,10 @@
         "target": "8APX",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8APX",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8BKV",
-        "target": "8APX",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 3,
         "dataset": "DS3"
       },
       {
@@ -3942,6 +4535,10 @@
         "target": "8ANB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3949,6 +4546,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -3956,27 +4557,23 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8BY",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8BY",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "8BY",
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3984,6 +4581,8 @@
         "target": "8CEMS",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -3991,6 +4590,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -3998,6 +4601,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4005,6 +4612,8 @@
         "target": "HMR",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4012,6 +4621,8 @@
         "target": "8EFW",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4019,13 +4630,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8CEMS",
-        "target": "8BFL",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -4033,6 +4641,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4040,6 +4652,8 @@
         "target": "8AQB",
         "provenance": "inferred",
         "signal": "DS5_survey_downstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4047,20 +4661,10 @@
         "target": "8A",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8DFB",
-        "target": "8A",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "8EFW",
-        "target": "8AFK",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -4068,6 +4672,10 @@
         "target": "8AFK",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -4075,20 +4683,20 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8FVE",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "8LNQ",
         "target": "8OHM",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4096,6 +4704,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4103,69 +4715,48 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "HIUN1",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "HIUN1",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "OK",
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "OK",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "OK",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "OK",
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "OK",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "OK",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "OK",
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4173,6 +4764,10 @@
         "target": "8A",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4180,6 +4775,10 @@
         "target": "8ARH",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4187,76 +4786,44 @@
         "target": "HMR",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
         "source": "IEVK",
         "target": "8AFN",
         "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AFN",
-        "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
+        "datasets": [
+          "DS1",
+          "DS2",
+          "DS3"
+        ],
+        "count": 5,
+        "dataset": "DS1, DS2, DS3"
       },
       {
         "source": "IEVK",
         "target": "8AQB",
         "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AQB",
-        "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 4,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "IEVK",
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4264,20 +4831,10 @@
         "target": "8ADW",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "IEVK",
-        "target": "8ADW",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -4285,6 +4842,10 @@
         "target": "8AGQ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -4292,6 +4853,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4299,6 +4864,10 @@
         "target": "8ANB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4306,13 +4875,10 @@
         "target": "8AO1",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "IEVK",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -4320,6 +4886,10 @@
         "target": "8AUQ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4327,6 +4897,10 @@
         "target": "8AUD",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4334,6 +4908,8 @@
         "target": "9AQB",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4341,13 +4917,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "8T3K",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -4355,13 +4928,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8T3K",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -4369,6 +4939,10 @@
         "target": "8ARK",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4376,6 +4950,10 @@
         "target": "8AUD",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4383,6 +4961,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4390,13 +4970,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "MYF",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -4404,13 +4981,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "MYF",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -4418,6 +4992,10 @@
         "target": "8ARH",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4425,6 +5003,10 @@
         "target": "8AUD",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4432,6 +5014,8 @@
         "target": "8IPQ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4439,41 +5023,34 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "HSFO",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "HSFO",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "HSFO",
         "target": "8BCKS",
         "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "HSFO",
-        "target": "8BCKS",
-        "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "MSTF",
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4481,20 +5058,22 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "MSTF",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "MSTF",
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4502,6 +5081,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4509,55 +5092,43 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "ZECC",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "ZECC",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "KTFC",
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
         "source": "KTFC",
         "target": "8BCKS",
         "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "KTFC",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "KTFC",
-        "target": "8BCKS",
-        "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "KTFC",
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4565,6 +5136,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4572,6 +5145,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4579,27 +5156,22 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "HPU",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "HPU",
-        "target": "8BCC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "HPU",
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -4607,6 +5179,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4614,6 +5190,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4621,6 +5201,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4628,6 +5210,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4635,6 +5219,8 @@
         "target": "HMR",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4642,6 +5228,8 @@
         "target": "HNI",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4649,6 +5237,8 @@
         "target": "KDUZ",
         "provenance": "inferred",
         "signal": "DS6_splunk_stated_source",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4656,6 +5246,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4663,20 +5257,22 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "ZIOC",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "ZIOC",
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4684,6 +5280,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4691,6 +5291,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -4698,6 +5302,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4705,6 +5313,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4712,6 +5324,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -4719,6 +5335,10 @@
         "target": "8AGV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4726,6 +5346,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4733,6 +5357,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4740,6 +5368,8 @@
         "target": "8BY",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4747,6 +5377,8 @@
         "target": "8LNQ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4754,6 +5386,8 @@
         "target": "8T3K",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4761,6 +5395,8 @@
         "target": "8WQMA",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4768,6 +5404,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4775,6 +5413,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4782,6 +5422,8 @@
         "target": "HMR",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4789,6 +5431,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4796,6 +5442,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -4803,6 +5453,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4810,6 +5464,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -4817,6 +5475,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4824,6 +5486,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -4831,34 +5497,34 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "LCT",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "VPU",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "VPU",
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 2,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "VPU",
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4866,34 +5532,33 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
         "source": "W2EBD",
         "target": "8BCKS",
         "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "W2EBD",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "W2EBD",
-        "target": "8BCKS",
-        "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
+        "datasets": [
+          "DS1",
+          "DS2"
+        ],
+        "count": 3,
+        "dataset": "DS1, DS2"
       },
       {
         "source": "JCQNS",
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4901,6 +5566,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4908,6 +5577,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4915,6 +5588,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4922,6 +5599,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4929,6 +5610,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4936,6 +5621,8 @@
         "target": "HNI",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4943,6 +5630,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4950,6 +5641,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4957,6 +5652,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4964,6 +5663,10 @@
         "target": "8AGV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4971,6 +5674,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -4978,6 +5685,8 @@
         "target": "8DEM",
         "provenance": "inferred",
         "signal": "DS5_survey_downstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4985,6 +5694,8 @@
         "target": "8NYD",
         "provenance": "inferred",
         "signal": "DS6_splunk_stated_source",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -4992,6 +5703,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -4999,6 +5714,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5006,6 +5725,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5013,6 +5736,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5020,6 +5747,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5027,6 +5758,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5034,6 +5769,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5041,6 +5780,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5048,6 +5791,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5055,13 +5802,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS1"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8BFL",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 2,
         "dataset": "DS1"
       },
       {
@@ -5069,13 +5813,10 @@
         "target": "8ADW",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8ADW",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -5083,6 +5824,10 @@
         "target": "8AFK",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5090,6 +5835,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5097,20 +5846,10 @@
         "target": "8AGQ",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8AGQ",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 3,
         "dataset": "DS3"
       },
       {
@@ -5118,20 +5857,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8AGC",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "PGVGY",
-        "target": "8AO1",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -5139,6 +5868,10 @@
         "target": "8AO1",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -5146,6 +5879,10 @@
         "target": "8APX",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5153,6 +5890,10 @@
         "target": "8ANB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5160,6 +5901,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5167,6 +5912,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5174,6 +5923,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5181,6 +5934,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5188,6 +5945,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5195,6 +5956,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5202,6 +5967,8 @@
         "target": "8BFL",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5209,6 +5976,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5216,6 +5987,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5223,6 +5998,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5230,6 +6009,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5237,6 +6020,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5244,6 +6031,10 @@
         "target": "8BCC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5251,6 +6042,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5258,6 +6053,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5265,6 +6064,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5272,6 +6075,8 @@
         "target": "JSVKR",
         "provenance": "inferred",
         "signal": "DS6_splunk_stated_source",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5279,6 +6084,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5286,6 +6095,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5293,6 +6106,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5300,6 +6117,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5307,6 +6128,8 @@
         "target": "9CPC",
         "provenance": "inferred",
         "signal": "DS6_splunk_stated_source",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5314,6 +6137,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5321,6 +6148,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5328,13 +6159,8 @@
         "target": "8CCCM",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
-      },
-      {
-        "source": "DIDDP",
-        "target": "8CCCM",
-        "provenance": "inferred",
-        "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 2,
         "dataset": ""
       },
       {
@@ -5342,6 +6168,10 @@
         "target": "8BFL",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5349,6 +6179,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5356,6 +6190,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5363,6 +6201,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5370,6 +6212,8 @@
         "target": "HDGL",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5377,6 +6221,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5384,6 +6232,8 @@
         "target": "8TCU",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5391,6 +6241,8 @@
         "target": "6WDC",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5398,6 +6250,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5405,6 +6261,10 @@
         "target": "8BKV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS1"
+        ],
+        "count": 1,
         "dataset": "DS1"
       },
       {
@@ -5412,13 +6272,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8FOQ",
-        "target": "8AFN",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5426,6 +6283,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5433,6 +6294,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5440,6 +6305,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5447,6 +6316,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5454,6 +6327,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5461,6 +6338,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5468,13 +6349,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "UD",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5482,6 +6360,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5489,6 +6371,8 @@
         "target": "8XP",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5496,6 +6380,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5503,13 +6391,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8TBN",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5517,6 +6402,10 @@
         "target": "8AFN",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5524,6 +6413,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5531,20 +6424,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8AUD",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8COH",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5552,6 +6435,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5559,20 +6446,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8MFW",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "REGC",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5580,6 +6457,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5587,20 +6468,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "KIURR",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "8SQV",
-        "target": "8AQB",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5608,6 +6479,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5615,6 +6490,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5622,6 +6501,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5629,6 +6512,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5636,6 +6523,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5643,6 +6534,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5650,6 +6545,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5657,6 +6556,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5664,6 +6567,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5671,6 +6578,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5678,6 +6589,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5685,6 +6600,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5692,6 +6611,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5699,6 +6622,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5706,6 +6633,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5713,6 +6644,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5720,6 +6655,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5727,6 +6666,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5734,6 +6677,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5741,20 +6688,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "WPQCA",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "NPQG",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5762,6 +6699,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5769,20 +6710,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "NPQGS",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
-        "dataset": "DS2"
-      },
-      {
-        "source": "NPG",
-        "target": "8BCKS",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5790,6 +6721,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 2,
         "dataset": "DS2"
       },
       {
@@ -5797,6 +6732,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5804,6 +6743,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5811,6 +6754,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5818,6 +6765,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5825,6 +6776,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5832,6 +6787,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5839,6 +6798,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5846,6 +6809,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5853,6 +6818,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5860,6 +6829,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5867,6 +6840,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5874,6 +6851,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5881,6 +6862,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5888,6 +6873,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5895,6 +6884,10 @@
         "target": "8BCKS",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS2"
+        ],
+        "count": 1,
         "dataset": "DS2"
       },
       {
@@ -5902,13 +6895,10 @@
         "target": "80HG",
         "provenance": "metadata",
         "signal": "",
-        "dataset": "DS3"
-      },
-      {
-        "source": "WWFG",
-        "target": "80HG",
-        "provenance": "metadata",
-        "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 2,
         "dataset": "DS3"
       },
       {
@@ -5916,13 +6906,8 @@
         "target": "8OHM",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
-        "dataset": ""
-      },
-      {
-        "source": "8A",
-        "target": "8OHM",
-        "provenance": "inferred",
-        "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 2,
         "dataset": ""
       },
       {
@@ -5930,6 +6915,10 @@
         "target": "8ACQ",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5937,6 +6926,10 @@
         "target": "8ADC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5944,6 +6937,8 @@
         "target": "8EIV",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5951,6 +6946,8 @@
         "target": "8EFW",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5958,6 +6955,10 @@
         "target": "8AGV",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5965,6 +6966,10 @@
         "target": "8AGC",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5972,6 +6977,10 @@
         "target": "8AKP",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -5979,6 +6988,8 @@
         "target": "8TCU",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5986,6 +6997,8 @@
         "target": "6PNX",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -5993,6 +7006,8 @@
         "target": "6PNXAZ",
         "provenance": "inferred",
         "signal": "DS5_survey_upstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -6000,6 +7015,10 @@
         "target": "8AOB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -6007,6 +7026,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -6014,6 +7037,10 @@
         "target": "8AQB",
         "provenance": "metadata",
         "signal": "",
+        "datasets": [
+          "DS3"
+        ],
+        "count": 1,
         "dataset": "DS3"
       },
       {
@@ -6021,6 +7048,8 @@
         "target": "EC",
         "provenance": "inferred",
         "signal": "DS5_survey_downstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -6028,6 +7057,8 @@
         "target": "8AQB",
         "provenance": "inferred",
         "signal": "DS5_survey_downstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       },
       {
@@ -6035,6 +7066,8 @@
         "target": "8BY",
         "provenance": "inferred",
         "signal": "DS5_survey_downstream",
+        "datasets": [],
+        "count": 1,
         "dataset": ""
       }
     ],
@@ -9527,95 +10560,286 @@
     },
     "heavy_hitters": [
       {
-        "system": "8CCF",
-        "downstream_reach": 28,
-        "exclusive_reach": 2,
-        "out_degree": 3,
-        "risk": 53.53,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
-        "system": "8DFB",
-        "downstream_reach": 2,
-        "exclusive_reach": 2,
-        "out_degree": 1,
-        "risk": 50.25,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
-        "system": "8EFW",
-        "downstream_reach": 1,
-        "exclusive_reach": 2,
-        "out_degree": 1,
-        "risk": 40.13,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
         "system": "6CWC",
         "downstream_reach": 29,
-        "exclusive_reach": 1,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
         "out_degree": 7,
         "risk": 33.66,
         "betweenness": 0.0,
         "carries_pan": true
       },
       {
+        "system": "8CCF",
+        "downstream_reach": 28,
+        "exclusive_reach": 1,
+        "solo_descope": 1,
+        "out_degree": 3,
+        "risk": 53.53,
+        "betweenness": 0.0,
+        "carries_pan": true
+      },
+      {
         "system": "8MEC",
         "downstream_reach": 27,
-        "exclusive_reach": 1,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
         "out_degree": 1,
         "risk": 53.4,
         "betweenness": 0.0,
         "carries_pan": true
       },
       {
+        "system": "8DEM",
+        "downstream_reach": 27,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
+        "out_degree": 2,
+        "risk": 43.41,
+        "betweenness": 0.0001,
+        "carries_pan": true
+      },
+      {
+        "system": "8AQB",
+        "downstream_reach": 26,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
+        "out_degree": 19,
+        "risk": 43.82,
+        "betweenness": 0.0269,
+        "carries_pan": true
+      },
+      {
+        "system": "8BCC",
+        "downstream_reach": 26,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
+        "out_degree": 13,
+        "risk": 43.47,
+        "betweenness": 0.0095,
+        "carries_pan": true
+      },
+      {
+        "system": "8AFN",
+        "downstream_reach": 26,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
+        "out_degree": 3,
+        "risk": 43.38,
+        "betweenness": 0.0051,
+        "carries_pan": true
+      },
+      {
+        "system": "8BY",
+        "downstream_reach": 26,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
+        "out_degree": 2,
+        "risk": 43.28,
+        "betweenness": 0.0004,
+        "carries_pan": true
+      },
+      {
         "system": "8CCCM",
         "downstream_reach": 3,
-        "exclusive_reach": 1,
+        "exclusive_reach": 0,
+        "solo_descope": 0,
         "out_degree": 1,
         "risk": 40.38,
         "betweenness": 0.0,
         "carries_pan": true
       },
       {
-        "system": "9CPC",
+        "system": "8DFB",
         "downstream_reach": 2,
         "exclusive_reach": 1,
+        "solo_descope": 1,
         "out_degree": 1,
-        "risk": 20.25,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
-        "system": "8FVE",
-        "downstream_reach": 1,
-        "exclusive_reach": 1,
-        "out_degree": 1,
-        "risk": 50.13,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
-        "system": "8LNQ",
-        "downstream_reach": 1,
-        "exclusive_reach": 1,
-        "out_degree": 1,
-        "risk": 40.13,
-        "betweenness": 0.0,
-        "carries_pan": true
-      },
-      {
-        "system": "6IVC",
-        "downstream_reach": 1,
-        "exclusive_reach": 1,
-        "out_degree": 1,
-        "risk": 30.13,
+        "risk": 50.25,
         "betweenness": 0.0,
         "carries_pan": true
       }
     ]
+  },
+  "agents": [
+    {
+      "key": "supervisor",
+      "name": "Supervisor / Orchestrator",
+      "kind": "control",
+      "role": "Owns graph state, routing, retries, and the human approval gate.",
+      "method": "LangGraph StateGraph \u2014 explicit nodes, checkpointed, resumable."
+    },
+    {
+      "key": "ingest",
+      "name": "Ingestion & Sanitiser",
+      "kind": "deterministic",
+      "role": "Loads the CSV exports, validates schema, and masks PAN on entry.",
+      "method": "PAN masked to first-6/last-4 at the boundary; nothing unmasked passes."
+    },
+    {
+      "key": "validate_masking_leak",
+      "name": "Masking-Leak Validator",
+      "kind": "deterministic",
+      "role": "Fails the entire run if any unmasked PAN escapes ingestion.",
+      "method": "Luhn + pattern scan across every ingested cell; raises on any leak."
+    },
+    {
+      "key": "build_graph",
+      "name": "Graph Builder",
+      "kind": "deterministic",
+      "role": "Builds the system interdependency graph of cardholder-data flow.",
+      "method": "Typed MultiDiGraph; metadata (BAM) vs inferred (survey/Splunk) edges kept distinct."
+    },
+    {
+      "key": "condense_to_dag",
+      "name": "Cycle Resolver",
+      "kind": "deterministic",
+      "role": "Surfaces circular dependencies, then condenses them into a DAG.",
+      "method": "Tarjan strongly-connected components -> condensation; acyclicity asserted."
+    },
+    {
+      "key": "score",
+      "name": "Quant / Scoring",
+      "kind": "deterministic",
+      "role": "Assigns each system a defensible composite risk score.",
+      "method": "sensitivity x reachability x betweenness (Brandes) x true-source; bounded 0-100."
+    },
+    {
+      "key": "analytics",
+      "name": "Core Analyst",
+      "kind": "deterministic",
+      "role": "Computes PCI scope, heavy hitters, clean-stream impact, and hidden scope.",
+      "method": "Graph reachability + exclusive-reach set logic; no black boxes."
+    },
+    {
+      "key": "human_gate",
+      "name": "Human-in-the-Loop Gate",
+      "kind": "human",
+      "role": "Lets a reviewer approve, revise, or abort before anything is reported.",
+      "method": "LangGraph interrupt \u2014 the run genuinely pauses for a human decision."
+    },
+    {
+      "key": "report",
+      "name": "Reporter",
+      "kind": "llm",
+      "role": "Narrates the already-computed, grounded numbers in plain language.",
+      "method": "LLM constrained to the computed facts only \u2014 it explains, it never decides."
+    }
+  ],
+  "suggested_questions": [
+    "How many systems are in PCI scope, and how many are confirmed vs inferred?",
+    "Which systems are the biggest PAN distributors?",
+    "What happens if we tokenize PAN at 6CWC?",
+    "Why is 6CWC in PCI scope?",
+    "Which systems are hidden PCI (BAM misses)?"
+  ],
+  "plan": {
+    "before": 95,
+    "descopable": 71,
+    "after": 92,
+    "total_descoped": 3,
+    "k": 3,
+    "plan": [
+      "8CCF",
+      "8DFB",
+      "8EFW"
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "tokenize": "8CCF",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 1,
+        "scope_after": 94,
+        "solo_descope": 1,
+        "exclusive_reach": 1,
+        "pct_of_descopable": 1.4
+      },
+      {
+        "step": 2,
+        "tokenize": "8DFB",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 2,
+        "scope_after": 93,
+        "solo_descope": 1,
+        "exclusive_reach": 1,
+        "pct_of_descopable": 2.8
+      },
+      {
+        "step": 3,
+        "tokenize": "8EFW",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 3,
+        "scope_after": 92,
+        "solo_descope": 1,
+        "exclusive_reach": 1,
+        "pct_of_descopable": 4.2
+      }
+    ],
+    "target_fraction": 0.8,
+    "optimality_bound_ceiling": 5,
+    "method": "greedy max-coverage (Nemhauser-Wolsey-Fisher 1978; (1-1/e) bound)"
+  },
+  "whatif_top3": {
+    "tokenized_systems": [
+      "8CCF",
+      "8DFB",
+      "8EFW"
+    ],
+    "scope_before": 95,
+    "scope_after": 92,
+    "nodes_descoped": 3,
+    "descoped_systems_sample": [
+      "8A",
+      "8AFK",
+      "HMR"
+    ],
+    "sources_downgraded": [
+      "8CCF",
+      "8DFB",
+      "8EFW"
+    ],
+    "sources_downgraded_count": 3,
+    "sources_retained_tier4": [],
+    "retained_via_detokenization": [
+      "8BCKS",
+      "8CEMS",
+      "8DUDR"
+    ],
+    "retained_via_detokenization_count": 3,
+    "pan_edges_before": 77,
+    "pan_edges_after": 75,
+    "risk_before": 2517.1,
+    "risk_after": 2486.8,
+    "risk_reduction_pct": 1.2,
+    "node_surface_reduction_pct": 3.2,
+    "descoped_systems": [
+      "8A",
+      "8AFK",
+      "HMR"
+    ]
+  },
+  "structure": {
+    "reach_gini": 0.883,
+    "reach_hhi": 0.0883,
+    "top5_reach_share_pct": 48.1,
+    "propagation_depth": 4,
+    "pan_islands": 53,
+    "choke_points": [
+      "6CWC",
+      "8CCF",
+      "8BKV",
+      "8AFN",
+      "8BCC",
+      "8AQB",
+      "8CEMS",
+      "8BFL",
+      "8A",
+      "8BCKS",
+      "8OHM"
+    ],
+    "choke_point_count": 11,
+    "pan_subgraph_nodes": 95,
+    "pan_subgraph_edges": 77
   }
 }

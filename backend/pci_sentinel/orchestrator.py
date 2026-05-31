@@ -47,6 +47,8 @@ class SentinelState(TypedDict, total=False):
     impact: dict
     hidden: dict
     headline: dict
+    recommend: list
+    plan: dict
 
 
 def _tid(config) -> str:
@@ -112,11 +114,15 @@ def analyze_node(state, config):
     scope = analytics.pci_scope(H, art.pan_sources)
     hh = analytics.heavy_hitters(art.G, art.pan_sources, scores, top_k=10)
     top = max(1, int(state.get("recommend_top", 3)))
-    recommend = [h["system"] for h in hh[:top]]
+    recommend = analytics.recommended_levers(art.G, art.pan_sources, scores, top)
     impact = analytics.clean_stream_impact(art.G, art.pan_sources, scores, recommend)
+    plan = analytics.minimal_tokenization_plan(art.G, art.pan_sources, scores,
+                                               target_fraction=0.8, max_k=8)
     hidden = analytics.hidden_scope(art.G)
     s["scope"] = scope
+    s["plan"] = plan
     return {"scope_size": len(scope), "heavy_hitters": hh, "impact": impact, "hidden": hidden,
+            "recommend": recommend, "plan": plan,
             "audit": _log(state, "analytics", t, scope=len(scope),
                           recommend_top=top, hidden_pci=hidden["hidden_pci_count"])}
 
@@ -127,12 +133,14 @@ def human_gate(state, config):
                 "audit": _log(state, "human_gate", time.perf_counter(), decision="approve(auto)")}
     hh = state.get("heavy_hitters") or []
     top = max(1, int(state.get("recommend_top", 3)))
+    s = store(_tid(config))
+    recommend = state.get("recommend") or s.get("recommend") or [h["system"] for h in hh[:top]]
+    plan = state.get("plan") or s.get("plan") or {}
     # build a grounded preview so the reviewer can interrogate the analysis at the gate
     try:
-        s = store(_tid(config))
         s["preview"] = finalize(s["ing"], s["art"], s["dagr"], s["scores"], s["scope"],
                                 hh, state.get("impact", {}), state.get("hidden", {}),
-                                state.get("audit", []))
+                                state.get("audit", []), plan=plan)
     except Exception:
         pass
     decision = interrupt({
@@ -140,8 +148,8 @@ def human_gate(state, config):
         "scope_size": state.get("scope_size"),
         "hidden_pci": (state.get("hidden") or {}).get("hidden_pci_count"),
         "recommend_top": top,
-        "recommended_interventions": [h["system"] for h in hh[:top]],
-        "top_intervention": hh[0]["system"] if hh else None,
+        "recommended_interventions": recommend,
+        "top_intervention": recommend[0] if recommend else analytics.top_intervention(hh),
     })
     d = decision if isinstance(decision, dict) else {"decision": str(decision)}
     return {"human_decision": d.get("decision", "approve"), "feedback": d.get("feedback", ""),
@@ -168,8 +176,9 @@ def report_node(state, config):
     s = store(_tid(config))
     art, dagr, scores, scope = s["art"], s["dagr"], s["scores"], s["scope"]
     hh, impact, hidden = state["heavy_hitters"], state["impact"], state["hidden"]
+    plan = state.get("plan") or s.get("plan") or {}
     audit = _log(state, "report", t)
-    result = finalize(s["ing"], art, dagr, scores, scope, hh, impact, hidden, audit)
+    result = finalize(s["ing"], art, dagr, scores, scope, hh, impact, hidden, audit, plan=plan)
     s["result"] = result
     return {"status": "complete", "headline": result.headline, "audit": audit}
 

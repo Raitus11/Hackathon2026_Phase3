@@ -173,3 +173,75 @@ def test_chat_deterministic_grounded():
     top = r.heavy_hitters[0]["system"]
     a2 = chat.answer(r, f"What happens if we tokenize {top}?")
     assert top in a2["answer"] and top in a2["grounded_on"]
+
+
+# ---- V-017..020 corrected impact model (regression guards) ----
+import glob as _glob
+
+
+def _sample_art():
+    files = [(f, open(f, encoding="utf-8-sig").read()) for f in _glob.glob("../sample_data/DS*.csv")]
+    art = build_graph(ingest_files(files))
+    return art, compute_scores(art.G)
+
+
+def test_solo_descope_never_exceeds_reach():
+    """The headline bug guard: exclusive/solo descope is a SUBSET of downstream
+    reach, so it can never exceed it. (Was violated when the source counted itself.)"""
+    art, scores = _sample_art()
+    hh = analytics.heavy_hitters(art.G, art.pan_sources, scores, top_k=len(art.pan_sources))
+    for h in hh:
+        assert h["solo_descope"] <= h["downstream_reach"], h
+        assert h["solo_descope"] == h["exclusive_reach"]   # alias stays in sync
+
+
+def test_single_source_descope_equals_solo_descope():
+    """Cross-function consistency: tokenizing exactly one source descopes precisely
+    that source's solo_descope count (the two computations can never drift)."""
+    art, scores = _sample_art()
+    hh = analytics.heavy_hitters(art.G, art.pan_sources, scores, top_k=8)
+    for h in hh:
+        imp = analytics.clean_stream_impact(art.G, art.pan_sources, scores, [h["system"]])
+        assert imp["nodes_descoped"] == h["solo_descope"], (h["system"], imp["nodes_descoped"], h["solo_descope"])
+
+
+def test_tokenized_source_stays_in_scope():
+    """A tokenized PAN source remains in the CDE (tokenization point); it must not
+    appear in the descoped set, and if it is a pure-PAN source it downgrades 4->3."""
+    art = build_graph(_toy())
+    scores = compute_scores(art.G)
+    imp = analytics.what_if(art.G, art.pan_sources, scores, ["BBP"])
+    assert "BBP" not in imp["descoped_systems"]            # source is NOT descoped
+    assert "BBP" in imp["sources_downgraded"]              # pure-PAN -> tier 4->3
+    assert imp["risk_after"] <= imp["risk_before"]
+
+
+def _toy_with_track():
+    import io, csv
+    def to_csv(rows, cols):
+        s = io.StringIO(); w = csv.DictWriter(s, fieldnames=cols); w.writeheader()
+        for r in rows: w.writerow(r)
+        return s.getvalue()
+    ecols = ["Parent App ID", "Child App ID", "Consuming App Environment", "type"]
+    # SRC provides to TRK (full-track) and to PLAIN (plain consumer)
+    erows = [{"Parent App ID": "TRK", "Child App ID": "SRC", "Consuming App Environment": "Production", "type": "x"},
+             {"Parent App ID": "PLN", "Child App ID": "SRC", "Consuming App Environment": "Production", "type": "x"}]
+    bcols = ["APPLICATION_MNEMONIC_DISTRIBUTED_ID", "PCI", "PCI_PRIMARYACCOUNTNUMBER_PROCESSTRANSMIT",
+             "PCI_FULLTRACKDATA_PROCESSTRANSMIT", "APPLICATION_NAME"]
+    brows = [{"APPLICATION_MNEMONIC_DISTRIBUTED_ID": "SRC", "PCI": "YES",
+              "PCI_PRIMARYACCOUNTNUMBER_PROCESSTRANSMIT": "YES", "PCI_FULLTRACKDATA_PROCESSTRANSMIT": "NO",
+              "APPLICATION_NAME": "src"},
+             {"APPLICATION_MNEMONIC_DISTRIBUTED_ID": "TRK", "PCI": "YES",
+              "PCI_PRIMARYACCOUNTNUMBER_PROCESSTRANSMIT": "NO", "PCI_FULLTRACKDATA_PROCESSTRANSMIT": "YES",
+              "APPLICATION_NAME": "track"}]
+    return ingest_files([("DS1.csv", to_csv(erows, ecols)), ("DS4.csv", to_csv(brows, bcols))])
+
+
+def test_always_cde_systems_never_descope():
+    """Data-dictionary rule: full-track / PIN / detokenizers are always a CDE
+    candidate — tokenizing upstream PAN must never descope them."""
+    art = build_graph(_toy_with_track())
+    scores = compute_scores(art.G)
+    imp = analytics.what_if(art.G, art.pan_sources, scores, ["SRC"])
+    assert "TRK" not in imp["descoped_systems"]           # full-track stays in CDE
+    assert "TRK" not in imp["sources_downgraded"]         # and never tier-downgraded

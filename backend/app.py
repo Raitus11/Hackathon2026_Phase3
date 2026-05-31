@@ -40,6 +40,7 @@ def _full(r):
         "scope_breakdown": r.scope_breakdown, "heavy_hitters": r.heavy_hitters,
         "impact": r.impact, "cycles": r.cycles, "unresolved_signals_sample": r.unresolved_signals,
         "explanation": r.explanation, "audit": r.audit, "structure": r.structure,
+        "plan": r.plan,
     }
 
 
