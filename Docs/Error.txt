@@ -1,0 +1,8 @@
+uvicorn app:app --reload --port 8000
+cd D:\Hackathon2026_Phase3\code\pci-sentinel-complete\pci-sentinel\backend
+
+Invoke-RestMethod -Uri "http://localhost:8000/api/run" -Method POST -ContentType "application/json" -Body '{
+  "auto_approve": true
+}' | ConvertTo-Json | Out-File api_response.json
+
+cat api_response.json
