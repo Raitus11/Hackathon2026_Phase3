@@ -1,0 +1,20 @@
+You have analysis_snapshot.json (output of a PCI data-flow analysis) and analytics.py in this workspace. I need you to extract raw values and verbatim excerpts only — do not summarize, interpret, or draw conclusions. Report exactly what's in the files.
+Part 1 — Snapshot structure
+
+List the top-level keys of analysis_snapshot.json.
+Pick any one in-scope system record and paste it verbatim (all its fields), so I can see the schema of a per-system entry.
+
+Part 2 — True-source parent counts (most important)
+For every system that is in PCI scope, I need its count of distinct true-PAN-source ancestors (systems where the PAN originates, not just systems that carry PAN).
+3. State which field(s) in the snapshot represent a system's upstream PAN sources / parents, and whether any field distinguishes "true PAN source" from "carries PAN." Quote the field names exactly.
+4. If that data exists, produce a distribution: how many in-scope systems have exactly 1 such true-source parent, exactly 2, 3, 4, 5+? Give me the count in each bucket and the minimum across all in-scope systems.
+5. List up to 10 system IDs that have exactly 1 true-source parent (if any), with that parent's ID.
+Part 3 — Heavy hitters / solo descope
+6. For the top 10 systems by downstream reach, paste a table: system ID, reach, solo_descope (or whatever the "systems freed if only this source is tokenized" field is called), out-degree. Use the exact field names from the file.
+7. State whether any field named like solo_descope, exclusive, feeds_removed, or parent_reduction exists per source. List every per-source impact field name present.
+Part 4 — Optimizer / plan
+8. Paste verbatim whatever the snapshot stores for the tokenization plan / optimizer result (descopable count, sources selected, descoped count, before/after scope, risk delta, "need RISE/APG" count).
+Part 5 — The descope predicate (from analytics.py, not the JSON)
+9. Find the function minimal_tokenization_plan and any helper that decides whether a system is "safe" / "descoped" / "covered." Paste the body of that function and the predicate verbatim.
+10. In that predicate, quote the exact line(s) that decide when a downstream system counts as descoped, and state plainly: does it require all PAN-carrying ancestors to be tokenized, or only the true-PAN-source ancestors? Quote the code that proves your answer — do not paraphrase.
+Output raw values, field names, and code excerpts. No analysis.
