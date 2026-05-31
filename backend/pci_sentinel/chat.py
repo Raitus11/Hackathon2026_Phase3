@@ -82,10 +82,11 @@ def answer(result, question: str, history=None) -> dict:
     # 2) heavy hitters
     if any(k in ql for k in ["heavy hitter", "hitter", "biggest", "distributor", "top ", "most pan", "leverage", "intervention", "tokeniz"]) and not ids:
         top = hh[:5]
-        lines = "; ".join(f"{h['system']} (exclusive reach {h['exclusive_reach']}, reaches "
-                          f"{h['downstream_reach']})" for h in top)
-        return {"answer": f"The primary PAN distributors, ranked by exclusive downstream reach, are: {lines}. "
-                          f"Tokenizing at the top sources yields the largest clean-stream descope.",
+        lines = "; ".join(f"{h['system']} (reaches {h['downstream_reach']}, "
+                          f"solo descope {h.get('solo_descope', h.get('exclusive_reach', 0))})" for h in top)
+        return {"answer": f"The primary PAN distributors, ranked by downstream reach, are: {lines}. "
+                          f"Solo descope is small for each because the same downstream systems are fed by several "
+                          f"sources, so the minimal tokenization set (see the planner) descopes more than any one source alone.",
                 "grounded_on": [h["system"] for h in top]}
 
     # 3) hidden PCI
@@ -102,16 +103,17 @@ def answer(result, question: str, history=None) -> dict:
         h = next((x for x in hh if x["system"] == sid), None)
         n = nodes.get(sid, {})
         if h:
+            solo = h.get("solo_descope", h.get("exclusive_reach", 0))
             return {"answer": f"{sid} is a PAN distributor reaching {h['downstream_reach']} systems, "
-                              f"{h['exclusive_reach']} of which depend on it exclusively. Tokenizing PAN at "
+                              f"{solo} of which are fed only by it. Tokenizing PAN at "
                               f"{sid} (so it emits CRN instead of clear PAN) descopes those "
-                              f"{h['exclusive_reach']} exclusively-dependent system(s); shared-dependency "
-                              f"systems only descope once every upstream sends CRN. Systems that must "
+                              f"{solo} system(s) that have no other clear-PAN parent; systems with "
+                              f"multiple PAN parents only descope once every upstream sends CRN. Systems that must "
                               f"de-tokenize via centralized RISE/APG services remain in the CDE.",
                     "grounded_on": [sid]}
         return {"answer": f"{sid} reaches {n.get('reach', 0)} downstream system(s). It is not among the "
-                          f"top exclusive-leverage sources, so tokenizing it alone descopes fewer systems "
-                          f"than the recommended targets.",
+                          f"recommended tokenization levers, so tokenizing it alone descopes fewer systems "
+                          f"than the minimal set the planner selects.",
                 "grounded_on": [sid]}
 
     # 5) why in scope / explain a system

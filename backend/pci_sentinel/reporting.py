@@ -198,8 +198,9 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     # methodology + honesty
     E.append(Paragraph("Method &amp; honest scope", h2))
     E.append(Paragraph(
-        "Risk R(v)∈[0,100] = 0.40·sensitivity-tier + 0.30·normalized reachability (transitive closure) + "
-        "0.20·betweenness centrality (Brandes 2001) + 0.10·true-source flag. Cycles in the BAM/ServiceNow "
+        "Risk R(v)∈[0,100] = 0.40·sensitivity-tier + 0.30·reachability (transitive closure, scaled to the "
+        "widest distributor) + 0.20·betweenness centrality (Brandes 2001, scaled to the most-central system) "
+        "+ 0.10·true-source flag. Cycles in the BAM/ServiceNow "
         "relationships are resolved by Tarjan strongly-connected-component detection then condensation, yielding "
         "a provable DAG. Inferred edges (Splunk/survey) carry their source and are never merged with metadata "
         "edges. <b>What this does not do:</b> it does not remediate controls, assert business need, or execute "
