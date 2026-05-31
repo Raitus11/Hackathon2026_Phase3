@@ -61,66 +61,92 @@ def _log(state, stage, t0, **extra):
 
 
 def supervisor(state, config):
+    import logging; logging.getLogger(__name__).info("[NODE] Supervisor: initializing orchestrator")
     return {"status": "started",
             "audit": _log(state, "supervisor", time.perf_counter(), files=len(state.get("files", [])))}
 
 
 def ingest_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Ingest: loading and validating CSV files...")
     t = time.perf_counter()
     ing = ingest_mod.ingest_files(state["files"])
     store(_tid(config))["ing"] = ing
+    log.info(f"[NODE] Ingest: ✓ loaded {ing.quality.get('rows_total', 0)} rows, masked={ing.quality.get('masked', False)}")
     return {"audit": _log(state, "ingest", t, **ing.quality)}
 
 
 def validate_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Validate: checking for PAN masking leaks...")
     t = time.perf_counter()
     ing = store(_tid(config))["ing"]
     leak = scan_for_leaks(ing.edge_rows + ing.bam_rows + ing.survey_rows + ing.splunk_rows)
     if not leak.clean:
+        log.error("[NODE] Validate: ✗ MASKING LEAK DETECTED - RUN FAILED")
         return {"status": "aborted", "error": "masking-leak check FAILED",
                 "audit": _log(state, "validate_masking_leak", t, clean=False)}
+    log.info("[NODE] Validate: ✓ masking-leak check passed")
     return {"audit": _log(state, "validate_masking_leak", t, clean=True)}
 
 
 def graph_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Graph: building system dependency graph...")
     t = time.perf_counter()
     s = store(_tid(config))
     art = graph_build.build_graph(s["ing"])
     s["art"] = art
+    log.info(f"[NODE] Graph: ✓ built graph with {art.stats.get('nodes', 0)} systems, {art.stats.get('edges', 0)} edges")
     return {"audit": _log(state, "build_graph", t, **art.stats)}
 
 
 def dag_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] DAG: resolving cycles with Tarjan SCC detection...")
     t = time.perf_counter()
     s = store(_tid(config))
     H = analytics._flatten(s["art"].G)
     dagr = dag_transform.condense_to_dag(H)
     s["dagr"] = dagr
+    log.info(f"[NODE] DAG: ✓ condensed to {dagr.stats.get('dag_nodes', 0)} DAG nodes, {dagr.stats.get('sccs', 0)} SCC clusters resolved")
     return {"audit": _log(state, "condense_to_dag", t, **dagr.stats)}
 
 
 def score_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Score: computing risk scores for all systems...")
     t = time.perf_counter()
     s = store(_tid(config))
     s["scores"] = compute_scores(s["art"].G)
+    log.info(f"[NODE] Score: ✓ scored {len(s['scores'])} systems (R ∈ [0,100])")
     return {"audit": _log(state, "score", t, scored_nodes=len(s["scores"]))}
 
 
 def analyze_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Analyze: computing PCI scope, heavy hitters, and tokenization impact...")
     t = time.perf_counter()
     s = store(_tid(config))
     art, scores = s["art"], s["scores"]
     H = analytics._flatten(art.G)
+    log.info("       - Computing PCI scope...")
     scope = analytics.pci_scope(H, art.pan_sources)
+    log.info("       - Identifying heavy hitters...")
     hh = analytics.heavy_hitters(art.G, art.pan_sources, scores, top_k=10)
     top = max(1, int(state.get("recommend_top", 3)))
+    log.info("       - Recommending tokenization levers...")
     recommend = analytics.recommended_levers(art.G, art.pan_sources, scores, top)
+    log.info("       - Computing clean-stream impact...")
     impact = analytics.clean_stream_impact(art.G, art.pan_sources, scores, recommend)
+    log.info("       - Building minimal tokenization plan...")
     plan = analytics.minimal_tokenization_plan(art.G, art.pan_sources, scores,
                                                target_fraction=0.8, max_k=8)
+    log.info("       - Detecting hidden PCI (BAM misses)...")
     hidden = analytics.hidden_scope(art.G)
     s["scope"] = scope
     s["plan"] = plan
+    log.info(f"[NODE] Analyze: ✓ scope={len(scope)} systems, hidden_pci={hidden['hidden_pci_count']}, hh={len(hh)}")
     return {"scope_size": len(scope), "heavy_hitters": hh, "impact": impact, "hidden": hidden,
             "recommend": recommend, "plan": plan,
             "audit": _log(state, "analytics", t, scope=len(scope),
@@ -172,6 +198,8 @@ def revise_node(state, config):
 
 
 def report_node(state, config):
+    import logging; log = logging.getLogger(__name__)
+    log.info("[NODE] Report: generating narrative explanation...")
     t = time.perf_counter()
     s = store(_tid(config))
     art, dagr, scores, scope = s["art"], s["dagr"], s["scores"], s["scope"]
@@ -180,6 +208,7 @@ def report_node(state, config):
     audit = _log(state, "report", t)
     result = finalize(s["ing"], art, dagr, scores, scope, hh, impact, hidden, audit, plan=plan)
     s["result"] = result
+    log.info(f"[NODE] Report: ✓ narrative complete ({len(result.explanation)} chars)")
     return {"status": "complete", "headline": result.headline, "audit": audit}
 
 

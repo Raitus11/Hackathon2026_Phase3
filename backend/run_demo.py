@@ -1,10 +1,13 @@
 """One-command demo: run the agentic pipeline on the sample CSVs, print a summary.
 Usage:  python run_demo.py [dir_of_csvs]
 """
-import json, sys, glob, os, logging
+import json
+import sys
+import glob
+import os
+import logging
 
-# Setup logging - print EVERYTHING
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 log = logging.getLogger(__name__)
 
 log.info("=" * 80)
