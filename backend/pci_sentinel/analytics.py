@@ -435,8 +435,13 @@ def source_exposure_impact(G, pan_sources: set, scores: dict, top_k: int = 25) -
             "parent_reduction": len(feeds_removed) - len(solo),
             "risk": scores.get(s, {}).get("risk", 0.0),
             "is_true_source": True,
+            # names of the systems FULLY freed by blocking this one source (small on a
+            # saturated estate) — drives the "who benefits" overlay + the named report.
+            "solo_systems": sorted(solo)[:50],
         })
-    rows.sort(key=lambda r: (r["feeds_removed"], r["solo_descope"], r["downstream_reach"]),
+    # Rank so the DEFAULT-highlighted source is the genuinely best SINGLE block:
+    # most systems fully freed, then widest exposure narrowed, then reach.
+    rows.sort(key=lambda r: (r["solo_descope"], r["feeds_removed"], r["downstream_reach"]),
               reverse=True)
     return {
         "true_source_count": len(origins),
@@ -739,18 +744,23 @@ def weight_sensitivity(scores: dict, top_n: int = 8) -> dict:
     tracked = base_order[:top_n]
     base_top5 = set(base_order[:5])
 
-    def spearman(order):  # rho over the tracked set, ranks within that set
+    def spearman(order):
+        # Honest: rho over the FULL universe of PAN carriers using each system's
+        # GLOBAL rank under base vs the scenario. The old version correlated only the
+        # base top-8 among themselves, so a scenario that leapfrogs new systems into
+        # the top while leaving the original 8 in the same relative order scored
+        # rho=1.00 yet had 0/5 top-5 overlap — a contradiction. Full-universe ranks
+        # capture the real reshuffle (e.g. betweenness-heavy surfaces conduit hubs).
         idx = {n: i for i, n in enumerate(order)}
-        a = {n: r for r, n in enumerate(sorted(tracked, key=lambda x: base_rank[x]))}
-        b = {n: r for r, n in enumerate(sorted(tracked, key=lambda x: idx[x]))}
-        m = len(tracked)
+        m = len(universe)
         if m < 2:
             return 1.0
-        d2 = sum((a[n] - b[n]) ** 2 for n in tracked)
+        d2 = sum((base_rank[n] - idx[n]) ** 2 for n in universe)
         return round(1 - 6 * d2 / (m * (m * m - 1)), 3)
 
     scen_out, rhos, min_overlap = [], [], 5
     rank_by_scenario = {}
+    least_robust = {"name": None, "rho": 1.0, "overlap": 5}
     for i, (name, w) in enumerate(scenarios_def):
         order = ranking(w)
         rank_by_scenario[name] = {n: j + 1 for j, n in enumerate(order)}
@@ -758,12 +768,16 @@ def weight_sensitivity(scores: dict, top_n: int = 8) -> dict:
             rho = 1.0
         else:
             rho = spearman(order); rhos.append(rho)
-            min_overlap = min(min_overlap, len(base_top5 & set(order[:5])))
+            ov = len(base_top5 & set(order[:5]))
+            min_overlap = min(min_overlap, ov)
+            if rho < least_robust["rho"]:
+                least_robust = {"name": name, "rho": rho, "overlap": ov}
         scen_out.append({
             "name": name,
             "weights": {"sensitivity": round(w[0], 2), "reach": round(w[1], 2),
                         "betweenness": round(w[2], 2), "source": round(w[3], 2)},
             "top5": order[:5], "rho": rho,
+            "top5_overlap": (5 if i == 0 else len(base_top5 & set(order[:5]))),
         })
 
     tracked_rows = []
@@ -777,6 +791,7 @@ def weight_sensitivity(scores: dict, top_n: int = 8) -> dict:
         "mean_rank_correlation": round(sum(rhos) / len(rhos), 3) if rhos else 1.0,
         "min_rank_correlation": min(rhos) if rhos else 1.0,
         "top5_overlap_min": min_overlap,
+        "least_robust_scenario": least_robust,
         "tracked": tracked_rows,
         "universe_size": len(universe),
     }

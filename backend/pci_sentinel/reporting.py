@@ -323,16 +323,21 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
                 s["scope_after"], s["pct_of_descopable"]] for s in plan.get("steps", [])],
               [8, 16, 18, 20, 12, 16])
 
-    # Source exposure — per-true-source block-this/measure-the-benefit table (§3).
-    # Non-zero even when full descope is 0: feeds_removed = solo_descope + parent_reduction.
+    # Source exposure — per-true-source block-this/measure-the-benefit table (§3),
+    # now with % of scope and the NAMES of fully-freed systems (the block-A-benefits
+    # report). Non-zero even when full descope is 0: feeds_removed = solo + parent_red.
     exp = analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=50)
+    scope_before = max(1, exp.get("scope_before", 1))
     sheet(wb.create_sheet("SourceExposure"),
           ["True source", "Downstream reach", "Solo descope (fully freed)",
-           "Feeds removed", "Parent-count reduction", "Risk"],
+           "Feeds removed", "% of scope (feed)", "Parent-count reduction", "Risk",
+           "Fully-freed systems (names)"],
           [[row["system"], row["downstream_reach"], row["solo_descope"],
-            row["feeds_removed"], row["parent_reduction"], row["risk"]]
+            row["feeds_removed"], round(100 * row["feeds_removed"] / scope_before, 1),
+            row["parent_reduction"], row["risk"],
+            ", ".join(row.get("solo_systems", []))]
            for row in exp.get("per_source", [])],
-          [14, 16, 22, 14, 22, 8])
+          [14, 16, 22, 14, 16, 22, 8, 48])
 
     out = io.BytesIO(); wb.save(out); out.seek(0)
     return out.read()

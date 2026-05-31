@@ -14,10 +14,13 @@ function filterGraph(viz, mode, heavyList) {
   const byId = new Map(nodes.map(n => [n.id, n]))
   const carries = n => n && (n.carries_pan || n.true_source || n.hidden_pci)
   if (mode === 'heavy') {
+    // Distributors + their DIRECT consumers only (first hop). The old version walked
+    // the full downstream closure, which on a saturated estate is ~the whole graph
+    // (1800+ nodes) — a blob, not a focused view. First-hop keeps it legible.
     const adj = new Map()
     edges.forEach(e => { if (!adj.has(e.source)) adj.set(e.source, []); adj.get(e.source).push(e.target) })
-    const keep = new Set(heavyList); const stack = [...heavyList]
-    while (stack.length) { const x = stack.pop(); (adj.get(x) || []).forEach(t => { if (!keep.has(t)) { keep.add(t); stack.push(t) } }) }
+    const keep = new Set(heavyList)
+    heavyList.forEach(h => (adj.get(h) || []).forEach(t => keep.add(t)))
     return { N: nodes.filter(n => keep.has(n.id)), L: edges.filter(e => keep.has(e.source) && keep.has(e.target)) }
   }
   if (mode === 'pan') {
@@ -481,7 +484,7 @@ function GraphView({ d, selected, onPick }) {
 
   const modes = [['pan', 'PAN flow only'], ['heavy', 'Heavy-hitter subgraph'], ['all', 'All systems']]
   const modeHelp = { pan: 'Only the cardholder-data lineage: edges originating from a PAN-carrying system.',
-    heavy: 'The top PAN distributors (by downstream reach) and everything downstream of them — the decision-relevant subgraph.',
+    heavy: 'The top PAN distributors (by downstream reach) and their direct consumers (first hop) — the decision-relevant subgraph, not the full downstream blob.',
     all: 'Every system and dependency. Hover a node to isolate its neighbourhood.' }
   return (
     <div className="card p-3">
@@ -785,11 +788,78 @@ function Planner({ d, live, onPick }) {
           </div>
         </div>
       </div>
+
+      <SaturationCurve plan={d.plan} />
+      <BlockComparison plan={d.plan} onPick={onPick} />
     </div>
   )
 }
 
 /* ============================ CHARTS (pure SVG, no deps) ============================ */
+function SaturationCurve({ plan }) {
+  const sc = plan?.saturation_curve
+  if (!sc || !sc.curve?.length) return null
+  const W = 720, H = 230, P = { l: 48, r: 16, t: 16, b: 40 }
+  const before = sc.scope_before || Math.max(1, ...sc.curve.map(p => p.fully_descoped))
+  const maxY = Math.max(1, ...sc.curve.map(p => p.fully_descoped), Math.round(before * 0.05))
+  const x = pct => P.l + (pct / 100) * (W - P.l - P.r)
+  const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
+  const pts = sc.curve.map(p => `${x(p.pct_sources)},${y(p.fully_descoped)}`).join(' ')
+  const last = sc.curve[sc.curve.length - 1]
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold">Saturation curve <span className="text-faint text-xs font-normal">— why no small set reduces scope</span></div>
+      <div className="text-xs text-dim mb-2 max-w-3xl">Systems <b>fully descoped</b> as you tokenize the true-PAN-source front from 0→100%. Because every system has many true-source parents (a saturated estate) and a system frees only when <i>all</i> of them are tokenized, the curve stays flat until nearly the whole front is covered, then rises — the empirical signature of a <b>supermodular</b> objective. This is why single-source blocking frees ~0 and the minimal <i>set</i> is what matters.</div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 250 }}>
+        {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
+          <g key={i}>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="var(--line)" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="var(--faint)">{Math.round(f * maxY)}</text>
+          </g>
+        ))}
+        {[0, 25, 50, 75, 100].map((p, i) => (
+          <text key={i} x={x(p)} y={H - P.b + 14} textAnchor="middle" fontSize="9" fill="var(--faint)">{p}%</text>
+        ))}
+        <text x={P.l - 34} y={P.t + 4} fontSize="9" fill="var(--dim)" transform={`rotate(-90 ${P.l - 34} ${H / 2})`}>systems fully descoped</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">% of true PAN sources tokenized →</text>
+        <polyline points={pts} fill="none" stroke="var(--safe)" strokeWidth="2" />
+        {sc.curve.map((p, i) => <circle key={i} cx={x(p.pct_sources)} cy={y(p.fully_descoped)} r="3" fill="var(--safe)"><title>{p.pct_sources}% sources ({p.k}) → {p.fully_descoped} fully descoped</title></circle>)}
+      </svg>
+      <div className="text-[11px] text-faint mt-2">Full front ({sc.source_count} sources) → {last?.fully_descoped ?? 0} of {before} fully descoped. The exposure benefit of partial tokenization is in the Block-&-Benefit tab and the heavy-hitter table — non-zero at every step even while full descope stays low.</div>
+    </div>
+  )
+}
+
+function BlockComparison({ plan, onPick }) {
+  const bc = plan?.block_comparison
+  if (!bc) return null
+  const entries = Object.entries(bc)
+  if (!entries.length) return null
+  const tone = v => v > 0 ? 'text-safe' : 'text-faint'
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold">Block-set comparison <span className="text-faint text-xs font-normal">— block this set vs that set</span></div>
+      <div className="text-xs text-dim mb-3 max-w-3xl">The FAQ's “block A vs block B” at the set level. Each column tokenizes a different candidate set and reports the benefit. Note the <b>conduit</b> set frees far fewer systems despite high traffic — tokenizing high-betweenness relays does little, because they are pass-throughs, not true sources. Benefit comes from tokenizing true sources.</div>
+      <div className="grid md:grid-cols-3 gap-3">
+        {entries.map(([label, v], i) => (
+          <div key={i} className="bg-panel2 rounded-xl p-4 border border-line">
+            <div className="text-sm font-semibold text-txt mb-1">{label}</div>
+            <div className="flex flex-wrap gap-1 mb-3">
+              {(v.tokenize || []).map(s => <button key={s} onClick={() => onPick && onPick(s)} className="mono text-[11px] px-1.5 py-0.5 rounded bg-pan/10 text-pan hover:bg-pan/20">{s}</button>)}
+            </div>
+            <div className="grid grid-cols-2 gap-y-2 text-sm">
+              <div><div className={'disp text-2xl font-black ' + tone(v.fully_descoped)}>{v.fully_descoped}</div><div className="text-[11px] text-faint">fully descoped</div></div>
+              <div><div className={'disp text-2xl font-black ' + tone(v.feeds_removed)}>{v.feeds_removed}</div><div className="text-[11px] text-faint">feeds removed</div></div>
+              <div><div className="disp text-lg font-bold text-cool">{v.parent_reduction}</div><div className="text-[11px] text-faint">parent-count ↓</div></div>
+              <div><div className="disp text-lg font-bold text-cool">{(v.risk_reduction_pct ?? 0).toFixed(1)}%</div><div className="text-[11px] text-faint">risk ↓</div></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ScatterReachRisk({ d, onPick }) {
   const nodes = (d.viz?.nodes || []).filter(n => n.carries_pan || n.hidden_pci || (n.reach || 0) > 0)
   const W = 560, H = 300, P = { l: 44, r: 16, t: 14, b: 36 }
@@ -868,21 +938,22 @@ function BarExclusiveReach({ d, onPick }) {
 function WeightSensitivity({ ws }) {
   if (!ws || !ws.scenarios) return null
   const rho = ws.mean_rank_correlation, ov = ws.top5_overlap_min
+  const lr = ws.least_robust_scenario || null
   const tone = rho >= 0.9 ? 'text-safe' : rho >= 0.75 ? 'text-pan' : 'text-panhot'
   return (
     <div className="card p-5">
       <div className="disp font-bold text-lg">Risk-weight sensitivity <span className="text-faint text-xs font-normal">— does the ranking depend on the weights?</span></div>
       <p className="text-sm text-dim mt-1 mb-4 max-w-3xl leading-relaxed">
-        The composite risk weights sensitivity/reach/betweenness/source at 0.40/0.30/0.20/0.10. To show the heavy-hitter
-        ranking isn't an artifact of those constants, each PAN-carrying system's risk is recomputed from its stored
-        graph-derived factors under alternative weightings and re-ranked. A rank correlation near 1.0 means the ordering —
-        and the conclusions — fall out of the data-flow structure, not the chosen numbers.
+        The composite risk weights sensitivity/reach/betweenness/source at 0.40/0.30/0.20/0.10. To test whether the
+        ranking is an artifact of those constants, every PAN-carrying system is re-ranked under alternative weightings and
+        compared by Spearman ρ over the <i>full</i> set (not just the base top-N, which would hide reshuffles). The order is
+        broadly stable{lr && lr.name ? <>, with the largest movement under <b className="text-pan">{lr.name}</b> (ρ {lr.rho.toFixed(2)}, top-5 held {lr.overlap}/5) — a reweighting that surfaces a different facet of risk.</> : '.'}
       </p>
       <div className="flex flex-wrap gap-3 mb-4">
         <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
           <div className={'disp text-3xl font-black ' + tone}>{rho.toFixed(2)}</div>
           <div className="text-xs text-txt mt-1">Mean rank correlation (Spearman ρ)</div>
-          <div className="text-[11px] text-faint mt-0.5">base vs each reweighting · 1.0 = identical order</div>
+          <div className="text-[11px] text-faint mt-0.5">full universe · base vs each reweighting</div>
         </div>
         <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
           <div className="disp text-3xl font-black text-safe">{ov}/5</div>
@@ -892,21 +963,22 @@ function WeightSensitivity({ ws }) {
         <div className="bg-panel2 rounded-xl p-4 flex-1 min-w-[180px]">
           <div className="disp text-3xl font-black text-cool">{ws.min_rank_correlation.toFixed(2)}</div>
           <div className="text-xs text-txt mt-1">Worst-case ρ</div>
-          <div className="text-[11px] text-faint mt-0.5">most adversarial single reweighting</div>
+          <div className="text-[11px] text-faint mt-0.5">{lr && lr.name ? lr.name : 'most adversarial reweighting'}</div>
         </div>
       </div>
       <div className="scroll overflow-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-[11px] uppercase tracking-wider text-faint bg-panel2">
-            <th className="px-3 py-2">Weighting (s/r/b/src)</th><th className="px-3 py-2">ρ</th><th className="px-3 py-2">Top-5 distributors by risk</th></tr></thead>
+            <th className="px-3 py-2">Weighting (s/r/b/src)</th><th className="px-3 py-2">ρ</th><th className="px-3 py-2">top-5 held</th><th className="px-3 py-2">Top-5 distributors by risk</th></tr></thead>
           <tbody>
             {ws.scenarios.map((sc, i) => (
-              <tr key={i} className={'border-t border-line ' + (i === 0 ? 'bg-pan/5' : '')}>
+              <tr key={i} className={'border-t border-line ' + (i === 0 ? 'bg-pan/5' : (lr && sc.name === lr.name ? 'bg-panhot/5' : ''))}>
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   <span className={'font-semibold ' + (i === 0 ? 'text-pan' : 'text-txt')}>{sc.name}</span>
                   <span className="mono text-[11px] text-faint ml-2">{sc.weights.sensitivity}/{sc.weights.reach}/{sc.weights.betweenness}/{sc.weights.source}</span>
                 </td>
                 <td className="px-3 py-2.5 mono text-dim">{i === 0 ? '—' : sc.rho.toFixed(2)}</td>
+                <td className={'px-3 py-2.5 mono ' + ((sc.top5_overlap ?? 5) >= 4 ? 'text-safe' : 'text-pan')}>{i === 0 ? '—' : (sc.top5_overlap ?? '—') + '/5'}</td>
                 <td className="px-3 py-2.5">
                   <span className="flex flex-wrap gap-1">
                     {sc.top5.map(id => <span key={id} className="mono text-[11px] px-1.5 py-0.5 rounded bg-line text-dim">{id}</span>)}
@@ -917,7 +989,7 @@ function WeightSensitivity({ ws }) {
           </tbody>
         </table>
       </div>
-      <div className="text-[11px] text-faint mt-3">Ranking over {ws.universe_size} PAN-carrying systems. Same distributors recur in the top 5 across every weighting — the result is structural, not tuned.</div>
+      <div className="text-[11px] text-faint mt-3">Ranking over {ws.universe_size} PAN-carrying systems, full-universe Spearman. The top distributors recur across weightings; where they move, the table names the reweighting responsible — the conclusion is structural, with its sensitivities stated rather than hidden.</div>
     </div>
   )
 }
@@ -1057,6 +1129,158 @@ function Ask({ suggested, live }) {
   )
 }
 
+/* ============================ BLOCK & BENEFIT (interactive block-a-source) ============================ */
+function BeneficiaryFan({ row, color, label, scopeBefore }) {
+  // Focused, saturation-aware viz: source on the left; the systems FULLY freed
+  // (this is their only true source) fan out bright on the right; an aggregate badge
+  // represents the larger set that loses a clear-PAN feed but stays in scope. We do
+  // NOT glow the whole downstream — on a saturated estate that is ~the entire graph.
+  if (!row) return null
+  const solo = (row.solo_systems || []).slice(0, 12)
+  const moreSolo = Math.max(0, (row.solo_descope || 0) - solo.length)
+  const feedOnly = Math.max(0, (row.feeds_removed || 0) - (row.solo_descope || 0))
+  const W = 680, H = Math.max(150, 70 + solo.length * 22), cx = 120, cy = H / 2
+  const yFor = (i, n) => 36 + i * ((H - 72) / Math.max(1, n - 1 || 1))
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
+      <text x={cx} y="16" textAnchor="middle" fontSize="10" fill="var(--faint)">{label}</text>
+      <text x={W - 150} y="16" textAnchor="middle" fontSize="9" fill="var(--faint)">fully freed (leave scope)</text>
+      {solo.map((s, i) => <line key={'l' + i} x1={cx + 12} y1={cy} x2={W - 220} y2={yFor(i, solo.length)} stroke={color} strokeWidth="1.3" strokeOpacity="0.7" />)}
+      {solo.map((s, i) => (
+        <g key={'n' + i}>
+          <circle cx={W - 212} cy={yFor(i, solo.length)} r="6" fill={color}>
+            <animate attributeName="r" values="6;8;6" dur="1.8s" repeatCount="indefinite" />
+          </circle>
+          <text x={W - 200} y={yFor(i, solo.length) + 3} fontSize="10" fill="var(--txt)" className="mono">{s}</text>
+        </g>
+      ))}
+      {moreSolo > 0 && <text x={W - 200} y={yFor(solo.length, solo.length + 1) + 3} fontSize="10" fill="var(--dim)" className="mono">+{moreSolo} more fully freed</text>}
+      {/* source node */}
+      <circle cx={cx} cy={cy} r="13" fill={color} stroke="#fff" strokeWidth="2" />
+      <text x={cx} y={cy - 20} textAnchor="middle" fontSize="11" fill="var(--txt)" className="mono">{row.system}</text>
+      <text x={cx} y={cy + 4} textAnchor="middle" fontSize="8" fill="#0a0e14" className="mono">block</text>
+      {/* aggregate feed-only badge */}
+      <g>
+        <rect x={cx - 70} y={H - 30} width="260" height="22" rx="6" fill="var(--panel2)" stroke="var(--line)" />
+        <text x={cx + 60} y={H - 15} textAnchor="middle" fontSize="10" fill="var(--dim)">+ {feedOnly} more lose a clear-PAN feed ({((100 * feedOnly) / Math.max(1, scopeBefore)).toFixed(1)}% of scope)</text>
+      </g>
+    </svg>
+  )
+}
+
+function BlastRadius({ d, onPick }) {
+  const se = d.plan?.source_exposure
+  const rows = useMemo(() => se?.per_source || [], [se])
+  const scopeBefore = se?.scope_before || d.headline?.systems_exposed_to_clear_pan || 1
+  const [a, setA] = useState(null)
+  const [b, setB] = useState(null)
+  useEffect(() => { if (!a && rows.length) setA(rows[0].system) }, [rows, a])
+  const [copied, setCopied] = useState(false)
+  if (!se || !rows.length) {
+    return <div className="card p-6 text-dim text-sm">No per-source exposure data in this snapshot. Re-run the analysis on the backend to populate the Block-&-Benefit view.</div>
+  }
+  const rowOf = id => rows.find(r => r.system === id) || null
+  const ra = rowOf(a), rb = rowOf(b)
+  const pct = n => ((100 * (n || 0)) / Math.max(1, scopeBefore)).toFixed(1)
+
+  const report = ra ? (
+    `Block PAN at ${ra.system}:\n` +
+    `• ${ra.feeds_removed} systems (${pct(ra.feeds_removed)}% of the ${scopeBefore}-system scope) lose a clear-PAN feed\n` +
+    `• ${ra.solo_descope} fully descope (this was their only true source)` +
+    (ra.solo_systems?.length ? `: ${ra.solo_systems.join(', ')}` : '') + `\n` +
+    `• ${ra.parent_reduction} keep PAN via another source (parent-count reduced)\n` +
+    (rb ? (`\nvs block PAN at ${rb.system}:\n` +
+      `• ${rb.feeds_removed} lose a feed (${pct(rb.feeds_removed)}%) · ${rb.solo_descope} fully descope · ${rb.parent_reduction} parent-reduced\n`) : '')
+  ) : ''
+  const copy = async () => { try { await navigator.clipboard.writeText(report); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch (e) {} }
+
+  const Card = ({ r, color, tag }) => r ? (
+    <div className="bg-panel2 rounded-xl p-4 border border-line flex-1 min-w-[240px]">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+        <button onClick={() => onPick(r.system)} className="mono text-sm font-bold hover:underline" style={{ color }}>{r.system}</button>
+        <span className="text-[10px] text-faint ml-auto">{tag}</span>
+      </div>
+      <div className="grid grid-cols-2 gap-y-2">
+        <div><div className="disp text-2xl font-black text-safe">{r.feeds_removed}</div><div className="text-[11px] text-faint">lose a clear-PAN feed</div></div>
+        <div><div className="disp text-2xl font-black text-cool">{pct(r.feeds_removed)}%</div><div className="text-[11px] text-faint">of {scopeBefore}-system scope</div></div>
+        <div><div className="disp text-xl font-bold text-safe">{r.solo_descope}</div><div className="text-[11px] text-faint">fully descope</div></div>
+        <div><div className="disp text-xl font-bold text-dim">{r.parent_reduction}</div><div className="text-[11px] text-faint">parent-count ↓ only</div></div>
+      </div>
+      {r.solo_systems?.length > 0 && <div className="mt-2 pt-2 border-t border-line">
+        <div className="text-[10px] uppercase tracking-wider text-faint mb-1">fully freed</div>
+        <div className="flex flex-wrap gap-1">{r.solo_systems.slice(0, 16).map(s => <button key={s} onClick={() => onPick(s)} className="mono text-[10px] px-1.5 py-0.5 rounded bg-safe/10 text-safe hover:bg-safe/20">{s}</button>)}
+          {r.solo_descope > 16 && <span className="text-[10px] text-faint">+{r.solo_descope - 16}</span>}</div>
+      </div>}
+    </div>
+  ) : null
+
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Block &amp; Benefit <span className="text-faint text-xs font-normal">— block a source, see who benefits downstream</span></div>
+        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
+          The FAQ's core question, made interactive: pick an upstream true PAN source to <b>block</b> (tokenize → CRN) and
+          see exactly which downstream systems benefit. <span className="text-safe">Bright nodes fully leave PCI scope</span> (this
+          was their only true source); the badge counts systems that lose a clear-PAN feed but stay in scope via another
+          parent. Select a second source to compare. The list is pre-ranked, so the default selection is the
+          highest-benefit single block on this estate.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-5">
+        {/* ranked candidate list */}
+        <div className="card p-4">
+          <div className="text-[11px] uppercase tracking-widest text-faint mb-2">Candidate sources <span className="text-faint normal-case">· ranked by benefit</span></div>
+          <div className="text-[11px] text-faint mb-2">Click = block (A). “vs” = compare (B).</div>
+          <div className="scroll max-h-[460px] overflow-auto space-y-1">
+            {rows.map((r, i) => {
+              const isA = r.system === a, isB = r.system === b
+              return (
+                <div key={r.system} className={'rounded-lg px-2.5 py-2 border cursor-pointer ' + (isA ? 'border-pan bg-pan/10' : isB ? 'border-cool bg-cool/10' : 'border-line hover:border-dim')} onClick={() => setA(r.system)}>
+                  <div className="flex items-center gap-2">
+                    <span className="mono text-sm" style={{ color: isA ? 'var(--pan)' : isB ? 'var(--cool)' : 'var(--txt)' }}>{r.system}</span>
+                    {i === 0 && <span className="text-[9px] px-1 rounded bg-safe/15 text-safe">best</span>}
+                    <button onClick={(e) => { e.stopPropagation(); setB(isB ? null : r.system) }} className={'ml-auto text-[10px] px-1.5 py-0.5 rounded border ' + (isB ? 'border-cool text-cool' : 'border-line text-faint hover:text-dim')}>vs</button>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-[10px] text-faint mono">
+                    <span className="text-safe">{r.solo_descope} freed</span>
+                    <span>{r.feeds_removed} feed ({pct(r.feeds_removed)}%)</span>
+                    <span>reach {r.downstream_reach}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* benefit detail */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <Card r={ra} color="var(--pan)" tag="A · blocked" />
+            {rb && <Card r={rb} color="var(--cool)" tag="B · compare" />}
+          </div>
+
+          <div className="card p-4">
+            <div className="text-[11px] uppercase tracking-widest text-faint mb-1">Beneficiaries</div>
+            <BeneficiaryFan row={ra} color="var(--pan)" label={`block ${ra?.system || ''}`} scopeBefore={scopeBefore} />
+            {rb && <div className="border-t border-line mt-2 pt-2"><BeneficiaryFan row={rb} color="var(--cool)" label={`block ${rb.system}`} scopeBefore={scopeBefore} /></div>}
+          </div>
+
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="text-[11px] uppercase tracking-widest text-faint">Report</div>
+              <button onClick={copy} className="ml-auto mono text-[11px] px-2 py-0.5 rounded border border-line text-pan hover:bg-panel2">{copied ? 'copied ✓' : 'copy'}</button>
+            </div>
+            <pre className="text-xs text-dim whitespace-pre-wrap leading-relaxed mono">{report}</pre>
+            {ra && ra.solo_descope === 0 && <div className="text-[11px] text-faint mt-1">On this saturated estate no single block fully frees a system — the benefit is exposure narrowing ({ra.feeds_removed} feeds removed). Use the Planner's block-set comparison to find combinations that fully descope.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ============================ VERDICT BANNER (persistent answer) ============================ */
 function VerdictBanner({ d, onTab, onPick }) {
   const h = d.headline || {}, imp = d.impact || {}, hid = d.hidden || {}
@@ -1166,7 +1390,7 @@ export default function App() {
   const [sel, setSel] = useState(null)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
+  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
   const showBanner = !['pipeline'].includes(tab)
   return (
     <div className="max-w-[1280px] mx-auto px-5 py-5">
@@ -1194,6 +1418,7 @@ export default function App() {
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
       {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
+      {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
