@@ -114,20 +114,40 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
         is tokenized. On densely-shared PAN flow this is small for everyone, which
         is precisely why the minimal-SET optimizer (see minimal_tokenization_plan)
         is the right tool rather than picking one source.
+
+    Performance: descendants of each PAN source are computed ONCE and cached, then
+    a single reach-count pass determines exclusivity. This is O(S·E) overall rather
+    than the naive O(S²·E) (which recomputed every other source's descendants for
+    each source). Results are identical — pure memoization.
     """
     import logging
+    from collections import Counter
     log = logging.getLogger(__name__)
     H = _flatten(G)
+    sources = [s for s in pan_sources if s in H]
+    log.info(f"       [heavy_hitters] Processing {len(sources)} PAN sources (caching descendants once)...")
+
+    # 1) Compute each source's descendants ONCE.
+    desc_cache = {}
+    for idx, s in enumerate(sources, 1):
+        desc_cache[s] = nx.descendants(H, s)
+        if idx % 50 == 0 or idx == len(sources):
+            log.info(f"       [heavy_hitters] cached descendants {idx}/{len(sources)}")
+
+    # 2) Single reach-count pass: how many sources reach each node (incl. source itself).
+    #    A node is exclusive to s iff exactly one source reaches it AND s reaches it.
+    reach_count = Counter()
+    for s in sources:
+        for n in desc_cache[s]:
+            reach_count[n] += 1
+        reach_count[s] += 1            # the source reaches itself
+    log.info(f"       [heavy_hitters] reach-count pass complete over {len(reach_count)} nodes")
+
+    # 3) Build rows. exclusive = nodes in desc(s) (excluding s) reached by only one source.
     out = []
-    pan_sources_list = list(pan_sources)
-    log.info(f"       [heavy_hitters] Processing {len(pan_sources_list)} PAN sources...")
-    for idx, s in enumerate(pan_sources_list, 1):
-        if s not in H:
-            continue
-        log.info(f"       [heavy_hitters] {idx}/{len(pan_sources_list)}: {s} - computing descendants...")
-        desc = nx.descendants(H, s)
-        log.info(f"       [heavy_hitters] {idx}/{len(pan_sources_list)}: {s} - computing exclusive reach...")
-        exclusive = _exclusive_reach(H, s, pan_sources)
+    for s in sources:
+        desc = desc_cache[s]
+        exclusive = {n for n in desc if n != s and reach_count[n] == 1}
         out.append({
             "system": s,
             "downstream_reach": len(desc),
@@ -140,7 +160,7 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
         })
     # primary-distributor ranking: reach first (organizer definition), then solo
     # descope leverage, then composite risk.
-    log.info(f"       [heavy_hitters] ✓ Processing complete, sorting {len(out)} sources...")
+    log.info(f"       [heavy_hitters] ✓ complete, sorting {len(out)} sources...")
     out.sort(key=lambda x: (x["downstream_reach"], x["solo_descope"], x["risk"]), reverse=True)
     return out[:top_k]
 
