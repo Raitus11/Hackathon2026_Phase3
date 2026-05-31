@@ -1,14 +1,12 @@
-cd D:\Hackathon2026_Phase3\code\pci-sentinel-complete\pci-sentinel\backend
+cd C:\Users\U669117\source\repos\Hackathon2026PCI\PCISentinel\backend
+
 python -u -c "
-from pci_sentinel import ingest as ig
+from pci_sentinel.orchestrator import run_agentic
 import glob, os
-files=[]
-for p in sorted(glob.glob('../sample_data/*.csv')):
-    files.append((os.path.basename(p), open(p, encoding='utf-8-sig').read()))
-out = ig.ingest_files(files)
-print('quality:', out.quality)
-print('edge_rows:', len(out.edge_rows))
-print('bam_rows:', len(out.bam_rows))
-print('splunk_rows:', len(out.splunk_rows))
-print('sample edge row:', out.edge_rows[0] if out.edge_rows else 'NONE')
+files=[(os.path.basename(p), open(p, encoding='utf-8-sig').read()) for p in sorted(glob.glob('../sample_data/*.csv'))]
+st = run_agentic(files, recommend_top=8)
+r = st['result']
+import json
+print('PLAN:', json.dumps(r.impact, indent=2))
+for s in (r.__dict__.get('plan') or {}).get('plan', []): print('  lever:', s)
 "
