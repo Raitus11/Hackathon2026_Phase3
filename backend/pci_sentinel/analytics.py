@@ -482,7 +482,10 @@ def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25)
         if best is None:
             break
         chosen.append(best)
-        fed_cum |= (cache[best] & before)
+        # STRICT descendants only (exclude the source itself) and never subtract the
+        # growing `chosen` set — feeds-removed counts DOWNSTREAM consumers that lost a
+        # clear-PAN feed, which can only grow as more sources are tokenized (monotone).
+        fed_cum |= (nx.descendants(H, best) & before)
         cur = best_after
         curve.append({
             "k": len(chosen),
@@ -490,11 +493,38 @@ def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25)
             "last_source": best,
             "cumulative_descoped": before_n - len(cur),
             "marginal_descoped": best_marginal,
-            "cumulative_feeds_removed": len(fed_cum - set(chosen)),
+            "cumulative_feeds_removed": len(fed_cum),
         })
         if len(cur) == 0:
             break
     return curve
+
+
+def saturation_curve(G, pan_sources: set, scores: dict, points: int = 12) -> dict:
+    """The supermodular-cliff proof. Tokenize true sources in reach order at coarse
+    cumulative counts (0, n/points, ... , all) and record how many systems FULLY
+    descope at each. On a saturated estate this stays ~0 until nearly the whole source
+    front is tokenized, then jumps — the visual that explains *why* no small set helps,
+    and the empirical signature of supermodularity (marginal gains increase)."""
+    H = _flatten(G)
+    before = pci_scope(H, pan_sources)
+    before_n = len(before)
+    origins = list(_true_pan_sources(H, set(pan_sources)))
+    cache = {s: ({s} | nx.descendants(H, s)) for s in origins}
+    order = sorted(origins, key=lambda s: -len(cache[s]))
+    n = len(order)
+    ks = sorted({0} | {round(i * n / points) for i in range(1, points)} | {n})
+    out = []
+    for k in ks:
+        tok = set(order[:k])
+        rem = set(origins) - tok
+        scope = set()
+        for s in rem:
+            scope |= cache[s]
+        scope |= (tok & before)
+        out.append({"k": k, "pct_sources": round(100 * k / max(1, n), 1),
+                    "fully_descoped": before_n - len(scope)})
+    return {"source_count": n, "scope_before": before_n, "curve": out}
 
 
 def block_set_comparison(G, pan_sources: set, scores: dict, sets: dict) -> dict:

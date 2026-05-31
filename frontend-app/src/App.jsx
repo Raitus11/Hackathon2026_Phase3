@@ -703,9 +703,10 @@ function Planner({ d, live, onPick }) {
         <div className="disp font-bold text-lg">Tokenization planner <span className="text-faint text-xs font-normal">— where intervention has the greatest reduction</span></div>
         <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
           The optimizer answers the core question: tokenize the <b>fewest</b> sources to take the <b>most</b> systems
-          out of PCI scope. A system goes safe only when every clear-PAN source reaching it is tokenized, so coverage
-          is monotone and submodular — greedy selection is within (1−1/e) of optimal
-          <span className="text-faint"> (Nemhauser, Wolsey &amp; Fisher, 1978)</span>.
+          out of PCI scope. A system goes safe only when <i>every</i> true PAN source reaching it is tokenized — a
+          conjunctive (AND) condition, so the freed-systems objective is <b>supermodular</b> (marginal gains grow as the
+          source front is covered). Greedy is therefore used as a transparent heuristic; the (1−1/e) submodular guarantee
+          does <b>not</b> apply here and is not claimed.
         </p>
       </div>
 
@@ -792,16 +793,22 @@ function Planner({ d, live, onPick }) {
 function ScatterReachRisk({ d, onPick }) {
   const nodes = (d.viz?.nodes || []).filter(n => n.carries_pan || n.hidden_pci || (n.reach || 0) > 0)
   const W = 560, H = 300, P = { l: 44, r: 16, t: 14, b: 36 }
-  const maxX = Math.max(1, ...nodes.map(n => n.reach || 0))
+  // On a saturated estate, downstream reach is ~identical for every source (the dots
+  // collapse to one vertical line), so reach can't discriminate. Conduit centrality
+  // (betweenness) is the axis that separates the systems many PAN paths route THROUGH
+  // from ordinary carriers — the real prioritization signal here.
+  const bx = n => n.betweenness || 0
+  const maxX = Math.max(1e-9, ...nodes.map(bx))
   const maxY = Math.max(1, ...nodes.map(n => n.risk || 0))
+  const chokes = new Set(((d.structure || {}).choke_points) || [])
   const hh = new Set(d.heavy_hitters.slice(0, 8).map(h => h.system))
   const x = v => P.l + (v / maxX) * (W - P.l - P.r)
   const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
   const color = n => n.hidden_pci ? 'var(--panhot)' : n.true_source ? 'var(--pan)' : n.carries_pan ? '#e3a83a' : 'var(--cool)'
   return (
     <div className="card p-5">
-      <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— downstream reach × risk</span></div>
-      <div className="text-xs text-dim mb-2">Each dot is a PAN-carrying system. Upper-right = high reach <i>and</i> high risk: the prime tokenization targets. Ringed dots are the top distributors.</div>
+      <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— conduit centrality × risk</span></div>
+      <div className="text-xs text-dim mb-2">Reach is saturated here (every source reaches ~the whole estate), so we plot <b>betweenness</b> — how many PAN paths route through a system — against risk. Upper-right = high-conduit <i>and</i> high-risk: the systems whose tokenization would sever the most PAN flow. <span className="text-pan">◯ ringed</span> = top distributor · <span className="text-safe">▢</span> = choke point (cut vertex).</div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
@@ -810,19 +817,20 @@ function ScatterReachRisk({ d, onPick }) {
           </g>
         ))}
         <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="var(--dim)" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">downstream reach →</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">betweenness (conduit centrality) →</text>
         {nodes.map((n, i) => {
-          const r = hh.has(n.id) ? 7 : 3.2
-          return <circle key={i} cx={x(n.reach || 0)} cy={y(n.risk || 0)} r={r}
+          const isChoke = chokes.has(n.id)
+          const r = hh.has(n.id) ? 7 : 3.6
+          if (isChoke) return <rect key={i} x={x(bx(n)) - r} y={y(n.risk || 0) - r} width={2 * r} height={2 * r}
+            fill={color(n)} fillOpacity={0.85} stroke="var(--safe)" strokeWidth="1.4" rx="1"
+            style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
+            <title>{n.id} · choke point · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title></rect>
+          return <circle key={i} cx={x(bx(n))} cy={y(n.risk || 0)} r={r}
             fill={color(n)} fillOpacity={hh.has(n.id) ? 0.95 : 0.55}
             stroke={hh.has(n.id) ? '#fff' : 'none'} strokeWidth={hh.has(n.id) ? 1 : 0}
             style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
-            <title>{n.id} · reach {n.reach || 0} · risk {n.risk}</title>
+            <title>{n.id} · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title>
           </circle>
-        })}
-        {d.heavy_hitters.slice(0, 6).map((h, i) => {
-          const n = nodes.find(z => z.id === h.system); if (!n) return null
-          return <text key={i} x={x(n.reach || 0) + 9} y={y(n.risk || 0) + 3} fontSize="9" fill="var(--txt)" className="mono">{h.system}</text>
         })}
       </svg>
     </div>
@@ -923,7 +931,7 @@ function Methods({ d }) {
     ['Conduit importance', 'Betweenness centrality (exact; pivot-sampled at scale)', 'Freeman 1977; Brandes 2001; Brandes & Pich 2007', 'Systems that many PAN paths route through. Sampled estimator above ~600 nodes keeps scoring sub-second without changing the quantity measured.'],
     ['Heavy-hitter ranking', 'Downstream reach (primary distributor); solo descope = exclusive reach via set difference', 'own, interpretable', 'Distributors are ranked by how many systems they feed clear PAN to (reach). Solo descope — systems freed if only this source is tokenized — is reported alongside; it is small under shared PAN flow, which the minimal-set optimizer addresses.'],
     ['Composite risk', 'Weighted sum: 0.40 sensitivity + 0.30 reach + 0.20 betweenness + 0.10 source', 'own, every term bounded & named', 'R(v)∈[0,100]. No magic constants; weights are config-tunable and each factor is individually defensible.'],
-    ['Minimum-intervention plan', 'Greedy maximum-coverage on a monotone submodular objective', 'Nemhauser, Wolsey & Fisher 1978 — (1−1/e) bound', 'Fewest sources to tokenize for the most descope. Greedy is provably within ~63% of the optimal k-set; we report the optimality ceiling.'],
+    ['Minimum-intervention plan', 'Greedy max-marginal full-descope over the true PAN sources', 'heuristic (objective is supermodular under conjunctive coverage)', 'Fewest sources to tokenize for the most descope. A system frees only when ALL its true sources are tokenized, so the objective is supermodular — the (1−1/e) submodular guarantee does not apply and is not claimed; greedy is reported as a transparent heuristic.'],
     ['Concentration', 'Gini coefficient + Herfindahl-Hirschman index', 'Gini 1912; Hirschman 1945', 'Quantifies how few systems carry the exposure — the mathematical justification for targeting heavy hitters.'],
     ['Choke points', 'Articulation / cut vertices of the PAN subgraph', 'classical graph theory', 'Single points whose tokenization severs PAN to an entire branch.'],
     ['Card-data safety', 'Luhn check on Luhn-valid synthetic data; first-6/last-4 masking', 'Luhn 1954; PCI-DSS', 'Masking enforced on ingest; an unmasked PAN fails the run. No real card data is ever stored, logged, or displayed.'],
@@ -1054,8 +1062,8 @@ function VerdictBanner({ d, onTab, onPick }) {
   const h = d.headline || {}, imp = d.impact || {}, hid = d.hidden || {}
   const detail = hid.hidden_detail || []
   const topMiss = detail.length ? detail[0] : null         // highest-reach BAM miss
+  const topDist = (d.heavy_hitters || [])[0] || null       // widest distributor overall
   const levers = imp.tokenized_systems || (d.plan?.plan || []).slice(0, 3)
-  const downgraded = imp.sources_downgraded_count ?? (imp.sources_downgraded || []).length
   return (
     <div className="card p-4 mb-5 border-l-4" style={{ borderLeftColor: '#ff5c5c' }}>
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -1065,12 +1073,15 @@ function VerdictBanner({ d, onTab, onPick }) {
       </div>
       <div className="text-sm text-dim mt-1.5 leading-relaxed">
         {fmt(h.systems_exposed_to_clear_pan)} systems sit in PCI scope ({h.scope_metadata_confirmed} confirmed · {h.scope_inferred_only} inferred).
-        {topMiss && topMiss.downstream_reach > 0 && <> The single widest PAN distributor,{' '}
+        {topDist && <> The widest PAN distributor is{' '}
+          <button onClick={() => onPick(topDist.system)} className="mono text-pan hover:underline">{topDist.system}</button>
+          {' '}(reaches {topDist.downstream_reach} systems).</>}
+        {topMiss && topMiss.downstream_reach > 0 && <> Strikingly, the widest <b>BAM-missed</b> distributor,{' '}
           <button onClick={() => onPick(topMiss.system)} className="mono text-panhot hover:underline">{topMiss.system}</button>
-          {' '}(reaches {topMiss.downstream_reach} systems), is itself one of those BAM misses.</>}
-        {levers.length > 0 && <> Tokenizing the {levers.length} highest-leverage sources
+          {' '}(reaches {topMiss.downstream_reach} systems), is itself one of those misses.</>}
+        {levers.length > 0 && <> Tokenizing the {levers.length} highest-leverage true sources
           ({levers.map((s, i) => <span key={s}><button onClick={() => onPick(s)} className="mono text-pan hover:underline">{s}</button>{i < levers.length - 1 ? ', ' : ''}</span>)})
-          removes <b className="text-safe">{imp.nodes_descoped}</b> systems from scope and converts <b className="text-safe">{downgraded}</b> from live PAN to tokens.</>}
+          fully descopes <b className="text-safe">{imp.nodes_descoped}</b> and strips a clear-PAN feed from <b className="text-safe">{imp.feeds_removed ?? '—'}</b> more — full descope is small because the estate is saturated (every source reaches nearly all systems), which is the finding, not a failure.</>}
       </div>
     </div>
   )

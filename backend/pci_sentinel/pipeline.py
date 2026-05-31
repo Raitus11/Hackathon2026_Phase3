@@ -54,6 +54,8 @@ def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset()):
             "in_scope": in_scope, "carries_pan": sc.get("carries_pan", False),
             "tier": d.get("sensitivity_tier", 0), "risk": sc.get("risk", 0.0),
             "reach": sc.get("downstream_reach", 0), "true_source": sc.get("is_true_source", False),
+            "betweenness": sc.get("betweenness", 0.0),
+            "out_degree": art.G.out_degree(n) if hasattr(art.G, "out_degree") else 0,
             "pan_in_logs_observed": bool(d.get("pan_in_logs_observed")),
             "hidden_pci": bool(d.get("pan_in_logs_observed") and not d.get("pci_flag")),
             "scope_prov": (("inferred" if n in inferred_scope else "metadata") if in_scope else None),
@@ -126,6 +128,33 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     explanation = llm.explain(
         "You are a PCI scope analyst. Explain the data-flow analysis to a mixed "
         "technical/non-technical audience using only the grounded facts.", grounded)
+
+    # Enrich the plan with the comparison + saturation artifacts the FAQ asks for
+    # ("block this source set vs that one — who benefits") and the supermodular proof.
+    plan = dict(plan or {})
+    try:
+        plan.setdefault("saturation_curve",
+                        analytics.saturation_curve(art.G, art.pan_sources, scores, points=12))
+        plan.setdefault("source_exposure",
+                        analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=15))
+        greedy_set = (plan.get("plan") or [])[:3]
+        reach_top3 = [h["system"] for h in hh[:3]]
+        btw_top3 = [n for n, _ in sorted(
+            ((n, scores.get(n, {}).get("betweenness", 0.0))
+             for n in art.pan_sources if n in scores),
+            key=lambda kv: kv[1], reverse=True)[:3]]
+        sets = {}
+        if greedy_set:
+            sets["Greedy minimal set"] = greedy_set
+        if reach_top3:
+            sets["Top-3 by reach"] = reach_top3
+        if btw_top3:
+            sets["Top-3 by conduit (betweenness)"] = btw_top3
+        if sets:
+            plan["block_comparison"] = analytics.block_set_comparison(
+                art.G, art.pan_sources, scores, sets)
+    except Exception:
+        pass
 
     return RunResult(
         quality=ing.quality, graph_stats=art.stats, dag_stats=dagr.stats,
