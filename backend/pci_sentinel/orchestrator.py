@@ -72,7 +72,10 @@ def ingest_node(state, config):
     t = time.perf_counter()
     ing = ingest_mod.ingest_files(state["files"])
     store(_tid(config))["ing"] = ing
-    log.info(f"[NODE] Ingest: ✓ loaded {ing.quality.get('rows_total', 0)} rows, masked={ing.quality.get('masked', False)}")
+    q = ing.quality
+    log.info(f"[NODE] Ingest: ✓ edges={q.get('edge_rows', 0)}, bam={q.get('bam_rows', 0)}, "
+             f"survey={q.get('survey_rows', 0)}, splunk={q.get('splunk_rows', 0)}, "
+             f"pan_cells_masked={q.get('pan_cells_masked_on_ingest', 0)}, roles={q.get('roles_detected', [])}")
     return {"audit": _log(state, "ingest", t, **ing.quality)}
 
 

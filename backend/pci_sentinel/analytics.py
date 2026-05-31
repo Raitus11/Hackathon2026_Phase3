@@ -115,12 +115,18 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
         is precisely why the minimal-SET optimizer (see minimal_tokenization_plan)
         is the right tool rather than picking one source.
     """
+    import logging
+    log = logging.getLogger(__name__)
     H = _flatten(G)
     out = []
-    for s in pan_sources:
+    pan_sources_list = list(pan_sources)
+    log.info(f"       [heavy_hitters] Processing {len(pan_sources_list)} PAN sources...")
+    for idx, s in enumerate(pan_sources_list, 1):
         if s not in H:
             continue
+        log.info(f"       [heavy_hitters] {idx}/{len(pan_sources_list)}: {s} - computing descendants...")
         desc = nx.descendants(H, s)
+        log.info(f"       [heavy_hitters] {idx}/{len(pan_sources_list)}: {s} - computing exclusive reach...")
         exclusive = _exclusive_reach(H, s, pan_sources)
         out.append({
             "system": s,
@@ -134,6 +140,7 @@ def heavy_hitters(G, pan_sources: set, scores: dict, top_k: int = 10) -> list:
         })
     # primary-distributor ranking: reach first (organizer definition), then solo
     # descope leverage, then composite risk.
+    log.info(f"       [heavy_hitters] ✓ Processing complete, sorting {len(out)} sources...")
     out.sort(key=lambda x: (x["downstream_reach"], x["solo_descope"], x["risk"]), reverse=True)
     return out[:top_k]
 
@@ -155,11 +162,16 @@ def recommended_levers(G, pan_sources: set, scores: dict, n: int = 3) -> list:
     correct 'what should we tokenize first' set — distinct from the heavy-hitter
     table's distributor ranking (by reach). Falls back to top solo-descope sources
     if the plan returns fewer than n (e.g. when marginal descope hits zero)."""
+    import logging
+    log = logging.getLogger(__name__)
+    log.info(f"       [recommended_levers] Computing minimal tokenization plan (greedy set-cover, this may take 1-2 min)...")
     plan = minimal_tokenization_plan(G, pan_sources, scores, target_fraction=1.0,
                                      max_k=max(1, n))
+    log.info(f"       [recommended_levers] Plan complete, extracting top-{n} picks...")
     picks = list(plan.get("plan", []))
     if len(picks) < n:
         # pad with the next-best solo-descope sources not already chosen
+        log.info(f"       [recommended_levers] Plan returned {len(picks)} picks, padding with heavy-hitter fallback...")
         hh = heavy_hitters(G, pan_sources, scores, top_k=len(pan_sources) or 1)
         for h in sorted(hh, key=lambda x: (x["solo_descope"], x["downstream_reach"]),
                         reverse=True):
@@ -494,19 +506,25 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
         return scope
 
     chosen, steps, cur = [], [], before
+    import logging
+    log = logging.getLogger(__name__)
+    log.info(f"       [plan] Starting greedy set-cover: {len(candidates)} candidates, {before_n} systems in scope, max_k={max_k}")
     while len(chosen) < max_k:
+        log.info(f"       [plan] Iteration {len(chosen)+1}: evaluating {len([c for c in candidates if c not in chosen])} candidates...")
         best, best_after = None, cur
-        for s in candidates:
+        for idx, s in enumerate(candidates):
             if s in chosen:
                 continue
             a = scope_after(chosen + [s])
             if len(a) < len(best_after):
                 best, best_after = s, a
         if best is None or len(cur) - len(best_after) <= 0:
+            log.info(f"       [plan] Stopping: no marginal improvement")
             break
         marginal = len(cur) - len(best_after)
         chosen.append(best)
         cum = before_n - len(best_after)
+        log.info(f"       [plan] Step {len(chosen)}: chose {best}, marginal={marginal}, cumulative={cum}")
         steps.append({
             "step": len(chosen), "tokenize": best, "marginal_descoped": marginal,
             "cumulative_descoped": cum, "scope_after": len(best_after),
@@ -516,7 +534,9 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
         })
         cur = best_after
         if len(descopable) and cum / len(descopable) >= target_fraction:
+            log.info(f"       [plan] Reached target fraction, stopping")
             break
+    log.info(f"       [plan] ✓ Plan complete: {len(chosen)} steps, {before_n - len(cur)} systems descoped")
     total = before_n - len(cur)
     return {
         "before": before_n, "descopable": len(descopable), "after": len(cur),
