@@ -163,11 +163,13 @@ def build_graph(ingest) -> GraphArtifacts:
             # PAN observed in logs although BAM says PCI=No -> hidden PAN node (signal)
             G.nodes[app]["pan_in_logs_observed"] = True
             G.nodes[app]["inferred_pan"] = True
+            G.nodes[app]["splunk_finding"] = (r.get("findings in sept - december logs", "") or "").strip()
             inferred_pci.add(app)
             if G.nodes[app]["sensitivity_tier"] < SETTINGS.tier_medium:
                 G.nodes[app]["sensitivity_tier"] = SETTINGS.tier_medium
         src = r.get("stated upstream source", "")
         if src:
+            G.nodes[app]["splunk_stated_source"] = src.strip()
             add_inferred(src, app, "DS6_splunk_stated_source")
 
     # ---- PAN-source set: declared PAN carriers + DS6 observed PAN ----

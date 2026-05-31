@@ -454,9 +454,26 @@ def hidden_scope(G) -> dict:
     clear PAN in their logs -> hidden scope BAM misses. Uses the CURRENT BAM PCI
     flag (DS4), so systems BAM has since caught are not counted (DS6's flag is a
     point-in-time snapshot). Also surfaces declared PAN carriers for the headline
-    'systems exposed to clear PAN' metric."""
-    hidden = sorted(n for n, d in G.nodes(data=True)
-                    if d.get("pan_in_logs_observed") and not d.get("pci_flag"))
+    'systems exposed to clear PAN' metric, and a per-system evidence detail (the
+    Splunk finding, the app's stated source, and how far the leaked PAN then
+    propagates) so each BAM miss is auditable, not just counted."""
+    H = _flatten(G)
+    hidden, detail = [], []
+    for n, d in G.nodes(data=True):
+        if d.get("pan_in_logs_observed") and not d.get("pci_flag"):
+            hidden.append(n)
+            reach = len(nx.descendants(H, n)) if n in H else 0
+            detail.append({
+                "system": n,
+                "name": d.get("app_name", ""),
+                "downstream_reach": reach,            # how far the leaked PAN can travel onward
+                "stated_source": d.get("splunk_stated_source", ""),
+                "finding": d.get("splunk_finding", "") or "True PAN in logs",
+            })
+    hidden.sort()
+    detail.sort(key=lambda x: (-x["downstream_reach"], x["system"]))
     declared = sorted(n for n, d in G.nodes(data=True) if d.get("carries_pan"))
     return {"hidden_pci_systems": hidden, "hidden_pci_count": len(hidden),
+            "hidden_detail": detail,
+            "hidden_propagating_count": sum(1 for x in detail if x["downstream_reach"] > 0),
             "declared_pan_systems_count": len(declared)}

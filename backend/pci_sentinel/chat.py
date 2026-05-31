@@ -25,8 +25,15 @@ def suggested_questions(result):
     """A few safe, answerable prompts seeded with real system IDs from the run."""
     qs = list(_SUGGESTED)
     hh = getattr(result, "heavy_hitters", []) or []
-    if hh:
-        qs[2] = f"What happens if we tokenize PAN at {hh[0]['system']}?"
+    plan = getattr(result, "plan", {}) or {}
+    # the 'what if we tokenize X' prompt should name the best LEVER (greedy step 1),
+    # not the widest distributor — tokenizing a zero-solo-descope distributor frees nothing.
+    lever = (plan.get("plan") or [None])[0]
+    if not lever and hh:
+        lever = max(hh, key=lambda h: (h.get("solo_descope", h.get("exclusive_reach", 0)),
+                                       h.get("downstream_reach", 0)))["system"]
+    if lever:
+        qs[2] = f"What happens if we tokenize PAN at {lever}?"
     inf = (getattr(result, "scope_breakdown", {}) or {}).get("inferred_only_sample") or []
     if inf:
         qs[3] = f"Why is {inf[0]} in PCI scope?"

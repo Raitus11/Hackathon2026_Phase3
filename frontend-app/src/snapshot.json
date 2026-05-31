@@ -61,6 +61,345 @@
       "LZRKY"
     ],
     "hidden_pci_count": 48,
+    "hidden_detail": [
+      {
+        "system": "6CWC",
+        "name": "",
+        "downstream_reach": 29,
+        "stated_source": "KTCZP",
+        "finding": "True PAN"
+      },
+      {
+        "system": "9CPC",
+        "name": "",
+        "downstream_reach": 2,
+        "stated_source": "EC",
+        "finding": "True PAN"
+      },
+      {
+        "system": "6IVC",
+        "name": "",
+        "downstream_reach": 1,
+        "stated_source": "8BRC",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JSVCH",
+        "name": "",
+        "downstream_reach": 1,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "6PNXRO",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "PCOZ",
+        "finding": "True PAN"
+      },
+      {
+        "system": "6PNXUI",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8AKP",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8DEKT",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8EIV",
+        "name": "LAIVE",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8NC1",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8NYD",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "6CWC",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8TCLL",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "8TCU",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "HCV369",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "HNULL",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "HOGCN",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "HTOKM",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "IODMM",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JAED",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "JDH",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JAGC",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JAOCP",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "PCOZ",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JBFN",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "UA",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JBYP",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JCOC",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JEQPM",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JEQZT",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JEQZY",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JFO",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JHTSS",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JLF",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JLFXM",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "SAYC",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JMT",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JNJX",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JRGNS",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "Credit Bureaus",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JSEK",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "ZTEYM",
+        "finding": "True PAN"
+      },
+      {
+        "system": "JSVKR",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "OJ",
+        "finding": "True PAN"
+      },
+      {
+        "system": "KCO",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "Credit Bureaus",
+        "finding": "True PAN"
+      },
+      {
+        "system": "KDUZ",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "HPU",
+        "finding": "True PAN"
+      },
+      {
+        "system": "KIRB",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "KPO",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "KTEYN",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "Written in documents",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LCUZ",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LDR",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LDUCG",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LMQX",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "User Entry",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LPFR",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "Written in documents",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LSR1",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      },
+      {
+        "system": "LZRKY",
+        "name": "",
+        "downstream_reach": 0,
+        "stated_source": "",
+        "finding": "True PAN"
+      }
+    ],
+    "hidden_propagating_count": 4,
     "declared_pan_systems_count": 24
   },
   "quality": {
@@ -621,7 +960,7 @@
   "audit": [
     {
       "stage": "ingest",
-      "ms": 10.7,
+      "ms": 16.1,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -642,7 +981,7 @@
     },
     {
       "stage": "build_graph",
-      "ms": 4.1,
+      "ms": 9.5,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -657,7 +996,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 5.0,
+      "ms": 6.9,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -668,12 +1007,12 @@
     },
     {
       "stage": "score",
-      "ms": 15.8,
+      "ms": 20.0,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 95.2,
+      "ms": 103.8,
       "scope": 95,
       "heavy_hitters": 10,
       "hidden_pci": 48
@@ -10729,7 +11068,7 @@
   "suggested_questions": [
     "How many systems are in PCI scope, and how many are confirmed vs inferred?",
     "Which systems are the biggest PAN distributors?",
-    "What happens if we tokenize PAN at 6CWC?",
+    "What happens if we tokenize PAN at 8CCF?",
     "Why is 6CWC in PCI scope?",
     "Which systems are hidden PCI (BAM misses)?"
   ],
@@ -10828,15 +11167,15 @@
     "choke_points": [
       "6CWC",
       "8CCF",
+      "8AQB",
       "8BKV",
       "8AFN",
       "8BCC",
-      "8AQB",
       "8CEMS",
-      "8BFL",
       "8A",
-      "8BCKS",
-      "8OHM"
+      "8BFL",
+      "8OHM",
+      "8BCKS"
     ],
     "choke_point_count": 11,
     "pan_subgraph_nodes": 95,

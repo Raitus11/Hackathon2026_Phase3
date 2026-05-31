@@ -23,7 +23,7 @@ function filterGraph(viz, mode, heavyList) {
   if (mode === 'pan') {
     const panEdges = edges.filter(e => carries(byId.get(e.source)))
     const keep = new Set(); panEdges.forEach(e => { keep.add(e.source); keep.add(e.target) })
-    nodes.forEach(n => { if (carries(n)) keep.add(n.id) })
+    // only nodes incident to a PAN edge — isolated carriers add noise and scatter the layout
     return { N: nodes.filter(n => keep.has(n.id)), L: panEdges }
   }
   const idset = new Set(nodes.map(n => n.id))
@@ -42,17 +42,19 @@ function useData() {
   const [gate, setGate] = useState(null)          // { thread_id, gate, audit }
 
   const loadLive = async () => {
-    const [g, head, imp, hh, ag, sg] = await Promise.all([
+    const [g, head, imp, hh, ag, sg, pl] = await Promise.all([
       fetch('/api/graph').then(r => r.json()),
       fetch('/api/headline').then(r => r.json()),
       fetch('/api/impact').then(r => r.json()),
       fetch('/api/heavy-hitters?top_k=10').then(r => r.json()),
       fetch('/api/agents').then(r => r.json()).catch(() => null),
       fetch('/api/suggested').then(r => r.json()).catch(() => null),
+      fetch('/api/plan?target=0.8&max_k=8').then(r => r.json()).catch(() => null),
     ])
     const expl = await fetch('/api/explanation').then(r => r.json()).catch(() => ({}))
     setData({ ...SNAPSHOT, viz: g, headline: head.headline, hidden: head.hidden,
               scope_breakdown: head.scope_breakdown, impact: imp, heavy_hitters: hh.heavy_hitters,
+              plan: pl || SNAPSHOT.plan,
               explanation: expl.explanation || SNAPSHOT.explanation })
     if (ag && ag.agents) setAgents(ag.agents)
     if (sg && sg.questions) setSuggested(sg.questions)
@@ -342,17 +344,18 @@ function Overview({ d, onPick }) {
       <div className="grid lg:grid-cols-2 gap-5">
         <div className="card p-5">
           <div className="disp font-bold text-lg">Clean-stream impact</div>
-          <div className="text-xs text-dim mb-1">If PAN is tokenized (emitted as non-reversible CRN) at the top-{imp.tokenized_systems.length} true-source(s): {imp.tokenized_systems.map(s => <span key={s} className="mono text-pan cursor-pointer" onClick={() => onPick(s)}>{s} </span>)}</div>
-          <div className="text-[11px] text-faint mb-3">"Surface" = number of systems in PCI scope. Lower is cheaper to audit and less exposed.</div>
+          <div className="text-xs text-dim mb-1">If PAN is tokenized (emitted as non-reversible CRN) at the top-{imp.tokenized_systems.length} lever(s): {imp.tokenized_systems.map(s => <span key={s} className="mono text-pan cursor-pointer" onClick={() => onPick(s)}>{s} </span>)}</div>
+          <div className="text-[11px] text-faint mb-3">Downstream systems fed only by these descope. The sources stay in the CDE as tokenization points but drop from <b className="text-pan">live PAN (tier 4)</b> to <b className="text-safe">token-only (tier 3)</b> — the conservative, defensible read.</div>
           {[['In-scope now', before, 'bg-pan'], ['In-scope after tokenization', after, 'bg-safe']].map(([lbl, v, c], i) => (
             <div key={i} className="mb-3">
               <div className="flex justify-between text-xs mb-1"><span className="text-dim">{lbl}</span><span className="mono">{v} systems</span></div>
               <div className="h-3 rounded-full bg-panel2 overflow-hidden"><div className={'h-full ' + c} style={{ width: (100 * v / maxv) + '%', transition: 'width .8s cubic-bezier(.2,.8,.2,1)' }} /></div>
             </div>
           ))}
-          <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+          <div className="grid grid-cols-4 gap-2 mt-4 text-center">
             <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.nodes_descoped}</div><div className="text-[11px] text-dim">systems descoped</div></div>
-            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.node_surface_reduction_pct}%</div><div className="text-[11px] text-dim">surface reduction</div></div>
+            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-pan">{imp.sources_downgraded_count ?? (imp.sources_downgraded || []).length}</div><div className="text-[11px] text-dim">sources → token</div></div>
+            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.node_surface_reduction_pct}%</div><div className="text-[11px] text-dim">surface ↓</div></div>
             <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-cool">{imp.retained_via_detokenization_count}</div><div className="text-[11px] text-dim">stay (RISE/APG)</div></div>
           </div>
           <div className="text-[11px] text-faint mt-3">A system descopes only when it receives CRN from <b>all</b> upstreams. Systems that must de-tokenize via centralized RISE/APG services remain in the CDE by design.</div>
@@ -360,17 +363,19 @@ function Overview({ d, onPick }) {
 
         <div className="card p-5">
           <div className="disp font-bold text-lg">Heavy hitters — primary PAN distributors</div>
-          <div className="text-xs text-dim mb-1">Ranked by <b>exclusive reach</b>: systems that fall out of scope if this one source is tokenized (no other clear-PAN parent). Click to inspect.</div>
+          <div className="text-xs text-dim mb-1">Ranked by <b>downstream reach</b> (how many systems each feeds clear PAN — the organizer's definition of a heavy hitter). <b className="text-safe">Solo descope</b> = systems that leave scope if <i>only</i> this source is tokenized; it's small for everyone because PAN flow is shared, so the Planner finds the minimal <i>set</i>. Click a row to inspect.</div>
           <div className="scroll overflow-auto max-h-[280px] mt-2">
             <table className="dt w-full text-sm">
               <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
-                <th>System</th><th title="Systems descoped if only this source is tokenized">Excl. reach</th>
-                <th title="Total downstream systems it feeds PAN to">Reach</th>
+                <th>System</th><th title="Total downstream systems it feeds PAN to (blast radius)">Reach</th>
+                <th title="Systems that leave scope if ONLY this source is tokenized (subset of reach)">Solo descope</th>
                 <th title="Direct PAN consumers (deduped)">Out-deg</th><th title="Composite 0–100 risk score">Risk</th></tr></thead>
               <tbody>{d.heavy_hitters.map(r => (
                 <tr key={r.system} className="hh mono" onClick={() => onPick(r.system)}>
                   <td className="text-pan font-semibold">{r.system}</td>
-                  <td className="text-safe">{r.exclusive_reach}</td><td>{r.downstream_reach}</td><td>{r.out_degree}</td>
+                  <td className="text-txt">{r.downstream_reach}</td>
+                  <td className={(r.solo_descope ?? r.exclusive_reach) > 0 ? 'text-safe' : 'text-faint'}>{r.solo_descope ?? r.exclusive_reach}</td>
+                  <td>{r.out_degree}</td>
                   <td><span className="px-2 py-0.5 rounded" style={{ background: 'rgba(245,166,35,' + (r.risk / 120) + ')' }}>{r.risk}</span></td>
                 </tr>))}</tbody>
             </table>
@@ -395,7 +400,7 @@ function Overview({ d, onPick }) {
 /* ============================ GRAPH ============================ */
 function GraphView({ d, selected, onPick }) {
   const ref = useRef()
-  const [mode, setMode] = useState('pan')
+  const [mode, setMode] = useState('heavy')
   const [showInferred, setShowInferred] = useState(true)
   const heavyList = useMemo(() => d.heavy_hitters.map(h => h.system), [d])
   const heavySet = useMemo(() => new Set(heavyList), [heavyList])
@@ -454,10 +459,10 @@ function GraphView({ d, selected, onPick }) {
         .on('drag', (e, n) => { n.fx = e.x; n.fy = e.y })
         .on('end', (e, n) => { if (!e.active) sim.alphaTarget(0); n.fx = null; n.fy = null }))
     node.append('title').text(n => `${n.id} ${n.name || ''}\nreach ${n.reach} · risk ${n.risk} · tier ${n.tier}`
-      + (heavySet.has(n.id) ? `\n★ heavy hitter — exclusive reach ${exclBySys[n.id]}` : '')
+      + (heavySet.has(n.id) ? `\n★ heavy hitter — solo descope ${exclBySys[n.id]}` : '')
       + (n.scope_prov ? `\nscope: ${n.scope_prov}` : '') + (n.hidden_pci ? '\n⚠ hidden PCI (PAN in Splunk, BAM=No)' : ''))
     const label = g.append('g').selectAll('text').data(N.filter(n => heavySet.has(n.id) || (n.reach || 0) >= 14 || n.hidden_pci)).join('text')
-      .text(n => heavySet.has(n.id) ? `${n.id} (${exclBySys[n.id]})` : n.id)
+      .text(n => n.id)
       .attr('font-size', n => heavySet.has(n.id) ? 10 : 9).attr('fill', n => heavySet.has(n.id) ? '#e6edf6' : '#8aa0bd')
       .attr('class', 'mono').attr('dx', 8).attr('dy', 3)
     sim.on('tick', () => {
@@ -475,7 +480,7 @@ function GraphView({ d, selected, onPick }) {
 
   const modes = [['pan', 'PAN flow only'], ['heavy', 'Heavy-hitter subgraph'], ['all', 'All systems']]
   const modeHelp = { pan: 'Only the cardholder-data lineage: edges originating from a PAN-carrying system.',
-    heavy: 'The top exclusive-reach PAN distributors and everything downstream of them.',
+    heavy: 'The top PAN distributors (by downstream reach) and everything downstream of them — the decision-relevant subgraph.',
     all: 'Every system and dependency. Hover a node to isolate its neighbourhood.' }
   return (
     <div className="card p-3">
@@ -650,7 +655,12 @@ function Drill({ d, selected, onPick }) {
 
 /* ============================ PLANNER (optimizer + what-if) ============================ */
 function Planner({ d, live, onPick }) {
-  const candidates = useMemo(() => d.heavy_hitters.map(h => h.system), [d])
+  const candidates = useMemo(() => {
+    const ids = d.heavy_hitters.map(h => h.system)
+    const seen = new Set(ids)
+    ;(d.plan?.plan || []).forEach(s => { if (!seen.has(s)) { ids.push(s); seen.add(s) } })  // ensure levers are toggleable
+    return ids
+  }, [d])
   const exclBy = useMemo(() => Object.fromEntries(d.heavy_hitters.map(h => [h.system, h.exclusive_reach])), [d])
   const [plan, setPlan] = useState(d.plan || null)
   const [target, setTarget] = useState(Math.round((d.plan?.target_fraction || 0.8) * 100))
@@ -790,7 +800,7 @@ function ScatterReachRisk({ d, onPick }) {
   return (
     <div className="card p-5">
       <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— downstream reach × risk</span></div>
-      <div className="text-xs text-dim mb-2">Each dot is a PAN-carrying system. Upper-right = high reach <i>and</i> high risk: the prime tokenization targets. Larger ring = bigger exclusive reach.</div>
+      <div className="text-xs text-dim mb-2">Each dot is a PAN-carrying system. Upper-right = high reach <i>and</i> high risk: the prime tokenization targets. Ringed dots are the top distributors.</div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
@@ -820,23 +830,26 @@ function ScatterReachRisk({ d, onPick }) {
 
 function BarExclusiveReach({ d, onPick }) {
   const rows = d.heavy_hitters.slice(0, 10)
-  const max = Math.max(1, ...rows.map(r => r.exclusive_reach))
+  const max = Math.max(1, ...rows.map(r => r.downstream_reach))
   return (
     <div className="card p-5">
-      <div className="disp font-bold">Exclusive reach <span className="text-faint text-xs font-normal">— systems descoped if this one source is tokenized</span></div>
-      <div className="text-xs text-dim mb-3">Downstream systems that fall out of scope if this source alone is tokenized (no other clear-PAN parent).</div>
+      <div className="disp font-bold">Distributor reach <span className="text-faint text-xs font-normal">— blast radius of each PAN source</span></div>
+      <div className="text-xs text-dim mb-3">Bar = downstream systems each source feeds clear PAN to. The <b className="text-safe">·N</b> tag is its solo descope (systems freed if only it is tokenized) — near-zero everywhere because the same downstream systems have multiple PAN parents, which is why the minimal tokenization <i>set</i> matters more than any single source.</div>
       <div className="space-y-1.5">
-        {rows.map((r, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            <button onClick={() => onPick(r.system)} className="mono text-pan w-14 text-left hover:underline">{r.system}</button>
-            <div className="flex-1 h-4 rounded bg-panel2 overflow-hidden">
-              <div className="h-full bg-pan/70 flex items-center justify-end pr-1.5" style={{ width: Math.max(8, 100 * r.exclusive_reach / max) + '%', transition: 'width .5s' }}>
-                <span className="mono text-[10px] text-ink font-bold">{r.exclusive_reach}</span>
+        {rows.map((r, i) => {
+          const solo = r.solo_descope ?? r.exclusive_reach ?? 0
+          return (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <button onClick={() => onPick(r.system)} className="mono text-pan w-14 text-left hover:underline">{r.system}</button>
+              <div className="flex-1 h-4 rounded bg-panel2 overflow-hidden">
+                <div className="h-full bg-pan/70 flex items-center justify-end pr-1.5" style={{ width: Math.max(8, 100 * r.downstream_reach / max) + '%', transition: 'width .5s' }}>
+                  <span className="mono text-[10px] text-ink font-bold">{r.downstream_reach}</span>
+                </div>
               </div>
+              <span className={'mono text-[10px] w-16 text-right ' + (solo > 0 ? 'text-safe' : 'text-faint')}>solo ·{solo}</span>
             </div>
-            <span className="mono text-[10px] text-faint w-20 text-right">reach {r.downstream_reach}</span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -849,7 +862,7 @@ function Methods({ d }) {
     ['Cycle resolution', 'Tarjan strongly-connected-components → condensation', 'Tarjan 1972', 'Source relationships from BAM/ServiceNow contain cycles; SCC detection + supervertex contraction provably yields a DAG. The rule is explicit and explainable.'],
     ['Reachability / scope', 'Transitive closure (DFS descendants)', 'classical', 'A system is in PCI scope if reachable from any clear-PAN source. Memoized per-source so scope evaluations are O(sources) set-unions.'],
     ['Conduit importance', 'Betweenness centrality (exact; pivot-sampled at scale)', 'Freeman 1977; Brandes 2001; Brandes & Pich 2007', 'Systems that many PAN paths route through. Sampled estimator above ~600 nodes keeps scoring sub-second without changing the quantity measured.'],
-    ['Heavy-hitter ranking', 'Exclusive downstream reach (set difference)', 'own, interpretable', 'Systems descoped if this one source is tokenized and no other clear-PAN parent feeds them — the true tokenization levers.'],
+    ['Heavy-hitter ranking', 'Downstream reach (primary distributor); solo descope = exclusive reach via set difference', 'own, interpretable', 'Distributors are ranked by how many systems they feed clear PAN to (reach). Solo descope — systems freed if only this source is tokenized — is reported alongside; it is small under shared PAN flow, which the minimal-set optimizer addresses.'],
     ['Composite risk', 'Weighted sum: 0.40 sensitivity + 0.30 reach + 0.20 betweenness + 0.10 source', 'own, every term bounded & named', 'R(v)∈[0,100]. No magic constants; weights are config-tunable and each factor is individually defensible.'],
     ['Minimum-intervention plan', 'Greedy maximum-coverage on a monotone submodular objective', 'Nemhauser, Wolsey & Fisher 1978 — (1−1/e) bound', 'Fewest sources to tokenize for the most descope. Greedy is provably within ~63% of the optimal k-set; we report the optimality ceiling.'],
     ['Concentration', 'Gini coefficient + Herfindahl-Hirschman index', 'Gini 1912; Hirschman 1945', 'Quantifies how few systems carry the exposure — the mathematical justification for targeting heavy hitters.'],
@@ -929,8 +942,8 @@ function ChatPanel({ suggested, live, threadId, height = 400 }) {
   }
   return (
     <div className="flex flex-col">
-      <div className="scroll overflow-auto space-y-3 pr-1" style={{ minHeight: height, maxHeight: height }}>
-        {msgs.length === 0 && <div className="text-xs text-faint">Pick a suggested question below, or type your own.</div>}
+      <div className="scroll overflow-auto space-y-3 pr-1" style={{ minHeight: msgs.length ? height : 0, maxHeight: height }}>
+        {msgs.length === 0 && <div className="text-xs text-faint mb-1">Pick a suggested question below, or type your own.</div>}
         {msgs.map((m, i) => (
           <div key={i} className={'max-w-[88%] ' + (m.role === 'user' ? 'ml-auto' : '')}>
             <div className={'rounded-xl px-3 py-2 text-sm ' + (m.role === 'user' ? 'bg-pan/15 text-txt' : 'bg-panel2 text-dim')}>{m.content}</div>
@@ -965,7 +978,7 @@ function Ask({ suggested, live }) {
         <div className="text-[11px] uppercase tracking-[.16em] text-faint mb-3">What I can answer</div>
         <ul className="text-xs text-dim space-y-2.5">
           <li><b className="text-txt">Scope</b> — totals and the metadata-confirmed vs inferred-only split.</li>
-          <li><b className="text-txt">Heavy hitters</b> — the biggest PAN distributors by exclusive reach.</li>
+          <li><b className="text-txt">Heavy hitters</b> — the biggest PAN distributors by downstream reach.</li>
           <li><b className="text-txt">Hidden PCI</b> — systems BAM missed but Splunk caught.</li>
           <li><b className="text-txt">A system</b> — name an ID (e.g. 8CCF) for risk, scope basis, and lineage.</li>
           <li><b className="text-txt">Tokenization</b> — "what if we tokenize X" and the descope it yields.</li>
@@ -976,14 +989,114 @@ function Ask({ suggested, live }) {
   )
 }
 
+/* ============================ VERDICT BANNER (persistent answer) ============================ */
+function VerdictBanner({ d, onTab, onPick }) {
+  const h = d.headline || {}, imp = d.impact || {}, hid = d.hidden || {}
+  const detail = hid.hidden_detail || []
+  const topMiss = detail.length ? detail[0] : null         // highest-reach BAM miss
+  const levers = imp.tokenized_systems || (d.plan?.plan || []).slice(0, 3)
+  const downgraded = imp.sources_downgraded_count ?? (imp.sources_downgraded || []).length
+  return (
+    <div className="card p-4 mb-5 border-l-4" style={{ borderLeftColor: '#ff5c5c' }}>
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="disp font-black text-3xl text-panhot">{fmt(h.hidden_pci_systems_bam_misses)}</span>
+        <span className="text-txt text-base">systems are handling clear card numbers that BAM never flagged as PCI.</span>
+        <button onClick={() => onTab('hidden')} className="mono text-[11px] px-2 py-0.5 rounded border border-panhot/40 text-panhot hover:bg-panhot/10 ml-1">see the evidence →</button>
+      </div>
+      <div className="text-sm text-dim mt-1.5 leading-relaxed">
+        {fmt(h.systems_exposed_to_clear_pan)} systems sit in PCI scope ({h.scope_metadata_confirmed} confirmed · {h.scope_inferred_only} inferred).
+        {topMiss && topMiss.downstream_reach > 0 && <> The single widest PAN distributor,{' '}
+          <button onClick={() => onPick(topMiss.system)} className="mono text-panhot hover:underline">{topMiss.system}</button>
+          {' '}(reaches {topMiss.downstream_reach} systems), is itself one of those BAM misses.</>}
+        {levers.length > 0 && <> Tokenizing the {levers.length} highest-leverage sources
+          ({levers.map((s, i) => <span key={s}><button onClick={() => onPick(s)} className="mono text-pan hover:underline">{s}</button>{i < levers.length - 1 ? ', ' : ''}</span>)})
+          removes <b className="text-safe">{imp.nodes_descoped}</b> systems from scope and converts <b className="text-safe">{downgraded}</b> from live PAN to tokens.</>}
+      </div>
+    </div>
+  )
+}
+
+/* ============================ HIDDEN SCOPE (the centerpiece) ============================ */
+function HiddenScope({ d, onPick }) {
+  const hid = d.hidden || {}
+  const detail = hid.hidden_detail || []
+  const propagating = detail.filter(x => x.downstream_reach > 0)
+  const [q, setQ] = useState('')
+  const rows = useMemo(() => {
+    const t = q.trim().toUpperCase()
+    return detail.filter(x => !t || x.system.toUpperCase().includes(t) || (x.name || '').toUpperCase().includes(t))
+  }, [detail, q])
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Hidden scope — what BAM missed <span className="text-faint text-xs font-normal">— the finding that matters most</span></div>
+        <p className="text-sm text-dim mt-1.5 max-w-3xl leading-relaxed">
+          BAM is self-reported, so it is incomplete. These systems are flagged <b className="text-txt">PCI = No</b> in the business
+          catalogue, yet Splunk observed real card numbers in their logs. Each one is unmanaged PCI scope — exposure no compliance
+          program currently knows about. We use BAM's <i>current</i> flag, so anything BAM has since caught is excluded.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <KPI label="Hidden PCI — BAM misses" value={fmt(hid.hidden_pci_count)} sub="PCI=No in BAM · clear PAN in Splunk" tone="hot" delay={0}
+          def="Systems BAM records as not handling PAN, but clear PAN appears in their Splunk logs." />
+        <KPI label="Actively propagating" value={fmt(hid.hidden_propagating_count ?? propagating.length)} sub="feed the leaked PAN further downstream" tone="pan" delay={70}
+          def="Hidden-PCI systems that are not leaf nodes — they pass cardholder data onward, widening the unknown exposure." />
+        <KPI label="Declared PAN carriers" value={fmt(hid.declared_pan_systems_count)} sub="known, in BAM (for contrast)" tone="cool" delay={140}
+          def="Systems BAM does flag as handling PAN — the known surface, shown for scale against the hidden surface." />
+      </div>
+
+      {propagating.length > 0 && (
+        <div className="card p-5 border-l-4" style={{ borderLeftColor: '#ff5c5c' }}>
+          <div className="disp font-bold text-sm text-panhot">Highest-risk misses — unflagged AND propagating</div>
+          <div className="text-[11px] text-faint mb-3">A system BAM doesn't know is PCI, that also feeds PAN to others, hides the most scope. These are where to look first.</div>
+          <div className="flex flex-wrap gap-2">
+            {propagating.map(x => (
+              <button key={x.system} onClick={() => onPick(x.system)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-panhot/10 border border-panhot/30 hover:bg-panhot/20">
+                <span className="mono text-panhot font-semibold">{x.system}</span>
+                <span className="text-[11px] text-dim">reaches {x.downstream_reach}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="card p-5">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+          <div className="disp font-bold">Evidence ledger <span className="text-faint text-xs font-normal">— every miss, with its Splunk proof</span></div>
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="filter id or name…" className="bg-panel2 border border-line rounded-lg px-3 py-1.5 text-sm mono text-txt w-56" />
+        </div>
+        <div className="scroll overflow-auto max-h-[460px]">
+          <table className="dt w-full text-sm">
+            <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+              <th>System</th><th title="Downstream systems it feeds PAN to">Propagates to</th>
+              <th title="App's own stated origin of the PAN (DS6)">Stated source</th>
+              <th>BAM flag</th><th title="What Splunk found in Sept–Dec logs">Splunk finding</th></tr></thead>
+            <tbody>{rows.map(x => (
+              <tr key={x.system} className="hh mono" onClick={() => onPick(x.system)}>
+                <td className="text-panhot font-semibold">{x.system}<span className="text-faint text-[10px] ml-1.5">{(x.name || '').slice(0, 18)}</span></td>
+                <td className={x.downstream_reach > 0 ? 'text-pan' : 'text-faint'}>{x.downstream_reach || '—'}</td>
+                <td className="text-dim">{x.stated_source || '—'}</td>
+                <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-line text-dim">PCI = No</span></td>
+                <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-panhot/15 text-panhot">{x.finding || 'True PAN'}</span></td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+        <div className="text-[11px] text-faint mt-2">Click any row to trace its lineage in Drill-down. "Stated source" is the application owner's own attestation of where the PAN came from — a lead, not authoritative.</div>
+      </div>
+    </div>
+  )
+}
+
 /* ============================ APP ============================ */
 export default function App() {
   const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, reset, clearError } = useData()
-  const [tab, setTab] = useState('pipeline')
+  const [tab, setTab] = useState('overview')
   const [sel, setSel] = useState(null)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
+  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
+  const showBanner = !['pipeline'].includes(tab)
   return (
     <div className="max-w-[1280px] mx-auto px-5 py-5">
       <header className="flex items-center gap-4 mb-5">
@@ -1005,8 +1118,10 @@ export default function App() {
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
         {tabs.map(([k, l]) => <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>)}
       </nav>
+      {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
+      {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
       {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
