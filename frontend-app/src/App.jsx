@@ -1256,17 +1256,64 @@ function BlastRadius({ d, onPick }) {
     </div>
   ) : null
 
+  const downloadFile = (name, text, mime) => {
+    try {
+      const blob = new Blob([text], { type: mime })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url; link.download = name; document.body.appendChild(link); link.click()
+      document.body.removeChild(link); setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (e) { /* noop */ }
+  }
+  const csvCell = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
+  const downloadCSV = () => {
+    const hdr = ['Source', 'Fully descoped (leave scope)', 'Feeds removed', '% of scope', 'Parent-count reduced', 'Downstream reach', 'Risk', 'Fully-freed systems']
+    const lines = [hdr.map(csvCell).join(',')]
+    for (const r of rows) lines.push([r.system, r.solo_descope, r.feeds_removed, pct(r.feeds_removed), r.parent_reduction, r.downstream_reach, r.risk, (r.solo_systems || []).join('; ')].map(csvCell).join(','))
+    downloadFile('pci-sentinel_block-benefit.csv', lines.join('\n'), 'text/csv;charset=utf-8')
+  }
+  const downloadMD = () => {
+    const lines = []
+    lines.push('# PCI-SENTINEL — Block & Benefit report')
+    lines.push('')
+    lines.push(`Per-source tokenization (PAN→CRN) impact across a ${scopeBefore}-system in-scope estate. A downstream system *fully descopes* only when **all** of its true PAN sources are tokenized (conjunctive); blocking one source removes a clear-PAN feed even when the system stays in scope via another parent.`)
+    lines.push('')
+    lines.push('| Source | Fully freed | Feeds removed | % of scope | Parent-count ↓ | Reach | Risk |')
+    lines.push('|---|---|---|---|---|---|---|')
+    for (const r of rows) lines.push(`| ${r.system} | ${r.solo_descope} | ${r.feeds_removed} | ${pct(r.feeds_removed)}% | ${r.parent_reduction} | ${r.downstream_reach} | ${r.risk} |`)
+    lines.push('')
+    lines.push('## Per-source detail')
+    for (const r of rows) {
+      lines.push('')
+      lines.push(`### Block PAN at ${r.system}`)
+      lines.push(`- ${r.feeds_removed} systems (${pct(r.feeds_removed)}% of scope) lose a clear-PAN feed`)
+      lines.push(`- ${r.solo_descope} fully descope (this was their only true source)${r.solo_systems?.length ? ': ' + r.solo_systems.join(', ') : ''}`)
+      lines.push(`- ${r.parent_reduction} keep PAN via another source (parent-count reduced)`)
+    }
+    lines.push('')
+    lines.push('_What this claims: current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (inferred, marked). What it does not: remediate controls or assert business need._')
+    downloadFile('pci-sentinel_block-benefit.md', lines.join('\n'), 'text/markdown;charset=utf-8')
+  }
+
   return (
     <div className="space-y-5">
       <div className="card p-5">
-        <div className="disp font-bold text-lg">Block &amp; Benefit <span className="text-faint text-xs font-normal">— block a source, see who benefits downstream</span></div>
-        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
-          The FAQ's core question, made interactive: pick an upstream true PAN source to <b>block</b> (tokenize → CRN) and
-          see exactly which downstream systems benefit. <span className="text-safe">Bright nodes fully leave PCI scope</span> (this
-          was their only true source); the badge counts systems that lose a clear-PAN feed but stay in scope via another
-          parent. Select a second source to compare. The list is pre-ranked, so the default selection is the
-          highest-benefit single block on this estate.
-        </p>
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <div className="disp font-bold text-lg">Block &amp; Benefit <span className="text-faint text-xs font-normal">— block a source, see who benefits downstream</span></div>
+            <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
+              The FAQ's core question, made interactive: pick an upstream true PAN source to <b>block</b> (tokenize → CRN) and
+              see exactly which downstream systems benefit. <span className="text-safe">Bright nodes fully leave PCI scope</span> (this
+              was their only true source); the badge counts systems that lose a clear-PAN feed but stay in scope via another
+              parent. Select a second source to compare. The list is pre-ranked, so the default selection is the
+              highest-benefit single block on this estate.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5 shrink-0">
+            <button onClick={downloadCSV} className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2 whitespace-nowrap">↓ report (CSV)</button>
+            <button onClick={downloadMD} className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2 whitespace-nowrap">↓ report (.md)</button>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-5">
