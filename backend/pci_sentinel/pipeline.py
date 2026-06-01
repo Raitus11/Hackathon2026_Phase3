@@ -131,12 +131,21 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
 
     # Enrich the plan with the comparison + saturation artifacts the FAQ asks for
     # ("block this source set vs that one — who benefits") and the supermodular proof.
+    # Each enrichment is guarded INDEPENDENTLY so a missing/older analytics helper can
+    # only blank its own panel, never the others (e.g. no saturation_curve must NOT
+    # also wipe source_exposure — that powers the Block-&-Benefit tab).
     plan = dict(plan or {})
+    try:
+        plan.setdefault("source_exposure",
+                        analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=15))
+    except Exception:
+        pass
     try:
         plan.setdefault("saturation_curve",
                         analytics.saturation_curve(art.G, art.pan_sources, scores, points=12))
-        plan.setdefault("source_exposure",
-                        analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=15))
+    except Exception:
+        pass
+    try:
         greedy_set = (plan.get("plan") or [])[:3]
         reach_top3 = [h["system"] for h in hh[:3]]
         btw_top3 = [n for n, _ in sorted(
