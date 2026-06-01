@@ -1223,6 +1223,21 @@ function BlastRadius({ d, onPick }) {
   }, [d])
   const soloA = useMemo(() => new Set(ra?.solo_systems || []), [ra])
   const soloB = useMemo(() => new Set(rb?.solo_systems || []), [rb])
+  // Detect a saturated estate: the top sources each reach most of the scope and their
+  // feeds_removed are near-identical. On such data single-source numbers look "stuck" —
+  // that's the finding, not a bug, so we surface it explicitly.
+  const sat = useMemo(() => {
+    const top = rows.slice(0, Math.min(10, rows.length))
+    if (top.length < 3) return null
+    const maxFeed = Math.max(...top.map(r => r.feeds_removed || 0))
+    if (maxFeed < 0.5 * scopeBefore) return null
+    const band = Math.max(2, 0.02 * scopeBefore)
+    const cluster = top.filter(r => Math.abs((r.feeds_removed || 0) - maxFeed) <= band)
+    if (cluster.length < 3) return null
+    const maxSolo = Math.max(...rows.map(r => r.solo_descope || 0))
+    return { n: cluster.length, pct: ((100 * maxFeed) / Math.max(1, scopeBefore)).toFixed(1), maxSolo,
+             topSolo: (rows.find(r => (r.solo_descope || 0) === maxSolo) || {}).system }
+  }, [rows, scopeBefore])
 
   const report = ra ? (
     `Block PAN at ${ra.system}:\n` +
@@ -1315,6 +1330,11 @@ function BlastRadius({ d, onPick }) {
           </div>
         </div>
       </div>
+
+      {sat && <div className="card p-4 border-l-4" style={{ borderLeftColor: '#5b8def' }}>
+        <div className="text-sm text-txt"><b className="text-cool">Saturated estate — this is the finding, not a bug.</b> The top {sat.n} true sources each feed ~{sat.pct}% of the in-scope estate, so their per-source numbers are near-identical. Every downstream system has <i>many</i> true-PAN parents, so blocking any one source removes a clear-PAN feed from almost everything yet <b>fully frees almost nothing</b> — which is precisely why piecemeal tokenization can't reduce this estate.</div>
+        <div className="text-[12px] text-dim mt-1.5">The signals that <i>do</i> discriminate here: the <span className="text-safe">fully-freed</span> column (only <span className="mono text-safe">{sat.topSolo}</span> frees a system on its own — its single exclusive child), and <b>set-vs-set</b> blocking. See the <b>Planner</b> for the block-set comparison and the saturation curve, which shows full descope only ramps once nearly the whole source front is tokenized.</div>
+      </div>}
 
       <div className="grid lg:grid-cols-3 gap-5">
         {/* ranked candidate list */}
