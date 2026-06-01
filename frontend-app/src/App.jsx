@@ -8,6 +8,54 @@ const fmt = n => (typeof n === 'number' ? n.toLocaleString() : n)
 const AGENTS_FALLBACK = SNAPSHOT.agents || []
 const SUGGESTED_FALLBACK = SNAPSHOT.suggested_questions || []
 
+/* ---- edge endpoint id helper (d3.forceLink mutates source/target into node refs after a sim runs;
+       any code that re-reads a filtered edge set must tolerate both shapes) ---- */
+const eid = x => (x && typeof x === 'object') ? x.id : x
+
+/* ---- focus filter: the neighbourhood of one system, by hop count and direction ----
+   dir: 'down' = systems it feeds (descendants), 'up' = systems that feed it (ancestors),
+        'both' = either. hops: 1, 2, or Infinity (full lineage in that direction).
+   Reuses the same BFS shape as the Block & Benefit ego-graph. ------------------------- */
+function focusGraph(viz, rootId, hops, dir) {
+  const { nodes, edges } = viz
+  if (!rootId) return null
+  const out = new Map(), inc = new Map()
+  edges.forEach(e => {
+    const s = eid(e.source), t = eid(e.target)
+    if (!out.has(s)) out.set(s, []); out.get(s).push(t)
+    if (!inc.has(t)) inc.set(t, []); inc.get(t).push(s)
+  })
+  const keep = new Set([rootId])
+  // BFS to `hops` rings; gather forward (down), backward (up), or both, per `dir`.
+  let frontier = [rootId]
+  const maxH = (hops === Infinity || hops >= 99) ? 1e9 : hops
+  for (let h = 0; h < maxH && frontier.length; h++) {
+    const next = []
+    frontier.forEach(id => {
+      if (dir !== 'up') (out.get(id) || []).forEach(t => { if (!keep.has(t)) { keep.add(t); next.push(t) } })
+      if (dir !== 'down') (inc.get(id) || []).forEach(s => { if (!keep.has(s)) { keep.add(s); next.push(s) } })
+    })
+    frontier = next
+  }
+  const N = nodes.filter(n => keep.has(n.id))
+  // keep an edge only if both ends survive AND it lies in the chosen direction relative to the kept set
+  const L = edges.filter(e => keep.has(eid(e.source)) && keep.has(eid(e.target)))
+  return { N, L, keep, truncated: false }
+}
+
+const FOCUS_CAP = 260   // beyond this a focused subgraph is a blob again; cap + report it
+function focusGraphCapped(viz, rootId, hops, dir) {
+  const f = focusGraph(viz, rootId, hops, dir)
+  if (!f || f.N.length <= FOCUS_CAP) return f
+  // saturated source under full lineage: keep root + nearest ring(s) up to the cap, by reach desc.
+  const keep = new Set([rootId])
+  const ranked = f.N.filter(n => n.id !== rootId).sort((a, b) => (b.reach || 0) - (a.reach || 0))
+  for (const n of ranked) { if (keep.size >= FOCUS_CAP) break; keep.add(n.id) }
+  const N = f.N.filter(n => keep.has(n.id))
+  const L = f.L.filter(e => keep.has(eid(e.source)) && keep.has(eid(e.target)))
+  return { N, L, keep, truncated: true, fullCount: f.N.length }
+}
+
 /* ---- shared graph filter (pan = cardholder-data lineage, heavy = top distributors, all = full) ---- */
 function filterGraph(viz, mode, heavyList) {
   const { nodes, edges } = viz
@@ -18,19 +66,19 @@ function filterGraph(viz, mode, heavyList) {
     // the full downstream closure, which on a saturated estate is ~the whole graph
     // (1800+ nodes) — a blob, not a focused view. First-hop keeps it legible.
     const adj = new Map()
-    edges.forEach(e => { if (!adj.has(e.source)) adj.set(e.source, []); adj.get(e.source).push(e.target) })
+    edges.forEach(e => { const s = eid(e.source), t = eid(e.target); if (!adj.has(s)) adj.set(s, []); adj.get(s).push(t) })
     const keep = new Set(heavyList)
     heavyList.forEach(h => (adj.get(h) || []).forEach(t => keep.add(t)))
-    return { N: nodes.filter(n => keep.has(n.id)), L: edges.filter(e => keep.has(e.source) && keep.has(e.target)) }
+    return { N: nodes.filter(n => keep.has(n.id)), L: edges.filter(e => keep.has(eid(e.source)) && keep.has(eid(e.target))) }
   }
   if (mode === 'pan') {
-    const panEdges = edges.filter(e => carries(byId.get(e.source)))
-    const keep = new Set(); panEdges.forEach(e => { keep.add(e.source); keep.add(e.target) })
+    const panEdges = edges.filter(e => carries(byId.get(eid(e.source))))
+    const keep = new Set(); panEdges.forEach(e => { keep.add(eid(e.source)); keep.add(eid(e.target)) })
     // only nodes incident to a PAN edge — isolated carriers add noise and scatter the layout
     return { N: nodes.filter(n => keep.has(n.id)), L: panEdges }
   }
   const idset = new Set(nodes.map(n => n.id))
-  return { N: nodes, L: edges.filter(e => idset.has(e.source) && idset.has(e.target)) }
+  return { N: nodes, L: edges.filter(e => idset.has(eid(e.source)) && idset.has(eid(e.target))) }
 }
 
 /* ---- data + run/approve/chat state machine ---- */
@@ -406,10 +454,33 @@ function GraphView({ d, selected, onPick }) {
   const ref = useRef()
   const [mode, setMode] = useState('heavy')
   const [showInferred, setShowInferred] = useState(true)
+  const [focusId, setFocusId] = useState(null)        // pinned app, or null = whole-estate view
+  const [hops, setHops] = useState(1)                  // 1 | 2 | Infinity
+  const [dir, setDir] = useState('both')               // 'down' | 'up' | 'both'
+  const [query, setQuery] = useState('')
+  const [openList, setOpenList] = useState(false)
   const heavyList = useMemo(() => d.heavy_hitters.map(h => h.system), [d])
   const heavySet = useMemo(() => new Set(heavyList), [heavyList])
   const exclBySys = useMemo(() => Object.fromEntries(d.heavy_hitters.map(h => [h.system, h.exclusive_reach])), [d])
-  const counts = useMemo(() => { const { N, L } = filterGraph(d.viz, mode, heavyList); return { n: N.length, l: L.length } }, [d, mode, heavyList])
+
+  // typeahead index over every system (id + name); cap matches so 2104-node estates stay responsive
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    return d.viz.nodes
+      .filter(n => n.id.toLowerCase().includes(q) || (n.name || '').toLowerCase().includes(q))
+      .slice(0, 12)
+  }, [query, d])
+  const focusNode = useMemo(() => focusId ? d.viz.nodes.find(n => n.id === focusId) : null, [focusId, d])
+
+  const focusResult = useMemo(() => focusId ? focusGraphCapped(d.viz, focusId, hops, dir) : null, [d, focusId, hops, dir])
+  const counts = useMemo(() => {
+    if (focusId) return focusResult ? { n: focusResult.N.length, l: focusResult.L.length } : { n: 0, l: 0 }
+    const { N, L } = filterGraph(d.viz, mode, heavyList); return { n: N.length, l: L.length }
+  }, [d, mode, heavyList, focusId, focusResult])
+
+  const pickFocus = id => { setFocusId(id); setQuery(''); setOpenList(false) }
+  const clearFocus = () => { setFocusId(null); setQuery(''); setOpenList(false) }
   const comp = useMemo(() => {
     const ns = d.viz.nodes
     return { total: ns.length, pan: ns.filter(n => n.carries_pan || n.true_source).length,
@@ -417,7 +488,9 @@ function GraphView({ d, selected, onPick }) {
   }, [d])
 
   useEffect(() => {
-    const base = filterGraph(d.viz, mode, heavyList)
+    const focused = !!focusId
+    const f = focused ? focusGraphCapped(d.viz, focusId, hops, dir) : null
+    const base = focused ? { N: f.N, L: f.L } : filterGraph(d.viz, mode, heavyList)
     const W = ref.current.clientWidth, H = 600
     const svg = d3.select(ref.current).html('').append('svg').attr('width', W).attr('height', H).attr('viewBox', [0, 0, W, H])
     svg.append('defs').append('marker').attr('id', 'arrow').attr('viewBox', '0 -5 10 10').attr('refX', 16)
@@ -432,7 +505,8 @@ function GraphView({ d, selected, onPick }) {
     const N = base.N.map(n => ({ ...n }))
     const deg = {}; Lv.forEach(e => { deg[e.source] = (deg[e.source] || 0) + 1; deg[e.target] = (deg[e.target] || 0) + 1 })
     const color = n => n.hidden_pci ? '#ff5c5c' : n.true_source ? '#f5a623' : n.carries_pan ? '#f7c873' : n.in_scope ? '#5b8def' : '#3a4a63'
-    const rad = n => (heavySet.has(n.id) ? 6 : 3) + Math.sqrt(n.reach || 0) * 1.7
+    const isRoot = n => focused && n.id === focusId
+    const rad = n => isRoot(n) ? 11 : (heavySet.has(n.id) ? 6 : 3) + Math.sqrt(n.reach || 0) * 1.7
     const adj = new Map()
     Lv.forEach(e => { (adj.get(e.source) || adj.set(e.source, new Set()).get(e.source)).add(e.target); (adj.get(e.target) || adj.set(e.target, new Set()).get(e.target)).add(e.source) })
     const sim = d3.forceSimulation(N)
@@ -448,8 +522,8 @@ function GraphView({ d, selected, onPick }) {
       .attr('stroke-dasharray', e => e.provenance === 'inferred' ? '4 3' : null)
     const node = g.append('g').selectAll('circle').data(N).join('circle')
       .attr('class', 'node').attr('r', rad).attr('fill', color)
-      .attr('stroke', n => n.hidden_pci ? '#ff5c5c' : (heavySet.has(n.id) ? '#fff' : (n.scope_prov === 'inferred' ? '#f5a623' : '#0a0e14')))
-      .attr('stroke-width', n => heavySet.has(n.id) ? 2 : (n.hidden_pci ? 2 : (n.scope_prov === 'inferred' ? 1.5 : 1)))
+      .attr('stroke', n => isRoot(n) ? '#2dd4bf' : n.hidden_pci ? '#ff5c5c' : (heavySet.has(n.id) ? '#fff' : (n.scope_prov === 'inferred' ? '#f5a623' : '#0a0e14')))
+      .attr('stroke-width', n => isRoot(n) ? 3.5 : heavySet.has(n.id) ? 2 : (n.hidden_pci ? 2 : (n.scope_prov === 'inferred' ? 1.5 : 1)))
       .attr('stroke-dasharray', n => (n.scope_prov === 'inferred' && !n.hidden_pci && !heavySet.has(n.id)) ? '2 2' : null)
       .on('click', (e, n) => onPick(n.id))
       .on('mouseover', (e, n) => {
@@ -465,16 +539,21 @@ function GraphView({ d, selected, onPick }) {
     node.append('title').text(n => `${n.id} ${n.name || ''}\nreach ${n.reach} · risk ${n.risk} · tier ${n.tier}`
       + (heavySet.has(n.id) ? `\n★ heavy hitter — solo descope ${exclBySys[n.id]}` : '')
       + (n.scope_prov ? `\nscope: ${n.scope_prov}` : '') + (n.hidden_pci ? '\n⚠ hidden PCI (PAN in Splunk, BAM=No)' : ''))
-    const label = g.append('g').selectAll('text').data(N.filter(n => heavySet.has(n.id) || (n.reach || 0) >= 14 || n.hidden_pci)).join('text')
+    // In focus mode the subgraph is small, so label everything; otherwise keep the sparse label rule.
+    const labelData = focused
+      ? N
+      : N.filter(n => heavySet.has(n.id) || (n.reach || 0) >= 14 || n.hidden_pci)
+    const label = g.append('g').selectAll('text').data(labelData).join('text')
       .text(n => n.id)
-      .attr('font-size', n => heavySet.has(n.id) ? 10 : 9).attr('fill', n => heavySet.has(n.id) ? '#e6edf6' : '#8aa0bd')
-      .attr('class', 'mono').attr('dx', 8).attr('dy', 3)
+      .attr('font-size', n => isRoot(n) ? 12 : heavySet.has(n.id) ? 10 : 9)
+      .attr('fill', n => isRoot(n) ? '#2dd4bf' : heavySet.has(n.id) ? '#e6edf6' : '#8aa0bd')
+      .attr('class', 'mono').attr('dx', n => isRoot(n) ? 13 : 8).attr('dy', 3)
     sim.on('tick', () => {
       link.attr('x1', e => e.source.x).attr('y1', e => e.source.y).attr('x2', e => e.target.x).attr('y2', e => e.target.y)
       node.attr('cx', n => n.x).attr('cy', n => n.y); label.attr('x', n => n.x).attr('y', n => n.y)
     })
     return () => sim.stop()
-  }, [d, mode, showInferred, heavyList, heavySet, exclBySys, onPick])
+  }, [d, mode, showInferred, heavyList, heavySet, exclBySys, onPick, focusId, hops, dir])
   useEffect(() => {
     if (!selected) return
     d3.select(ref.current).selectAll('circle')
@@ -486,27 +565,88 @@ function GraphView({ d, selected, onPick }) {
   const modeHelp = { pan: 'Only the cardholder-data lineage: edges originating from a PAN-carrying system.',
     heavy: 'The top PAN distributors (by downstream reach) and their direct consumers (first hop) — the decision-relevant subgraph, not the full downstream blob.',
     all: 'Every system and dependency. Hover a node to isolate its neighbourhood.' }
+  const dirLabel = { down: 'downstream — systems it feeds clear PAN to', up: 'upstream — systems that feed PAN into it', both: 'both directions' }
+  const hopLabel = h => h === Infinity ? 'full lineage' : h === 1 ? '1 hop' : h + ' hops'
+  const focusHelp = focusNode
+    ? `Focused on ${focusId}${focusNode.true_source ? ' — a true PAN source (origin of clear card data)'
+        : focusNode.carries_pan ? ' — carries PAN (received from upstream)'
+        : ' — in scope, no PAN of its own'}. Showing ${dirLabel[dir]}, ${hopLabel(hops)}. `
+        + `${focusNode.true_source && dir !== 'down' ? 'A true source has no PAN providers — the upstream side is empty by definition. ' : ''}`
+        + `${focusResult && focusResult.truncated ? `This source reaches ${fmt(focusResult.fullCount)} systems (a saturated estate) — showing the ${FOCUS_CAP} highest-reach for legibility; the full count is in the heavy-hitter table. ` : ''}`
+        + 'Drag nodes, scroll to zoom, click any node to drill down.'
+    : null
   return (
     <div className="card p-3">
       <div className="flex items-center gap-2 px-2 pt-1 pb-2 flex-wrap">
         <span className="text-[11px] text-faint mr-1">view:</span>
-        {modes.map(([k, l]) => <button key={k} onClick={() => setMode(k)}
-          className={'mono text-[11px] px-2.5 py-1 rounded border ' + (mode === k ? 'border-pan text-pan bg-pan/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
+        {modes.map(([k, l]) => <button key={k} onClick={() => { setMode(k); clearFocus() }}
+          className={'mono text-[11px] px-2.5 py-1 rounded border ' + (!focusId && mode === k ? 'border-pan text-pan bg-pan/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
         <label className="flex items-center gap-1 text-[11px] text-dim ml-2 cursor-pointer"><input type="checkbox" checked={showInferred} onChange={e => setShowInferred(e.target.checked)} />show inferred edges</label>
         <span className="ml-auto mono text-[11px] text-faint">{counts.n} nodes · {counts.l} edges</span>
       </div>
-      <div className="px-2 text-[11px] text-dim mb-1">{modeHelp[mode]}</div>
+
+      {/* focus row: pick one system and see only its neighbourhood */}
+      <div className="flex items-center gap-2 px-2 pb-2 flex-wrap">
+        <span className="text-[11px] text-faint mr-1">focus app:</span>
+        <div className="relative" style={{ minWidth: 220 }}>
+          <input value={query} placeholder="search id or name…"
+            onChange={e => { setQuery(e.target.value); setOpenList(true) }}
+            onFocus={() => setOpenList(true)}
+            onKeyDown={e => { if (e.key === 'Enter' && matches[0]) pickFocus(matches[0].id); if (e.key === 'Escape') setOpenList(false) }}
+            className="mono text-[11px] px-2 py-1 rounded border border-line bg-panel2 text-txt w-full outline-none focus:border-cool" />
+          {openList && matches.length > 0 && (
+            <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded border border-line bg-panel2 shadow-xl">
+              {matches.map(m => (
+                <button key={m.id} onClick={() => pickFocus(m.id)}
+                  className="block w-full text-left px-2 py-1 hover:bg-cool/10 border-b border-line/40 last:border-0">
+                  <span className="mono text-[11px] text-txt">{m.id}</span>
+                  {m.true_source && <span className="mono text-[9px] text-pan ml-1">true-source</span>}
+                  {m.hidden_pci && <span className="mono text-[9px] text-panhot ml-1">hidden-PCI</span>}
+                  <span className="block text-[10px] text-dim truncate">{m.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {focusId && (
+          <>
+            <span className="mono text-[11px] px-2 py-1 rounded bg-cool/15 text-safe border border-safe/40 flex items-center gap-1">
+              {focusId}
+              <button onClick={clearFocus} className="ml-1 text-dim hover:text-txt" title="clear focus">✕</button>
+            </span>
+            <span className="text-[11px] text-faint ml-1">direction:</span>
+            {[['both', 'both'], ['down', 'downstream'], ['up', 'upstream']].map(([k, l]) =>
+              <button key={k} onClick={() => setDir(k)}
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (dir === k ? 'border-cool text-cool bg-cool/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
+            <span className="text-[11px] text-faint ml-1">hops:</span>
+            {[[1, '1'], [2, '2'], [Infinity, 'all']].map(([k, l]) =>
+              <button key={l} onClick={() => setHops(k)}
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (hops === k ? 'border-cool text-cool bg-cool/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
+          </>
+        )}
+        {!focusId && <span className="text-[11px] text-faint">pick an app to isolate its PAN neighbourhood — or keep the full view above</span>}
+      </div>
+
+      <div className="px-2 text-[11px] text-dim mb-1">{focusId ? focusHelp : modeHelp[mode]}</div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 text-[11px] text-dim items-center">
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-white" style={{ background: '#f5a623' }} />true PAN source (★ heavy hitter)</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#f7c873' }} />carries PAN</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#ff5c5c' }} />hidden PCI (BAM miss)</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#5b8def' }} />in scope</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '1.5px dashed #f5a623' }} />inferred-only scope</span>
+        {focusId && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '2px solid #2dd4bf' }} />focused app</span>}
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#2c3e57" strokeWidth="2" markerEnd="" /></svg>metadata →</span>
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#f5a623" strokeWidth="2" strokeDasharray="4 3" /></svg>inferred →</span>
         <span className="ml-auto text-faint">arrow = PAN flow (provider→consumer) · hover = isolate · scroll = zoom</span>
       </div>
       <div ref={ref} style={{ width: '100%' }} />
+      {focusId && counts.n <= 1 && (
+        <div className="mx-2 mb-2 -mt-2 px-3 py-2 rounded border border-line bg-panel2 text-[11px] text-dim">
+          <span className="text-txt mono">{focusId}</span> has no {dir === 'up' ? 'PAN providers' : dir === 'down' ? 'downstream consumers' : 'PAN-flow neighbours'} in this direction.
+          {focusNode && focusNode.true_source && dir === 'up' && ' That is expected for a true PAN source — it originates clear card data, so nothing feeds PAN into it. Switch direction to "downstream" to see what it feeds.'}
+          {(!focusNode || !focusNode.true_source) && ' It may be a leaf consumer, or its links are inferred-only (toggle "show inferred edges"). Try "both" or a wider hop count.'}
+        </div>
+      )}
       <div className="px-3 py-2 text-[11px] text-faint mono border-t border-line mt-1">
         composition: {comp.total} systems · {comp.pan} carry PAN · {comp.hidden} hidden-PCI · {comp.scope} in scope
       </div>
