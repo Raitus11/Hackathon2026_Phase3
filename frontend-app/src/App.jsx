@@ -813,17 +813,17 @@ function SaturationCurve({ plan }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 250 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
-            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="var(--line)" strokeWidth="0.5" />
-            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="var(--faint)">{Math.round(f * maxY)}</text>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#1e2a3d" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#56657d">{Math.round(f * maxY)}</text>
           </g>
         ))}
         {[0, 25, 50, 75, 100].map((p, i) => (
-          <text key={i} x={x(p)} y={H - P.b + 14} textAnchor="middle" fontSize="9" fill="var(--faint)">{p}%</text>
+          <text key={i} x={x(p)} y={H - P.b + 14} textAnchor="middle" fontSize="9" fill="#56657d">{p}%</text>
         ))}
-        <text x={P.l - 34} y={P.t + 4} fontSize="9" fill="var(--dim)" transform={`rotate(-90 ${P.l - 34} ${H / 2})`}>systems fully descoped</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">% of true PAN sources tokenized →</text>
-        <polyline points={pts} fill="none" stroke="var(--safe)" strokeWidth="2" />
-        {sc.curve.map((p, i) => <circle key={i} cx={x(p.pct_sources)} cy={y(p.fully_descoped)} r="3" fill="var(--safe)"><title>{p.pct_sources}% sources ({p.k}) → {p.fully_descoped} fully descoped</title></circle>)}
+        <text x={P.l - 34} y={P.t + 4} fontSize="9" fill="#8aa0bd" transform={`rotate(-90 ${P.l - 34} ${H / 2})`}>systems fully descoped</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#8aa0bd">% of true PAN sources tokenized →</text>
+        <polyline points={pts} fill="none" stroke="#2dd4bf" strokeWidth="2" />
+        {sc.curve.map((p, i) => <circle key={i} cx={x(p.pct_sources)} cy={y(p.fully_descoped)} r="3" fill="#2dd4bf"><title>{p.pct_sources}% sources ({p.k}) → {p.fully_descoped} fully descoped</title></circle>)}
       </svg>
       <div className="text-[11px] text-faint mt-2">Full front ({sc.source_count} sources) → {last?.fully_descoped ?? 0} of {before} fully descoped. The exposure benefit of partial tokenization is in the Block-&-Benefit tab and the heavy-hitter table — non-zero at every step even while full descope stays low.</div>
     </div>
@@ -874,7 +874,7 @@ function ScatterReachRisk({ d, onPick }) {
   const hh = new Set(d.heavy_hitters.slice(0, 8).map(h => h.system))
   const x = v => P.l + (v / maxX) * (W - P.l - P.r)
   const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
-  const color = n => n.hidden_pci ? 'var(--panhot)' : n.true_source ? 'var(--pan)' : n.carries_pan ? '#e3a83a' : 'var(--cool)'
+  const color = n => n.hidden_pci ? '#ff5c5c' : n.true_source ? '#f5a623' : n.carries_pan ? '#e3a83a' : '#5b8def'
   return (
     <div className="card p-5">
       <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— conduit centrality × risk</span></div>
@@ -882,17 +882,17 @@ function ScatterReachRisk({ d, onPick }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
-            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="var(--line)" strokeWidth="0.5" />
-            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="var(--faint)">{Math.round(f * maxY)}</text>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#1e2a3d" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#56657d">{Math.round(f * maxY)}</text>
           </g>
         ))}
-        <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="var(--dim)" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="var(--dim)">betweenness (conduit centrality) →</text>
+        <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="#8aa0bd" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#8aa0bd">betweenness (conduit centrality) →</text>
         {nodes.map((n, i) => {
           const isChoke = chokes.has(n.id)
           const r = hh.has(n.id) ? 7 : 3.6
           if (isChoke) return <rect key={i} x={x(bx(n)) - r} y={y(n.risk || 0) - r} width={2 * r} height={2 * r}
-            fill={color(n)} fillOpacity={0.85} stroke="var(--safe)" strokeWidth="1.4" rx="1"
+            fill={color(n)} fillOpacity={0.85} stroke="#2dd4bf" strokeWidth="1.4" rx="1"
             style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
             <title>{n.id} · choke point · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title></rect>
           return <circle key={i} cx={x(bx(n))} cy={y(n.risk || 0)} r={r}
@@ -1130,41 +1130,73 @@ function Ask({ suggested, live }) {
 }
 
 /* ============================ BLOCK & BENEFIT (interactive block-a-source) ============================ */
-function BeneficiaryFan({ row, color, label, scopeBefore }) {
-  // Focused, saturation-aware viz: source on the left; the systems FULLY freed
-  // (this is their only true source) fan out bright on the right; an aggregate badge
-  // represents the larger set that loses a clear-PAN feed but stays in scope. We do
-  // NOT glow the whole downstream — on a saturated estate that is ~the entire graph.
-  if (!row) return null
-  const solo = (row.solo_systems || []).slice(0, 12)
-  const moreSolo = Math.max(0, (row.solo_descope || 0) - solo.length)
-  const feedOnly = Math.max(0, (row.feeds_removed || 0) - (row.solo_descope || 0))
-  const W = 680, H = Math.max(150, 70 + solo.length * 22), cx = 120, cy = H / 2
-  const yFor = (i, n) => 36 + i * ((H - 72) / Math.max(1, n - 1 || 1))
+function BlastGraph({ system, soloSet, adj, byId, color, onPick }) {
+  // Walk the actual cardholder-data flow downstream from the blocked source and draw
+  // the systems that benefit as nodes radiating outward. Fully-freed (this was their
+  // only true source) glow bright; feed-only (lose this feed, stay in scope via another
+  // parent) are dimmer. Display is capped/sampled so a saturated estate doesn't blob.
+  const { display, total, soloN, feedN } = useMemo(() => {
+    const seen = new Set()
+    if (system) {
+      const stack = [system]
+      while (stack.length) {
+        const x = stack.pop()
+        for (const t of (adj.get(x) || [])) if (t !== system && !seen.has(t)) { seen.add(t); stack.push(t) }
+      }
+    }
+    const inScope = [...seen].filter(id => byId.get(id)?.in_scope)
+    const solo = inScope.filter(id => soloSet.has(id))
+    const feed = inScope.filter(id => !soloSet.has(id))
+    const CAP = 54
+    const showFeed = feed.slice(0, Math.max(0, CAP - solo.length))
+    const disp = [...solo.map(id => ({ id, solo: true })), ...showFeed.map(id => ({ id, solo: false }))]
+    return { display: disp, total: inScope.length, soloN: solo.length, feedN: feed.length }
+  }, [system, adj, byId, soloSet])
+
+  if (!system) return null
+  const W = 720, H = 460, cx = W / 2, cy = H / 2
+  const rings = [{ r: 78, cap: 10 }, { r: 130, cap: 18 }, { r: 188, cap: 30 }]
+  // assign each displayed node a ring slot + angle
+  const placed = []
+  let idx = 0
+  for (let ri = 0; ri < rings.length && idx < display.length; ri++) {
+    const { r, cap } = rings[ri]
+    const count = Math.min(cap, display.length - idx)
+    for (let k = 0; k < count; k++) {
+      const ang = (k / count) * 2 * Math.PI - Math.PI / 2 + (ri * 0.35)
+      placed.push({ ...display[idx], x: cx + r * Math.cos(ang), y: cy + r * Math.sin(ang) })
+      idx++
+    }
+  }
+  const hidden = total - placed.length
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
-      <text x={cx} y="16" textAnchor="middle" fontSize="10" fill="var(--faint)">{label}</text>
-      <text x={W - 150} y="16" textAnchor="middle" fontSize="9" fill="var(--faint)">fully freed (leave scope)</text>
-      {solo.map((s, i) => <line key={'l' + i} x1={cx + 12} y1={cy} x2={W - 220} y2={yFor(i, solo.length)} stroke={color} strokeWidth="1.3" strokeOpacity="0.7" />)}
-      {solo.map((s, i) => (
-        <g key={'n' + i}>
-          <circle cx={W - 212} cy={yFor(i, solo.length)} r="6" fill={color}>
-            <animate attributeName="r" values="6;8;6" dur="1.8s" repeatCount="indefinite" />
-          </circle>
-          <text x={W - 200} y={yFor(i, solo.length) + 3} fontSize="10" fill="var(--txt)" className="mono">{s}</text>
-        </g>
-      ))}
-      {moreSolo > 0 && <text x={W - 200} y={yFor(solo.length, solo.length + 1) + 3} fontSize="10" fill="var(--dim)" className="mono">+{moreSolo} more fully freed</text>}
-      {/* source node */}
-      <circle cx={cx} cy={cy} r="13" fill={color} stroke="#fff" strokeWidth="2" />
-      <text x={cx} y={cy - 20} textAnchor="middle" fontSize="11" fill="var(--txt)" className="mono">{row.system}</text>
-      <text x={cx} y={cy + 4} textAnchor="middle" fontSize="8" fill="#0a0e14" className="mono">block</text>
-      {/* aggregate feed-only badge */}
-      <g>
-        <rect x={cx - 70} y={H - 30} width="260" height="22" rx="6" fill="var(--panel2)" stroke="var(--line)" />
-        <text x={cx + 60} y={H - 15} textAnchor="middle" fontSize="10" fill="var(--dim)">+ {feedOnly} more lose a clear-PAN feed ({((100 * feedOnly) / Math.max(1, scopeBefore)).toFixed(1)}% of scope)</text>
-      </g>
-    </svg>
+    <div>
+      <div className="flex items-center gap-4 mb-1 text-[11px] text-dim flex-wrap">
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2dd4bf' }} />fully freed — leaves PCI scope ({soloN})</span>
+        <span className="flex items-center gap-1"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#5b8def' }} />loses a clear-PAN feed, stays in scope ({feedN})</span>
+        <span className="flex items-center gap-1"><i className="w-3.5 h-3.5 rounded-full inline-block ring-1 ring-white" style={{ background: color }} />blocked source</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 430 }}>
+        {rings.map((rg, i) => <circle key={'rg' + i} cx={cx} cy={cy} r={rg.r} fill="none" stroke="#1e2a3d" strokeWidth="0.5" strokeDasharray="2 4" />)}
+        {placed.map((p, i) => <line key={'e' + i} x1={cx} y1={cy} x2={p.x} y2={p.y}
+          stroke={p.solo ? '#2dd4bf' : '#5b8def'} strokeWidth={p.solo ? 1.2 : 0.6} strokeOpacity={p.solo ? 0.65 : 0.3} />)}
+        {placed.map((p, i) => (
+          <g key={'n' + i} style={{ cursor: 'pointer' }} onClick={() => onPick && onPick(p.id)}>
+            <circle cx={p.x} cy={p.y} r={p.solo ? 7 : 4.5} fill={p.solo ? '#2dd4bf' : '#5b8def'} fillOpacity={p.solo ? 1 : 0.82} stroke={p.solo ? '#0a0e14' : 'none'} strokeWidth={p.solo ? 1 : 0}>
+              {p.solo && <animate attributeName="r" values="7;10;7" dur="1.9s" repeatCount="indefinite" />}
+            </circle>
+            {(p.solo || placed.length <= 30) && <text x={p.x} y={p.y - 9} textAnchor="middle" fontSize="8.5" fill={p.solo ? '#e6edf6' : '#8aa0bd'} className="mono">{p.id}</text>}
+            <title>{p.id}{p.solo ? ' · fully freed' : ' · loses a feed (stays in scope)'}</title>
+          </g>
+        ))}
+        {/* source at center */}
+        <circle cx={cx} cy={cy} r="15" fill={color} stroke="#fff" strokeWidth="2.5" />
+        <text x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fill="#0a0e14" className="mono">block</text>
+        <text x={cx} y={cy - 22} textAnchor="middle" fontSize="11" fill="#e6edf6" className="mono">{system}</text>
+        {hidden > 0 && <text x={cx} y={H - 12} textAnchor="middle" fontSize="10" fill="#56657d">+ {hidden} more beneficiaries not shown ({total} total downstream benefit)</text>}
+        {total === 0 && <text x={cx} y={cy + 40} textAnchor="middle" fontSize="11" fill="#56657d">this source feeds no in-scope systems</text>}
+      </svg>
+    </div>
   )
 }
 
@@ -1182,6 +1214,15 @@ function BlastRadius({ d, onPick }) {
   const rowOf = id => rows.find(r => r.system === id) || null
   const ra = rowOf(a), rb = rowOf(b)
   const pct = n => ((100 * (n || 0)) / Math.max(1, scopeBefore)).toFixed(1)
+  // flow adjacency (provider -> consumers) + node lookup for the downstream walk
+  const byId = useMemo(() => new Map((d.viz?.nodes || []).map(n => [n.id, n])), [d])
+  const adj = useMemo(() => {
+    const m = new Map()
+    for (const e of (d.viz?.edges || [])) { if (!m.has(e.source)) m.set(e.source, []); m.get(e.source).push(e.target) }
+    return m
+  }, [d])
+  const soloA = useMemo(() => new Set(ra?.solo_systems || []), [ra])
+  const soloB = useMemo(() => new Set(rb?.solo_systems || []), [rb])
 
   const report = ra ? (
     `Block PAN at ${ra.system}:\n` +
@@ -1239,7 +1280,7 @@ function BlastRadius({ d, onPick }) {
               return (
                 <div key={r.system} className={'rounded-lg px-2.5 py-2 border cursor-pointer ' + (isA ? 'border-pan bg-pan/10' : isB ? 'border-cool bg-cool/10' : 'border-line hover:border-dim')} onClick={() => setA(r.system)}>
                   <div className="flex items-center gap-2">
-                    <span className="mono text-sm" style={{ color: isA ? 'var(--pan)' : isB ? 'var(--cool)' : 'var(--txt)' }}>{r.system}</span>
+                    <span className="mono text-sm" style={{ color: isA ? '#f5a623' : isB ? '#5b8def' : '#e6edf6' }}>{r.system}</span>
                     {i === 0 && <span className="text-[9px] px-1 rounded bg-safe/15 text-safe">best</span>}
                     <button onClick={(e) => { e.stopPropagation(); setB(isB ? null : r.system) }} className={'ml-auto text-[10px] px-1.5 py-0.5 rounded border ' + (isB ? 'border-cool text-cool' : 'border-line text-faint hover:text-dim')}>vs</button>
                   </div>
@@ -1257,14 +1298,17 @@ function BlastRadius({ d, onPick }) {
         {/* benefit detail */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Card r={ra} color="var(--pan)" tag="A · blocked" />
-            {rb && <Card r={rb} color="var(--cool)" tag="B · compare" />}
+            <Card r={ra} color="#f5a623" tag="A · blocked" />
+            {rb && <Card r={rb} color="#5b8def" tag="B · compare" />}
           </div>
 
           <div className="card p-4">
-            <div className="text-[11px] uppercase tracking-widest text-faint mb-1">Beneficiaries</div>
-            <BeneficiaryFan row={ra} color="var(--pan)" label={`block ${ra?.system || ''}`} scopeBefore={scopeBefore} />
-            {rb && <div className="border-t border-line mt-2 pt-2"><BeneficiaryFan row={rb} color="var(--cool)" label={`block ${rb.system}`} scopeBefore={scopeBefore} /></div>}
+            <div className="text-[11px] uppercase tracking-widest text-faint mb-2">Downstream beneficiaries {ra && <span className="text-faint normal-case">· block {ra.system}</span>}</div>
+            <BlastGraph system={ra?.system} soloSet={soloA} adj={adj} byId={byId} color="#f5a623" onPick={onPick} />
+            {rb && <div className="border-t border-line mt-3 pt-3">
+              <div className="text-[11px] uppercase tracking-widest text-faint mb-2">Compare · block {rb.system}</div>
+              <BlastGraph system={rb.system} soloSet={soloB} adj={adj} byId={byId} color="#5b8def" onPick={onPick} />
+            </div>}
           </div>
 
           <div className="card p-4">
