@@ -154,7 +154,40 @@ def _need_art():
 def plan(target: float = 0.8, max_k: int = 8):
     """Greedy minimum-intervention roadmap: fewest sources to tokenize for the most descope."""
     G, ps, sc = _need_art()
-    return analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=target, max_k=max_k)
+    p = analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=target, max_k=max_k)
+    # The Planner (saturation + block-set comparison) and the Block-&-Benefit tab read
+    # these off d.plan. finalize() adds them for the snapshot path; the live /api/plan
+    # recompute must add them too, or those panels stay empty in live mode. Each guarded
+    # independently so a missing helper can only blank its own panel.
+    try:
+        p.setdefault("source_exposure",
+                     analytics_mod.source_exposure_impact(G, ps, sc, top_k=15))
+    except Exception:
+        pass
+    try:
+        p.setdefault("saturation_curve",
+                     analytics_mod.saturation_curve(G, ps, sc, points=12))
+    except Exception:
+        pass
+    try:
+        hh = analytics_mod.heavy_hitters(G, ps, sc, top_k=10)
+        greedy_set = (p.get("plan") or [])[:3]
+        reach_top3 = [h["system"] for h in hh[:3]]
+        btw_top3 = [n for n, _ in sorted(
+            ((n, sc.get(n, {}).get("betweenness", 0.0)) for n in ps if n in sc),
+            key=lambda kv: kv[1], reverse=True)[:3]]
+        sets = {}
+        if greedy_set:
+            sets["Greedy minimal set"] = greedy_set
+        if reach_top3:
+            sets["Top-3 by reach"] = reach_top3
+        if btw_top3:
+            sets["Top-3 by conduit (betweenness)"] = btw_top3
+        if sets:
+            p["block_comparison"] = analytics_mod.block_set_comparison(G, ps, sc, sets)
+    except Exception:
+        pass
+    return p
 
 
 class WhatIf(BaseModel):
