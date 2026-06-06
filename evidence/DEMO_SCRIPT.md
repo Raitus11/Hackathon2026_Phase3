@@ -39,8 +39,9 @@ of it.
 **1:45 — Planner, fewest moves for the most descope (35s).** *[Planner tab]*
 Because the same downstream systems are fed by *several* PAN sources, the right
 question isn't "which one source" — it's "which minimal *set*." A greedy
-max-coverage optimizer (Nemhauser–Wolsey–Fisher 1978, provably within (1−1/e) of
-optimal) picks **8CCF, 8DFB, 8EFW**: tokenizing those **descopes 3 downstream
+max-coverage optimizer (Nemhauser–Wolsey–Fisher 1978 — applied here as a
+transparent heuristic, since the freed-systems objective is supermodular under
+conjunctive true-source coverage, so the (1−1/e) bound does *not* hold) picks **8CCF, 8DFB, 8EFW**: tokenizing those **descopes 3 downstream
 systems** and **converts 3 sources from live PAN (tier 4) to non-reversible tokens
 (tier 3)**. The what-if simulator recomputes scope live as you toggle sources;
 systems that genuinely need PAN stay in the CDE and de-tokenize via RISE/APG — we

@@ -35,16 +35,20 @@ class RunResult:
     hidden: dict = field(default_factory=dict)
     structure: dict = field(default_factory=dict)
     plan: dict = field(default_factory=dict)
+    categories: dict = field(default_factory=dict)
+    economics: dict = field(default_factory=dict)
+    sankey: dict = field(default_factory=dict)
 
 
 def _audit(log, stage, t0, **extra):
     log.append({"stage": stage, "ms": round((time.perf_counter() - t0) * 1000, 1), **extra})
 
 
-def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset()):
+def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset(), categories=None):
     """Exact JSON contract the React/D3 views consume."""
     scope = set(scope)
     inferred_scope = set(inferred_scope)
+    cat_node = (categories or {}).get("per_node", {})
     nodes = []
     for n, d in art.G.nodes(data=True):
         sc = scores.get(n, {})
@@ -59,6 +63,8 @@ def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset()):
             "pan_in_logs_observed": bool(d.get("pan_in_logs_observed")),
             "hidden_pci": bool(d.get("pan_in_logs_observed") and not d.get("pci_flag")),
             "scope_prov": (("inferred" if n in inferred_scope else "metadata") if in_scope else None),
+            "category": cat_node.get(n, {}).get("category"),
+            "triggered_requirements": cat_node.get(n, {}).get("families", []),
             "super_node": dagr.node_to_super.get(n),
         })
     # Collapse parallel edges (the MultiDiGraph carries one edge per source dataset,
@@ -165,15 +171,43 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     except Exception:
         pass
 
+    # ---- decision layer: scope categories, requirement mapping, cost economics,
+    # segmentation candidates, Sankey. Each guarded independently so a failure in one
+    # can only blank its own panel, never the spine.
+    categories = {}
+    try:
+        categories = analytics.scope_categories(art.G, art.pan_sources, scope, scores)
+    except Exception:
+        pass
+    economics = {}
+    try:
+        sat = plan.get("saturation_curve") or analytics.saturation_curve(
+            art.G, art.pan_sources, scores, points=12)
+        economics = analytics.scope_economics(categories, sat, scores)
+    except Exception:
+        pass
+    sankey = {}
+    try:
+        sankey = analytics.sankey_payload(art.G, art.pan_sources, scope, scores)
+    except Exception:
+        pass
+    try:
+        structure = analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh)
+        structure["segmentation_candidates"] = analytics.segmentation_candidates(
+            art.G, art.pan_sources, scope, scores)
+    except Exception:
+        structure = analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh)
+
     return RunResult(
         quality=ing.quality, graph_stats=art.stats, dag_stats=dagr.stats,
         scope_size=len(scope), scope_breakdown=breakdown,
         heavy_hitters=hh, impact=impact, cycles=dagr.cycles[:20],
         unresolved_signals=art.unresolved_signals[:50], explanation=explanation,
-        audit=audit, viz=_viz_payload(art, dagr, scores, scope, hh, inferred_only),
+        audit=audit, viz=_viz_payload(art, dagr, scores, scope, hh, inferred_only, categories),
         headline=headline, hidden=hidden,
-        structure=analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh),
-        plan=plan or {})
+        structure=structure,
+        plan=plan or {},
+        categories=categories, economics=economics, sankey=sankey)
 
 
 def run(files: list, recommend_top: int = 3) -> RunResult:

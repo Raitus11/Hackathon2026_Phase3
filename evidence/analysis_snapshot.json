@@ -6,8 +6,8 @@
     "hidden_pci_systems_bam_misses": 48,
     "cycle_clusters_resolved": 2,
     "top_distributor": "6CWC",
-    "top_intervention": "8CCF",
-    "scope_reduction_if_top3_tokenized_pct": 3.2
+    "top_intervention": "6CWC",
+    "scope_reduction_if_top3_tokenized_pct": 28.4
   },
   "hidden": {
     "hidden_pci_systems": [
@@ -67,336 +67,624 @@
         "name": "",
         "downstream_reach": 29,
         "stated_source": "KTCZP",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "9CPC",
         "name": "",
         "downstream_reach": 2,
         "stated_source": "EC",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "6IVC",
         "name": "",
         "downstream_reach": 1,
         "stated_source": "8BRC",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JSVCH",
         "name": "",
         "downstream_reach": 1,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "6PNXRO",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "PCOZ",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "6PNXUI",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8AKP",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8DEKT",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8EIV",
         "name": "LAIVE",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8NC1",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8NYD",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "6CWC",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8TCLL",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "8TCU",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "HCV369",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "HNULL",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "HOGCN",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "HTOKM",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "IODMM",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JAED",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "JDH",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JAGC",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JAOCP",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "PCOZ",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JBFN",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "UA",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JBYP",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JCOC",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JEQPM",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JEQZT",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JEQZY",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JFO",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JHTSS",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JLF",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JLFXM",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "SAYC",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JMT",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JNJX",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JRGNS",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "Credit Bureaus",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JSEK",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "ZTEYM",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "JSVKR",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "OJ",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "KCO",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "Credit Bureaus",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "KDUZ",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "HPU",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "KIRB",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "KPO",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "KTEYN",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "Written in documents",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LCUZ",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LDR",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LDUCG",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LMQX",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "User Entry",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LPFR",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "Written in documents",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LSR1",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       },
       {
         "system": "LZRKY",
         "name": "",
         "downstream_reach": 0,
         "stated_source": "",
-        "finding": "True PAN"
+        "finding": "True PAN",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
+        "risk_note": "Clear PAN with no PCI controls applied \u2014 Req 3/4 (unprotected), Req 10 (PAN in logs), Req 11 (untested)."
       }
     ],
     "hidden_propagating_count": 4,
@@ -480,12 +768,13 @@
     {
       "system": "6CWC",
       "downstream_reach": 29,
-      "exclusive_reach": 0,
-      "solo_descope": 0,
+      "exclusive_reach": 2,
+      "solo_descope": 2,
       "out_degree": 7,
       "risk": 56.36,
       "betweenness": 0.0,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": true
     },
     {
       "system": "8CCF",
@@ -495,7 +784,8 @@
       "out_degree": 3,
       "risk": 75.45,
       "betweenness": 0.0,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": true
     },
     {
       "system": "8MEC",
@@ -505,7 +795,8 @@
       "out_degree": 1,
       "risk": 74.55,
       "betweenness": 0.0,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": true
     },
     {
       "system": "8DEM",
@@ -515,7 +806,8 @@
       "out_degree": 2,
       "risk": 64.63,
       "betweenness": 0.0043,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": false
     },
     {
       "system": "8AQB",
@@ -525,7 +817,8 @@
       "out_degree": 19,
       "risk": 83.64,
       "betweenness": 1.0,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": false
     },
     {
       "system": "8BCC",
@@ -535,7 +828,8 @@
       "out_degree": 13,
       "risk": 70.72,
       "betweenness": 0.3544,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": false
     },
     {
       "system": "8AFN",
@@ -545,7 +839,8 @@
       "out_degree": 3,
       "risk": 67.42,
       "betweenness": 0.1893,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": false
     },
     {
       "system": "8BY",
@@ -555,7 +850,8 @@
       "out_degree": 2,
       "risk": 63.92,
       "betweenness": 0.014,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": false
     },
     {
       "system": "8CCCM",
@@ -565,7 +861,8 @@
       "out_degree": 1,
       "risk": 42.74,
       "betweenness": 0.0007,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": true
     },
     {
       "system": "8DFB",
@@ -575,30 +872,83 @@
       "out_degree": 1,
       "risk": 51.82,
       "betweenness": 0.0,
-      "carries_pan": true
+      "carries_pan": true,
+      "is_true_source": true
     }
   ],
   "impact": {
     "tokenized_systems": [
+      "6CWC",
       "8CCF",
-      "8DFB",
-      "8EFW"
+      "8MEC"
     ],
     "scope_before": 95,
-    "scope_after": 92,
-    "nodes_descoped": 3,
+    "scope_after": 68,
+    "nodes_descoped": 27,
     "descoped_systems_sample": [
-      "8A",
-      "8AFK",
-      "HMR"
+      "6PNX",
+      "6PNXAZ",
+      "8ACD",
+      "8ADW",
+      "8AFN",
+      "8AGC",
+      "8AGF",
+      "8AGQ",
+      "8AGV",
+      "8AKP",
+      "8AKZ",
+      "8ANB",
+      "8ANF",
+      "8AO1",
+      "8APX",
+      "8AQB",
+      "8ARK",
+      "8AUQ",
+      "8AVB",
+      "8BCC",
+      "8BKV",
+      "8BTH",
+      "8BY",
+      "8DEM",
+      "8KP"
     ],
+    "feeds_removed": 30,
+    "feeds_removed_sample": [
+      "6PNX",
+      "6PNXAZ",
+      "8ACD",
+      "8ACQ",
+      "8ADW",
+      "8AFN",
+      "8AGC",
+      "8AGF",
+      "8AGQ",
+      "8AGV",
+      "8AKP",
+      "8AKZ",
+      "8ANB",
+      "8ANF",
+      "8AO1",
+      "8APX",
+      "8AQB",
+      "8ARK",
+      "8AUQ",
+      "8AVB",
+      "8BCC",
+      "8BCKS",
+      "8BFL",
+      "8BKV",
+      "8BTH"
+    ],
+    "parent_reduction": 3,
     "sources_downgraded": [
       "8CCF",
-      "8DFB",
-      "8EFW"
+      "8MEC"
     ],
-    "sources_downgraded_count": 3,
-    "sources_retained_tier4": [],
+    "sources_downgraded_count": 2,
+    "sources_retained_tier4": [
+      "6CWC"
+    ],
     "retained_via_detokenization": [
       "8BCKS",
       "8CEMS",
@@ -606,11 +956,11 @@
     ],
     "retained_via_detokenization_count": 3,
     "pan_edges_before": 77,
-    "pan_edges_after": 75,
+    "pan_edges_after": 23,
     "risk_before": 2780.3,
-    "risk_after": 2748.4,
-    "risk_reduction_pct": 1.1,
-    "node_surface_reduction_pct": 3.2
+    "risk_after": 2283.1,
+    "risk_reduction_pct": 17.9,
+    "node_surface_reduction_pct": 28.4
   },
   "cycles": [
     {
@@ -956,11 +1306,11 @@
       "signal": "DS5_survey_upstream"
     }
   ],
-  "explanation": "Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. Of these, 44 are confirmed by authoritative BAM metadata and 51 are inferred-only candidate scope surfaced from survey/Splunk signals (kept separate, never treated as ground truth). The widest PAN distributor is 6CWC, reaching 29 downstream systems; the highest-leverage single tokenization target is 8CCF. Because the same downstream systems are fed by several PAN sources, no single source frees many on its own \u2014 so the optimizer selects the minimal set. Tokenizing the recommended source(s) descopes 3 systems (3.2% of the in-scope surface), converts 3 source(s) from live PAN to non-transactable tokens, and lowers the aggregate risk score by 1.1% \u2014 the clean-stream effect.",
+  "explanation": "Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. Of these, 44 are confirmed by authoritative BAM metadata and 51 are inferred-only candidate scope surfaced from survey/Splunk signals (kept separate, never treated as ground truth). The widest PAN distributor is 6CWC, reaching 29 downstream systems; the highest-leverage single tokenization target is 6CWC. Because the same downstream systems are fed by several PAN sources, no single source frees many on its own \u2014 so the optimizer selects the minimal set. Tokenizing the recommended source(s) descopes 27 systems (28.4% of the in-scope surface), converts 2 source(s) from live PAN to non-transactable tokens, and lowers the aggregate risk score by 17.9% \u2014 the clean-stream effect.",
   "audit": [
     {
       "stage": "ingest",
-      "ms": 8.7,
+      "ms": 13.4,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -976,12 +1326,12 @@
     },
     {
       "stage": "validate_masking_leak",
-      "ms": 5.2,
+      "ms": 4.6,
       "clean": true
     },
     {
       "stage": "build_graph",
-      "ms": 4.6,
+      "ms": 2.8,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -996,7 +1346,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 3.6,
+      "ms": 2.5,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -1007,12 +1357,12 @@
     },
     {
       "stage": "score",
-      "ms": 12.5,
+      "ms": 15.4,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 81.4,
+      "ms": 51.0,
       "scope": 95,
       "heavy_hitters": 10,
       "hidden_pci": 48
@@ -1029,9 +1379,18 @@
         "risk": 67.42,
         "reach": 26,
         "true_source": false,
+        "betweenness": 0.1893,
+        "out_degree": 5,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -1043,9 +1402,18 @@
         "risk": 83.64,
         "reach": 26,
         "true_source": false,
+        "betweenness": 1.0,
+        "out_degree": 46,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -1057,9 +1425,19 @@
         "risk": 40.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC0"
       },
       {
@@ -1071,9 +1449,19 @@
         "risk": 70.72,
         "reach": 26,
         "true_source": false,
+        "betweenness": 0.3544,
+        "out_degree": 20,
         "pan_in_logs_observed": true,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -1085,9 +1473,19 @@
         "risk": 42.13,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0612,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC2"
       },
       {
@@ -1099,9 +1497,16 @@
         "risk": 60.58,
         "reach": 26,
         "true_source": false,
+        "betweenness": 0.3472,
+        "out_degree": 25,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -1113,9 +1518,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC22"
       },
       {
@@ -1127,9 +1536,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC23"
       },
       {
@@ -1141,9 +1560,18 @@
         "risk": 63.92,
         "reach": 26,
         "true_source": false,
+        "betweenness": 0.014,
+        "out_degree": 4,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -1155,9 +1583,18 @@
         "risk": 42.74,
         "reach": 3,
         "true_source": false,
+        "betweenness": 0.0007,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC25"
       },
       {
@@ -1169,9 +1606,19 @@
         "risk": 75.45,
         "reach": 28,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC27"
       },
       {
@@ -1183,9 +1630,16 @@
         "risk": 31.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC29"
       },
       {
@@ -1197,9 +1651,18 @@
         "risk": 41.84,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0013,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC24"
       },
       {
@@ -1211,9 +1674,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC30"
       },
       {
@@ -1225,9 +1698,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC31"
       },
       {
@@ -1239,9 +1716,13 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC32"
       },
       {
@@ -1253,9 +1734,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC33"
       },
       {
@@ -1267,9 +1752,18 @@
         "risk": 64.63,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0043,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC34"
       },
       {
@@ -1281,9 +1775,19 @@
         "risk": 51.82,
         "reach": 2,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC37"
       },
       {
@@ -1295,9 +1799,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC38"
       },
       {
@@ -1309,9 +1823,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC39"
       },
       {
@@ -1323,9 +1847,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC40"
       },
       {
@@ -1337,9 +1871,19 @@
         "risk": 40.92,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0007,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC28"
       },
       {
@@ -1351,9 +1895,13 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC41"
       },
       {
@@ -1365,9 +1913,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC42"
       },
       {
@@ -1379,9 +1935,18 @@
         "risk": 50.91,
         "reach": 1,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC43"
       },
       {
@@ -1393,9 +1958,13 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC44"
       },
       {
@@ -1407,9 +1976,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC45"
       },
       {
@@ -1421,9 +2000,18 @@
         "risk": 40.92,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0007,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC46"
       },
       {
@@ -1435,9 +2023,19 @@
         "risk": 74.55,
         "reach": 27,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC47"
       },
       {
@@ -1449,9 +2047,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC48"
       },
       {
@@ -1463,9 +2065,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC49"
       },
       {
@@ -1477,9 +2089,19 @@
         "risk": 40.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC35"
       },
       {
@@ -1491,9 +2113,19 @@
         "risk": 50.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC50"
       },
       {
@@ -1505,9 +2137,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC51"
       },
       {
@@ -1519,9 +2158,16 @@
         "risk": 28.18,
         "reach": 31,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 10,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC53"
       },
       {
@@ -1533,9 +2179,16 @@
         "risk": 26.36,
         "reach": 29,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 21,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC56"
       },
       {
@@ -1547,9 +2200,16 @@
         "risk": 25.48,
         "reach": 28,
         "true_source": false,
+        "betweenness": 0.0015,
+        "out_degree": 7,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC57"
       },
       {
@@ -1561,9 +2221,16 @@
         "risk": 27.27,
         "reach": 30,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 7,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC58"
       },
       {
@@ -1575,9 +2242,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 5,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC59"
       },
       {
@@ -1589,9 +2263,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 4,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC60"
       },
       {
@@ -1603,9 +2284,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 4,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC61"
       },
       {
@@ -1617,9 +2305,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 6,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC62"
       },
       {
@@ -1631,9 +2326,16 @@
         "risk": 27.27,
         "reach": 30,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 12,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC65"
       },
       {
@@ -1645,9 +2347,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 4,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC66"
       },
       {
@@ -1659,9 +2368,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC67"
       },
       {
@@ -1673,9 +2389,16 @@
         "risk": 30.0,
         "reach": 33,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 13,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC69"
       },
       {
@@ -1687,9 +2410,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC70"
       },
       {
@@ -1701,9 +2431,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC71"
       },
       {
@@ -1715,9 +2452,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC72"
       },
       {
@@ -1729,9 +2473,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC73"
       },
       {
@@ -1743,9 +2494,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 4,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC74"
       },
       {
@@ -1757,9 +2515,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC75"
       },
       {
@@ -1771,9 +2536,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC76"
       },
       {
@@ -1785,9 +2557,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC77"
       },
       {
@@ -1799,9 +2578,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC78"
       },
       {
@@ -1813,9 +2599,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC79"
       },
       {
@@ -1827,9 +2620,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC80"
       },
       {
@@ -1841,9 +2641,16 @@
         "risk": 25.45,
         "reach": 28,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC81"
       },
       {
@@ -1855,9 +2662,17 @@
         "risk": 56.36,
         "reach": 29,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 7,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC83"
       },
       {
@@ -1869,9 +2684,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC84"
       },
       {
@@ -1883,9 +2705,16 @@
         "risk": 24.89,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0171,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC63"
       },
       {
@@ -1897,9 +2726,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC85"
       },
       {
@@ -1911,9 +2747,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC86"
       },
       {
@@ -1925,9 +2768,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC87"
       },
       {
@@ -1939,9 +2789,16 @@
         "risk": 26.36,
         "reach": 29,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 18,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC88"
       },
       {
@@ -1953,9 +2810,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC89"
       },
       {
@@ -1967,9 +2831,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC90"
       },
       {
@@ -1981,9 +2852,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC91"
       },
       {
@@ -1995,9 +2873,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC92"
       },
       {
@@ -2009,9 +2894,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC93"
       },
       {
@@ -2023,9 +2915,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC94"
       },
       {
@@ -2037,9 +2936,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC95"
       },
       {
@@ -2051,9 +2957,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC96"
       },
       {
@@ -2065,9 +2978,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC97"
       },
       {
@@ -2079,9 +2999,16 @@
         "risk": 1.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC98"
       },
       {
@@ -2093,9 +3020,16 @@
         "risk": 1.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC99"
       },
       {
@@ -2107,9 +3041,16 @@
         "risk": 2.73,
         "reach": 3,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC101"
       },
       {
@@ -2121,9 +3062,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC102"
       },
       {
@@ -2135,9 +3083,16 @@
         "risk": 1.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC103"
       },
       {
@@ -2149,9 +3104,16 @@
         "risk": 2.77,
         "reach": 3,
         "true_source": false,
+        "betweenness": 0.002,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC105"
       },
       {
@@ -2163,9 +3125,16 @@
         "risk": 1.83,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0004,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC68"
       },
       {
@@ -2177,9 +3146,16 @@
         "risk": 3.64,
         "reach": 4,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC106"
       },
       {
@@ -2191,9 +3167,17 @@
         "risk": 21.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC104"
       },
       {
@@ -2205,9 +3189,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC107"
       },
       {
@@ -2219,9 +3210,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC108"
       },
       {
@@ -2233,9 +3231,16 @@
         "risk": 25.45,
         "reach": 28,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC110"
       },
       {
@@ -2247,9 +3252,16 @@
         "risk": 26.36,
         "reach": 29,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC113"
       },
       {
@@ -2261,9 +3273,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC114"
       },
       {
@@ -2275,9 +3294,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC115"
       },
       {
@@ -2289,9 +3315,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC116"
       },
       {
@@ -2303,9 +3336,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC117"
       },
       {
@@ -2317,9 +3357,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC118"
       },
       {
@@ -2331,9 +3378,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC119"
       },
       {
@@ -2345,9 +3399,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC120"
       },
       {
@@ -2359,9 +3420,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC121"
       },
       {
@@ -2373,9 +3441,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC122"
       },
       {
@@ -2387,9 +3462,16 @@
         "risk": 25.45,
         "reach": 28,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC124"
       },
       {
@@ -2401,9 +3483,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 3,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC125"
       },
       {
@@ -2415,9 +3504,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC126"
       },
       {
@@ -2429,9 +3525,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC54"
       },
       {
@@ -2443,9 +3546,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC127"
       },
       {
@@ -2457,9 +3567,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC128"
       },
       {
@@ -2471,9 +3588,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC129"
       },
       {
@@ -2485,9 +3609,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC130"
       },
       {
@@ -2499,9 +3630,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC131"
       },
       {
@@ -2513,9 +3651,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC132"
       },
       {
@@ -2527,9 +3672,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC133"
       },
       {
@@ -2541,9 +3693,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC134"
       },
       {
@@ -2555,9 +3714,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC135"
       },
       {
@@ -2569,9 +3735,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC136"
       },
       {
@@ -2583,9 +3756,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC137"
       },
       {
@@ -2597,9 +3777,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC138"
       },
       {
@@ -2611,9 +3798,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC139"
       },
       {
@@ -2625,9 +3819,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC140"
       },
       {
@@ -2639,9 +3840,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC141"
       },
       {
@@ -2653,9 +3861,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC142"
       },
       {
@@ -2667,9 +3882,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC143"
       },
       {
@@ -2681,9 +3903,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC144"
       },
       {
@@ -2695,9 +3924,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC145"
       },
       {
@@ -2709,9 +3945,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC146"
       },
       {
@@ -2723,9 +3966,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC147"
       },
       {
@@ -2737,9 +3987,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC148"
       },
       {
@@ -2751,9 +4008,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC149"
       },
       {
@@ -2765,9 +4029,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC150"
       },
       {
@@ -2779,9 +4050,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC151"
       },
       {
@@ -2793,9 +4071,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC152"
       },
       {
@@ -2807,9 +4092,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC153"
       },
       {
@@ -2821,9 +4113,17 @@
         "risk": 30.91,
         "reach": 1,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC154"
       },
       {
@@ -2835,9 +4135,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC155"
       },
       {
@@ -2849,9 +4156,16 @@
         "risk": 0.93,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.001,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC5"
       },
       {
@@ -2863,9 +4177,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC156"
       },
       {
@@ -2877,9 +4198,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC157"
       },
       {
@@ -2891,9 +4219,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC158"
       },
       {
@@ -2905,9 +4240,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC159"
       },
       {
@@ -2919,9 +4261,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC160"
       },
       {
@@ -2933,9 +4282,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC161"
       },
       {
@@ -2947,9 +4303,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC162"
       },
       {
@@ -2961,9 +4324,17 @@
         "risk": 30.91,
         "reach": 1,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC163"
       },
       {
@@ -2975,9 +4346,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC164"
       },
       {
@@ -2989,9 +4367,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC165"
       },
       {
@@ -3003,9 +4388,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC166"
       },
       {
@@ -3017,9 +4409,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC167"
       },
       {
@@ -3031,9 +4427,13 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC168"
       },
       {
@@ -3045,9 +4445,16 @@
         "risk": 0.94,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0013,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC36"
       },
       {
@@ -3059,9 +4466,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC1"
       },
       {
@@ -3073,9 +4487,16 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC169"
       },
       {
@@ -3087,9 +4508,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC15"
       },
       {
@@ -3101,9 +4529,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC3"
       },
       {
@@ -3115,9 +4550,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC170"
       },
       {
@@ -3129,9 +4568,16 @@
         "risk": 1.82,
         "reach": 2,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC171"
       },
       {
@@ -3143,9 +4589,16 @@
         "risk": 0.92,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0007,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC28"
       },
       {
@@ -3157,9 +4610,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC4"
       },
       {
@@ -3171,9 +4631,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC16"
       },
       {
@@ -3185,9 +4652,16 @@
         "risk": 25.45,
         "reach": 28,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 6,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC172"
       },
       {
@@ -3199,9 +4673,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC6"
       },
       {
@@ -3213,9 +4694,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC10"
       },
       {
@@ -3227,9 +4715,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC7"
       },
       {
@@ -3241,9 +4736,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC8"
       },
       {
@@ -3255,9 +4757,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC173"
       },
       {
@@ -3269,9 +4775,13 @@
         "risk": 0.91,
         "reach": 1,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC174"
       },
       {
@@ -3283,9 +4793,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC9"
       },
       {
@@ -3297,9 +4814,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC12"
       },
       {
@@ -3311,9 +4835,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC17"
       },
       {
@@ -3325,9 +4856,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC11"
       },
       {
@@ -3339,9 +4878,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC175"
       },
       {
@@ -3353,9 +4899,16 @@
         "risk": 24.55,
         "reach": 27,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "connected",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC176"
       },
       {
@@ -3367,9 +4920,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC20"
       },
       {
@@ -3381,9 +4941,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC52"
       },
       {
@@ -3395,9 +4959,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC18"
       },
       {
@@ -3409,9 +4980,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC13"
       },
       {
@@ -3423,9 +5001,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC19"
       },
       {
@@ -3437,9 +5022,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC177"
       },
       {
@@ -3451,9 +5040,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC178"
       },
       {
@@ -3465,9 +5058,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC179"
       },
       {
@@ -3479,9 +5076,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC180"
       },
       {
@@ -3493,9 +5094,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC181"
       },
       {
@@ -3507,9 +5112,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC111"
       },
       {
@@ -3521,9 +5134,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC182"
       },
       {
@@ -3535,9 +5152,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC183"
       },
       {
@@ -3549,9 +5170,13 @@
         "risk": 3.64,
         "reach": 4,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 1,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC184"
       },
       {
@@ -3563,9 +5188,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC123"
       },
       {
@@ -3577,9 +5206,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC55"
       },
       {
@@ -3591,9 +5224,16 @@
         "risk": 25.31,
         "reach": 26,
         "true_source": false,
+        "betweenness": 0.0836,
+        "out_degree": 2,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC21"
       },
       {
@@ -3605,9 +5245,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC14"
       },
       {
@@ -3619,9 +5266,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC112"
       },
       {
@@ -3633,9 +5284,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC185"
       },
       {
@@ -3647,9 +5302,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC186"
       },
       {
@@ -3661,9 +5320,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC187"
       },
       {
@@ -3675,9 +5338,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC109"
       },
       {
@@ -3689,9 +5356,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC188"
       },
       {
@@ -3703,9 +5374,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC189"
       },
       {
@@ -3717,9 +5392,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC190"
       },
       {
@@ -3731,9 +5410,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC191"
       },
       {
@@ -3745,9 +5428,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC192"
       },
       {
@@ -3759,9 +5446,16 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req11"
+        ],
         "super_node": "SCC26"
       },
       {
@@ -3773,9 +5467,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC193"
       },
       {
@@ -3787,9 +5485,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC194"
       },
       {
@@ -3801,9 +5507,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC195"
       },
       {
@@ -3815,9 +5529,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC82"
       },
       {
@@ -3829,9 +5551,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC196"
       },
       {
@@ -3843,9 +5573,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC197"
       },
       {
@@ -3857,9 +5595,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC198"
       },
       {
@@ -3871,9 +5617,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC199"
       },
       {
@@ -3885,9 +5639,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC200"
       },
       {
@@ -3899,9 +5661,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC201"
       },
       {
@@ -3913,9 +5683,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC202"
       },
       {
@@ -3927,9 +5705,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC203"
       },
       {
@@ -3941,9 +5727,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC204"
       },
       {
@@ -3955,9 +5749,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC205"
       },
       {
@@ -3969,9 +5771,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC206"
       },
       {
@@ -3983,9 +5793,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC207"
       },
       {
@@ -3997,9 +5815,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC208"
       },
       {
@@ -4011,9 +5837,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC209"
       },
       {
@@ -4025,9 +5859,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC210"
       },
       {
@@ -4039,9 +5881,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC211"
       },
       {
@@ -4053,9 +5903,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC212"
       },
       {
@@ -4067,9 +5925,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC213"
       },
       {
@@ -4081,9 +5947,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC214"
       },
       {
@@ -4095,9 +5969,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC215"
       },
       {
@@ -4109,9 +5991,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC216"
       },
       {
@@ -4123,9 +6013,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC217"
       },
       {
@@ -4137,9 +6035,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC218"
       },
       {
@@ -4151,9 +6057,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC219"
       },
       {
@@ -4165,9 +6079,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC220"
       },
       {
@@ -4179,9 +6101,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC100"
       },
       {
@@ -4193,9 +6123,13 @@
         "risk": 0.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "category": "out",
+        "triggered_requirements": [],
         "super_node": "SCC221"
       },
       {
@@ -4207,9 +6141,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC222"
       },
       {
@@ -4221,9 +6163,17 @@
         "risk": 20.0,
         "reach": 0,
         "true_source": false,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC64"
       },
       {
@@ -4235,9 +6185,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC223"
       },
       {
@@ -4249,9 +6207,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC224"
       },
       {
@@ -4263,9 +6229,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC225"
       },
       {
@@ -4277,9 +6251,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC226"
       },
       {
@@ -4291,9 +6273,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC227"
       },
       {
@@ -4305,9 +6295,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC228"
       },
       {
@@ -4319,9 +6317,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC229"
       },
       {
@@ -4333,9 +6339,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC230"
       },
       {
@@ -4347,9 +6361,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC231"
       },
       {
@@ -4361,9 +6383,17 @@
         "risk": 30.0,
         "reach": 0,
         "true_source": true,
+        "betweenness": 0.0,
+        "out_degree": 0,
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "category": "cde",
+        "triggered_requirements": [
+          "req7_8",
+          "req10",
+          "req11"
+        ],
         "super_node": "SCC232"
       }
     ],
@@ -10901,12 +12931,13 @@
       {
         "system": "6CWC",
         "downstream_reach": 29,
-        "exclusive_reach": 0,
-        "solo_descope": 0,
+        "exclusive_reach": 2,
+        "solo_descope": 2,
         "out_degree": 7,
         "risk": 56.36,
         "betweenness": 0.0,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": true
       },
       {
         "system": "8CCF",
@@ -10916,7 +12947,8 @@
         "out_degree": 3,
         "risk": 75.45,
         "betweenness": 0.0,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": true
       },
       {
         "system": "8MEC",
@@ -10926,7 +12958,8 @@
         "out_degree": 1,
         "risk": 74.55,
         "betweenness": 0.0,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": true
       },
       {
         "system": "8DEM",
@@ -10936,7 +12969,8 @@
         "out_degree": 2,
         "risk": 64.63,
         "betweenness": 0.0043,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": false
       },
       {
         "system": "8AQB",
@@ -10946,7 +12980,8 @@
         "out_degree": 19,
         "risk": 83.64,
         "betweenness": 1.0,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": false
       },
       {
         "system": "8BCC",
@@ -10956,7 +12991,8 @@
         "out_degree": 13,
         "risk": 70.72,
         "betweenness": 0.3544,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": false
       },
       {
         "system": "8AFN",
@@ -10966,7 +13002,8 @@
         "out_degree": 3,
         "risk": 67.42,
         "betweenness": 0.1893,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": false
       },
       {
         "system": "8BY",
@@ -10976,7 +13013,8 @@
         "out_degree": 2,
         "risk": 63.92,
         "betweenness": 0.014,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": false
       },
       {
         "system": "8CCCM",
@@ -10986,7 +13024,8 @@
         "out_degree": 1,
         "risk": 42.74,
         "betweenness": 0.0007,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": true
       },
       {
         "system": "8DFB",
@@ -10996,7 +13035,8 @@
         "out_degree": 1,
         "risk": 51.82,
         "betweenness": 0.0,
-        "carries_pan": true
+        "carries_pan": true,
+        "is_true_source": true
       }
     ]
   },
@@ -11068,78 +13108,995 @@
   "suggested_questions": [
     "How many systems are in PCI scope, and how many are confirmed vs inferred?",
     "Which systems are the biggest PAN distributors?",
-    "What happens if we tokenize PAN at 8CCF?",
+    "What happens if we tokenize PAN at 6CWC?",
     "Why is 6CWC in PCI scope?",
     "Which systems are hidden PCI (BAM misses)?"
   ],
   "plan": {
     "before": 95,
-    "descopable": 71,
-    "after": 92,
-    "total_descoped": 3,
-    "k": 3,
+    "descopable": 92,
+    "after": 65,
+    "total_descoped": 30,
+    "k": 6,
     "plan": [
+      "6CWC",
       "8CCF",
+      "8MEC",
       "8DFB",
-      "8EFW"
+      "8EFW",
+      "8LNQ"
     ],
     "steps": [
       {
         "step": 1,
-        "tokenize": "8CCF",
-        "marginal_descoped": 1,
-        "cumulative_descoped": 1,
-        "scope_after": 94,
-        "solo_descope": 1,
-        "exclusive_reach": 1,
-        "pct_of_descopable": 1.4
+        "tokenize": "6CWC",
+        "marginal_descoped": 2,
+        "cumulative_descoped": 2,
+        "scope_after": 93,
+        "solo_descope": 2,
+        "exclusive_reach": 2,
+        "pct_of_descopable": 2.2
       },
       {
         "step": 2,
-        "tokenize": "8DFB",
-        "marginal_descoped": 1,
-        "cumulative_descoped": 2,
-        "scope_after": 93,
-        "solo_descope": 1,
-        "exclusive_reach": 1,
-        "pct_of_descopable": 2.8
-      },
-      {
-        "step": 3,
-        "tokenize": "8EFW",
+        "tokenize": "8CCF",
         "marginal_descoped": 1,
         "cumulative_descoped": 3,
         "scope_after": 92,
         "solo_descope": 1,
         "exclusive_reach": 1,
-        "pct_of_descopable": 4.2
+        "pct_of_descopable": 3.3
+      },
+      {
+        "step": 3,
+        "tokenize": "8MEC",
+        "marginal_descoped": 24,
+        "cumulative_descoped": 27,
+        "scope_after": 68,
+        "solo_descope": 0,
+        "exclusive_reach": 0,
+        "pct_of_descopable": 29.3
+      },
+      {
+        "step": 4,
+        "tokenize": "8DFB",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 28,
+        "scope_after": 67,
+        "solo_descope": 1,
+        "exclusive_reach": 1,
+        "pct_of_descopable": 30.4
+      },
+      {
+        "step": 5,
+        "tokenize": "8EFW",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 29,
+        "scope_after": 66,
+        "solo_descope": 1,
+        "exclusive_reach": 1,
+        "pct_of_descopable": 31.5
+      },
+      {
+        "step": 6,
+        "tokenize": "8LNQ",
+        "marginal_descoped": 1,
+        "cumulative_descoped": 30,
+        "scope_after": 65,
+        "solo_descope": 0,
+        "exclusive_reach": 0,
+        "pct_of_descopable": 32.6
       }
     ],
     "target_fraction": 0.8,
-    "optimality_bound_ceiling": 5,
-    "method": "greedy max-coverage (Nemhauser-Wolsey-Fisher 1978; (1-1/e) bound)"
+    "true_source_count": 63,
+    "cumulative_curve": [
+      {
+        "k": 1,
+        "tokenized": [
+          "6CWC"
+        ],
+        "last_source": "6CWC",
+        "cumulative_descoped": 2,
+        "marginal_descoped": 2,
+        "cumulative_feeds_removed": 29
+      },
+      {
+        "k": 2,
+        "tokenized": [
+          "6CWC",
+          "8CCF"
+        ],
+        "last_source": "8CCF",
+        "cumulative_descoped": 3,
+        "marginal_descoped": 1,
+        "cumulative_feeds_removed": 30
+      },
+      {
+        "k": 3,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC"
+        ],
+        "last_source": "8MEC",
+        "cumulative_descoped": 27,
+        "marginal_descoped": 24,
+        "cumulative_feeds_removed": 30
+      },
+      {
+        "k": 4,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB"
+        ],
+        "last_source": "8DFB",
+        "cumulative_descoped": 28,
+        "marginal_descoped": 1,
+        "cumulative_feeds_removed": 32
+      },
+      {
+        "k": 5,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW"
+        ],
+        "last_source": "8EFW",
+        "cumulative_descoped": 29,
+        "marginal_descoped": 1,
+        "cumulative_feeds_removed": 33
+      },
+      {
+        "k": 6,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ"
+        ],
+        "last_source": "8LNQ",
+        "cumulative_descoped": 30,
+        "marginal_descoped": 1,
+        "cumulative_feeds_removed": 33
+      },
+      {
+        "k": 7,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM"
+        ],
+        "last_source": "8CCCM",
+        "cumulative_descoped": 30,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 8,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS"
+        ],
+        "last_source": "8CEMS",
+        "cumulative_descoped": 30,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 9,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC"
+        ],
+        "last_source": "9CPC",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 2,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 10,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH"
+        ],
+        "last_source": "JSVCH",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 11,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC"
+        ],
+        "last_source": "6IVC",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 12,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE"
+        ],
+        "last_source": "8FVE",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 13,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV"
+        ],
+        "last_source": "8EIV",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 14,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM"
+        ],
+        "last_source": "8ECMM",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 15,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED"
+        ],
+        "last_source": "JAED",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 16,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC"
+        ],
+        "last_source": "JAGC",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 17,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU"
+        ],
+        "last_source": "8TCU",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 18,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP"
+        ],
+        "last_source": "JAOCP",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 19,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR"
+        ],
+        "last_source": "LDR",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 20,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369"
+        ],
+        "last_source": "HCV369",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 21,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369",
+          "8DEKT"
+        ],
+        "last_source": "8DEKT",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 22,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369",
+          "8DEKT",
+          "8BCKS"
+        ],
+        "last_source": "8BCKS",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 23,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369",
+          "8DEKT",
+          "8BCKS",
+          "8REFM"
+        ],
+        "last_source": "8REFM",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 24,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369",
+          "8DEKT",
+          "8BCKS",
+          "8REFM",
+          "LDUCG"
+        ],
+        "last_source": "LDUCG",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      },
+      {
+        "k": 25,
+        "tokenized": [
+          "6CWC",
+          "8CCF",
+          "8MEC",
+          "8DFB",
+          "8EFW",
+          "8LNQ",
+          "8CCCM",
+          "8CEMS",
+          "9CPC",
+          "JSVCH",
+          "6IVC",
+          "8FVE",
+          "8EIV",
+          "8ECMM",
+          "JAED",
+          "JAGC",
+          "8TCU",
+          "JAOCP",
+          "LDR",
+          "HCV369",
+          "8DEKT",
+          "8BCKS",
+          "8REFM",
+          "LDUCG",
+          "JLFXM"
+        ],
+        "last_source": "JLFXM",
+        "cumulative_descoped": 32,
+        "marginal_descoped": 0,
+        "cumulative_feeds_removed": 34
+      }
+    ],
+    "method": "greedy max-marginal full-descope (heuristic; objective is supermodular under conjunctive true-source coverage, so no (1-1/e) guarantee)",
+    "source_exposure": {
+      "true_source_count": 63,
+      "scope_before": 95,
+      "per_source": [
+        {
+          "system": "6CWC",
+          "downstream_reach": 29,
+          "solo_descope": 2,
+          "feeds_removed": 29,
+          "parent_reduction": 27,
+          "risk": 56.36,
+          "is_true_source": true,
+          "solo_systems": [
+            "8DEM",
+            "8NYD"
+          ]
+        },
+        {
+          "system": "8CCF",
+          "downstream_reach": 28,
+          "solo_descope": 1,
+          "feeds_removed": 28,
+          "parent_reduction": 27,
+          "risk": 75.45,
+          "is_true_source": true,
+          "solo_systems": [
+            "HMR"
+          ]
+        },
+        {
+          "system": "8DFB",
+          "downstream_reach": 2,
+          "solo_descope": 1,
+          "feeds_removed": 2,
+          "parent_reduction": 1,
+          "risk": 51.82,
+          "is_true_source": true,
+          "solo_systems": [
+            "8A"
+          ]
+        },
+        {
+          "system": "8EFW",
+          "downstream_reach": 1,
+          "solo_descope": 1,
+          "feeds_removed": 1,
+          "parent_reduction": 0,
+          "risk": 40.92,
+          "is_true_source": true,
+          "solo_systems": [
+            "8AFK"
+          ]
+        },
+        {
+          "system": "8MEC",
+          "downstream_reach": 27,
+          "solo_descope": 0,
+          "feeds_removed": 27,
+          "parent_reduction": 27,
+          "risk": 74.55,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8CCCM",
+          "downstream_reach": 3,
+          "solo_descope": 0,
+          "feeds_removed": 3,
+          "parent_reduction": 3,
+          "risk": 42.74,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8CEMS",
+          "downstream_reach": 2,
+          "solo_descope": 0,
+          "feeds_removed": 2,
+          "parent_reduction": 2,
+          "risk": 41.84,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "9CPC",
+          "downstream_reach": 2,
+          "solo_descope": 0,
+          "feeds_removed": 2,
+          "parent_reduction": 2,
+          "risk": 21.82,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "JSVCH",
+          "downstream_reach": 1,
+          "solo_descope": 0,
+          "feeds_removed": 1,
+          "parent_reduction": 1,
+          "risk": 30.91,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "6IVC",
+          "downstream_reach": 1,
+          "solo_descope": 0,
+          "feeds_removed": 1,
+          "parent_reduction": 1,
+          "risk": 30.91,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8FVE",
+          "downstream_reach": 1,
+          "solo_descope": 0,
+          "feeds_removed": 1,
+          "parent_reduction": 1,
+          "risk": 50.91,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8LNQ",
+          "downstream_reach": 1,
+          "solo_descope": 0,
+          "feeds_removed": 1,
+          "parent_reduction": 1,
+          "risk": 40.92,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8EIV",
+          "downstream_reach": 0,
+          "solo_descope": 0,
+          "feeds_removed": 0,
+          "parent_reduction": 0,
+          "risk": 20.0,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "8ECMM",
+          "downstream_reach": 0,
+          "solo_descope": 0,
+          "feeds_removed": 0,
+          "parent_reduction": 0,
+          "risk": 50.0,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "JAED",
+          "downstream_reach": 0,
+          "solo_descope": 0,
+          "feeds_removed": 0,
+          "parent_reduction": 0,
+          "risk": 30.0,
+          "is_true_source": true,
+          "solo_systems": []
+        }
+      ],
+      "per_source_full_count": 63
+    },
+    "saturation_curve": {
+      "source_count": 63,
+      "scope_before": 95,
+      "curve": [
+        {
+          "k": 0,
+          "pct_sources": 0.0,
+          "fully_descoped": 0
+        },
+        {
+          "k": 5,
+          "pct_sources": 7.9,
+          "fully_descoped": 27
+        },
+        {
+          "k": 10,
+          "pct_sources": 15.9,
+          "fully_descoped": 31
+        },
+        {
+          "k": 16,
+          "pct_sources": 25.4,
+          "fully_descoped": 32
+        },
+        {
+          "k": 21,
+          "pct_sources": 33.3,
+          "fully_descoped": 32
+        },
+        {
+          "k": 26,
+          "pct_sources": 41.3,
+          "fully_descoped": 32
+        },
+        {
+          "k": 32,
+          "pct_sources": 50.8,
+          "fully_descoped": 32
+        },
+        {
+          "k": 37,
+          "pct_sources": 58.7,
+          "fully_descoped": 32
+        },
+        {
+          "k": 42,
+          "pct_sources": 66.7,
+          "fully_descoped": 32
+        },
+        {
+          "k": 47,
+          "pct_sources": 74.6,
+          "fully_descoped": 32
+        },
+        {
+          "k": 52,
+          "pct_sources": 82.5,
+          "fully_descoped": 32
+        },
+        {
+          "k": 58,
+          "pct_sources": 92.1,
+          "fully_descoped": 32
+        },
+        {
+          "k": 63,
+          "pct_sources": 100.0,
+          "fully_descoped": 32
+        }
+      ]
+    },
+    "block_comparison": {
+      "Greedy minimal set": {
+        "tokenize": [
+          "6CWC",
+          "8CCF",
+          "8MEC"
+        ],
+        "fully_descoped": 27,
+        "feeds_removed": 30,
+        "parent_reduction": 3,
+        "risk_reduction_pct": 17.9,
+        "scope_before": 95,
+        "scope_after": 68
+      },
+      "Top-3 by reach": {
+        "tokenize": [
+          "6CWC",
+          "8CCF",
+          "8MEC"
+        ],
+        "fully_descoped": 27,
+        "feeds_removed": 30,
+        "parent_reduction": 3,
+        "risk_reduction_pct": 17.9,
+        "scope_before": 95,
+        "scope_after": 68
+      },
+      "Top-3 by conduit (betweenness)": {
+        "tokenize": [
+          "8AQB",
+          "8BCC",
+          "8AFN"
+        ],
+        "fully_descoped": 0,
+        "feeds_removed": 0,
+        "parent_reduction": 0,
+        "risk_reduction_pct": 1.1,
+        "scope_before": 95,
+        "scope_after": 95
+      }
+    }
   },
   "whatif_top3": {
     "tokenized_systems": [
+      "6CWC",
       "8CCF",
-      "8DFB",
-      "8EFW"
+      "8MEC"
     ],
     "scope_before": 95,
-    "scope_after": 92,
-    "nodes_descoped": 3,
+    "scope_after": 68,
+    "nodes_descoped": 27,
     "descoped_systems_sample": [
-      "8A",
-      "8AFK",
+      "6PNX",
+      "6PNXAZ",
+      "8ACD",
+      "8ADW",
+      "8AFN",
+      "8AGC",
+      "8AGF",
+      "8AGQ",
+      "8AGV",
+      "8AKP",
+      "8AKZ",
+      "8ANB",
+      "8ANF",
+      "8AO1",
+      "8APX",
+      "8AQB",
+      "8ARK",
+      "8AUQ",
+      "8AVB",
+      "8BCC",
+      "8BKV",
+      "8BTH",
+      "8BY",
+      "8DEM",
+      "8KP",
+      "8NYD",
       "HMR"
     ],
+    "feeds_removed": 30,
+    "feeds_removed_sample": [
+      "6PNX",
+      "6PNXAZ",
+      "8ACD",
+      "8ACQ",
+      "8ADW",
+      "8AFN",
+      "8AGC",
+      "8AGF",
+      "8AGQ",
+      "8AGV",
+      "8AKP",
+      "8AKZ",
+      "8ANB",
+      "8ANF",
+      "8AO1",
+      "8APX",
+      "8AQB",
+      "8ARK",
+      "8AUQ",
+      "8AVB",
+      "8BCC",
+      "8BCKS",
+      "8BFL",
+      "8BKV",
+      "8BTH"
+    ],
+    "parent_reduction": 3,
     "sources_downgraded": [
       "8CCF",
-      "8DFB",
-      "8EFW"
+      "8MEC"
     ],
-    "sources_downgraded_count": 3,
-    "sources_retained_tier4": [],
+    "sources_downgraded_count": 2,
+    "sources_retained_tier4": [
+      "6CWC"
+    ],
     "retained_via_detokenization": [
       "8BCKS",
       "8CEMS",
@@ -11147,14 +14104,38 @@
     ],
     "retained_via_detokenization_count": 3,
     "pan_edges_before": 77,
-    "pan_edges_after": 75,
+    "pan_edges_after": 23,
     "risk_before": 2780.3,
-    "risk_after": 2748.4,
-    "risk_reduction_pct": 1.1,
-    "node_surface_reduction_pct": 3.2,
+    "risk_after": 2283.1,
+    "risk_reduction_pct": 17.9,
+    "node_surface_reduction_pct": 28.4,
     "descoped_systems": [
-      "8A",
-      "8AFK",
+      "6PNX",
+      "6PNXAZ",
+      "8ACD",
+      "8ADW",
+      "8AFN",
+      "8AGC",
+      "8AGF",
+      "8AGQ",
+      "8AGV",
+      "8AKP",
+      "8AKZ",
+      "8ANB",
+      "8ANF",
+      "8AO1",
+      "8APX",
+      "8AQB",
+      "8ARK",
+      "8AUQ",
+      "8AVB",
+      "8BCC",
+      "8BKV",
+      "8BTH",
+      "8BY",
+      "8DEM",
+      "8KP",
+      "8NYD",
       "HMR"
     ]
   },
@@ -11167,9 +14148,9 @@
     "choke_points": [
       "6CWC",
       "8CCF",
-      "8AFN",
       "8BKV",
       "8BCC",
+      "8AFN",
       "8AQB",
       "8CEMS",
       "8BFL",
@@ -11197,7 +14178,8 @@
             "8BCC",
             "8AFN"
           ],
-          "rho": 1.0
+          "rho": 1.0,
+          "top5_overlap": 5
         },
         {
           "name": "Equal",
@@ -11214,7 +14196,8 @@
             "6CWC",
             "8BCC"
           ],
-          "rho": 0.69
+          "rho": 0.781,
+          "top5_overlap": 4
         },
         {
           "name": "Sensitivity-heavy",
@@ -11231,7 +14214,8 @@
             "8BCC",
             "8AFN"
           ],
-          "rho": 1.0
+          "rho": 0.996,
+          "top5_overlap": 5
         },
         {
           "name": "Reach-heavy",
@@ -11248,7 +14232,8 @@
             "8BCC",
             "6CWC"
           ],
-          "rho": 0.857
+          "rho": 0.999,
+          "top5_overlap": 4
         },
         {
           "name": "Betweenness-heavy",
@@ -11265,7 +14250,8 @@
             "8MEC",
             "8AFN"
           ],
-          "rho": 0.857
+          "rho": 0.999,
+          "top5_overlap": 5
         },
         {
           "name": "Source-heavy",
@@ -11282,12 +14268,18 @@
             "6CWC",
             "8DFB"
           ],
-          "rho": 0.69
+          "rho": 0.778,
+          "top5_overlap": 3
         }
       ],
-      "mean_rank_correlation": 0.819,
-      "min_rank_correlation": 0.69,
+      "mean_rank_correlation": 0.911,
+      "min_rank_correlation": 0.778,
       "top5_overlap_min": 3,
+      "least_robust_scenario": {
+        "name": "Source-heavy",
+        "rho": 0.778,
+        "overlap": 3
+      },
       "tracked": [
         {
           "system": "8AQB",
@@ -11339,6 +14331,1960 @@
         }
       ],
       "universe_size": 72
+    },
+    "segmentation_candidates": [
+      {
+        "system": "6CWC",
+        "branch_size": 29,
+        "downstream_reach": 29,
+        "risk": 56.36,
+        "is_true_source": true
+      },
+      {
+        "system": "8CCF",
+        "branch_size": 28,
+        "downstream_reach": 28,
+        "risk": 75.45,
+        "is_true_source": true
+      },
+      {
+        "system": "8AFN",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 67.42,
+        "is_true_source": false
+      },
+      {
+        "system": "8BCC",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 70.72,
+        "is_true_source": false
+      },
+      {
+        "system": "8AQB",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 83.64,
+        "is_true_source": false
+      },
+      {
+        "system": "8BKV",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 60.58,
+        "is_true_source": false
+      },
+      {
+        "system": "8CEMS",
+        "branch_size": 2,
+        "downstream_reach": 2,
+        "risk": 41.84,
+        "is_true_source": false
+      },
+      {
+        "system": "8A",
+        "branch_size": 1,
+        "downstream_reach": 1,
+        "risk": 0.94,
+        "is_true_source": false
+      },
+      {
+        "system": "8BFL",
+        "branch_size": 1,
+        "downstream_reach": 1,
+        "risk": 42.13,
+        "is_true_source": false
+      },
+      {
+        "system": "8OHM",
+        "branch_size": 0,
+        "downstream_reach": 0,
+        "risk": 40.0,
+        "is_true_source": false
+      }
+    ]
+  },
+  "categories": {
+    "per_node": {
+      "8AFN": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8AQB": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8BCKS": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8BCC": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8BFL": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8BKV": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8BTKP": {
+        "category": "out",
+        "families": []
+      },
+      "8BUJ": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8BY": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8CCCM": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8CCF": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8CDCP": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8CEMS": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8CKND": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8CQXTK": {
+        "category": "out",
+        "families": []
+      },
+      "8CT1": {
+        "category": "out",
+        "families": []
+      },
+      "8CUBC": {
+        "category": "out",
+        "families": []
+      },
+      "8DEM": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8DFB": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8DUDR": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8DZZ": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8ECMM": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8EFW": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8EGWS": {
+        "category": "out",
+        "families": []
+      },
+      "8EIV": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8FVE": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8IPQ": {
+        "category": "out",
+        "families": []
+      },
+      "8KHD": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8LNQ": {
+        "category": "cde",
+        "families": [
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8MEC": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8MQN": {
+        "category": "out",
+        "families": []
+      },
+      "8OEWP": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8OHM": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8REFM": {
+        "category": "cde",
+        "families": [
+          "req3",
+          "req4",
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "HIUN1": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "OK": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "IEVK": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8T3K": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "MYF": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HSFO": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "MSTF": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZECC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KTFC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HPU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZIOC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DVEZ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LCRB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LPUVN": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "YWTNS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "J3OB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LCT": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "VPU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "W2EBD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JCQNS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "GOQDM": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JIUX": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZEDC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KIEO": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JCDC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6CWC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "PVU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HNI": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "WMYOB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JCUZNW": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JUUD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "PGVGY": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZTUNM": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DAT": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JX8": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JCKFR": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DIOCF": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KCDC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "YWU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JIX": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "VSOZ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "SOISN": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZAOV": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "OJ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ZAOV2": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "IMY": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "EC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8WQMA": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DIDDP": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "9CPC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "AMU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "TGGHT": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LPUC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DMDES": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LDTCF": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KGCDE": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8FOQ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "OR": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "YB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8BFG": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DCRDA": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8MZD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "UD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HXUD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8TBN": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "G2": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AUD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8COH": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8MFW": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "REGC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KIURR": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8SQV": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HCVFD": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8FGO": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8CTQ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8BT1": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8TVK": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8SFF": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "J6": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8EPM": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "YFFSR": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LCTVT": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "G0": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "0BQS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8SGZ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "KNZC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ESGVL": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "0ADN": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DXERG": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "GZBUL": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "WPQCA": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "NPQG": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "NPQGS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "NPG": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "JSVCH": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "WSEYH": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AGC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8CCMM": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LFOA": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "DCC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6TTN": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "WLFMS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6SVP": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6TTX": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6IVC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "DWYRP": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "H1YOB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "PRYC": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "80HG": {
+        "category": "out",
+        "families": []
+      },
+      "WWFG": {
+        "category": "out",
+        "families": []
+      },
+      "8A": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ACQ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "LNEDI": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ACD": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ADW": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ADC": {
+        "category": "out",
+        "families": []
+      },
+      "8RFB": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AFK": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AGQ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AGV": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "ADU": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AGF": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ANB": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ANF": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AO1": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AOB": {
+        "category": "out",
+        "families": []
+      },
+      "YIUO": {
+        "category": "out",
+        "families": []
+      },
+      "8APX": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AKZ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8KP": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AKP": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JOFS": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "PTOZ": {
+        "category": "connected",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ARK": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8ARH": {
+        "category": "out",
+        "families": []
+      },
+      "8AUQ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8AVB": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8BTH": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "8C21": {
+        "category": "out",
+        "families": []
+      },
+      "8IEX": {
+        "category": "out",
+        "families": []
+      },
+      "8OOC": {
+        "category": "out",
+        "families": []
+      },
+      "8SCC": {
+        "category": "out",
+        "families": []
+      },
+      "8SWW": {
+        "category": "out",
+        "families": []
+      },
+      "8TCU": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8TB1": {
+        "category": "out",
+        "families": []
+      },
+      "8WQM": {
+        "category": "out",
+        "families": []
+      },
+      "8XE3": {
+        "category": "out",
+        "families": []
+      },
+      "8XP": {
+        "category": "out",
+        "families": []
+      },
+      "9AQB": {
+        "category": "out",
+        "families": []
+      },
+      "6PNX": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6PNXAZ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "6WDC": {
+        "category": "out",
+        "families": []
+      },
+      "HAC1": {
+        "category": "out",
+        "families": []
+      },
+      "HAEA": {
+        "category": "out",
+        "families": []
+      },
+      "HBQK": {
+        "category": "out",
+        "families": []
+      },
+      "HDGL": {
+        "category": "out",
+        "families": []
+      },
+      "HFVKP": {
+        "category": "out",
+        "families": []
+      },
+      "HFYU": {
+        "category": "out",
+        "families": []
+      },
+      "HIFB": {
+        "category": "out",
+        "families": []
+      },
+      "HK": {
+        "category": "out",
+        "families": []
+      },
+      "HMKC": {
+        "category": "out",
+        "families": []
+      },
+      "HMR": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req11"
+        ]
+      },
+      "HN201": {
+        "category": "out",
+        "families": []
+      },
+      "8DEKT": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8NC1": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8NYD": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "8TCLL": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "6PNXRO": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "6PNXUI": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "HCV369": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "HNULL": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "HOGCN": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "HTOKM": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "IODMM": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JAED": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JAGC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JAOCP": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JBFN": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JBYP": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JCOC": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JEQPM": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JEQZT": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JEQZY": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JFO": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JHTSS": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JLF": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JLFXM": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JMT": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JNJX": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JRGNS": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JSEK": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JSVKR": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "JTTCTL": {
+        "category": "out",
+        "families": []
+      },
+      "KCO": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "KDUZ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "KIRB": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "KPO": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "KTEYN": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LCUZ": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LDR": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LDUCG": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LMQX": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LPFR": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LSR1": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      },
+      "LZRKY": {
+        "category": "cde",
+        "families": [
+          "req7_8",
+          "req10",
+          "req11"
+        ]
+      }
+    },
+    "counts": {
+      "cde": 95,
+      "connected": 109,
+      "out": 35
+    },
+    "family_counts": {
+      "req4": 24,
+      "req7_8": 204,
+      "req10": 72,
+      "req11": 204,
+      "req3": 16
+    },
+    "family_labels": {
+      "req3": "Req 3 \u2014 Protect stored account data (encryption/truncation of PAN at rest)",
+      "req4": "Req 4 \u2014 Protect CHD with strong cryptography during transmission",
+      "req3_sad": "Req 3.2 \u2014 SAD (full track / PIN) must NOT be retained after authorization",
+      "req7_8": "Req 7/8 \u2014 Restrict access + MFA for ALL access into the CDE (v4.0.1 8.3.1)",
+      "req10": "Req 10 \u2014 Log and monitor all access to system components and CHD",
+      "req11": "Req 11 \u2014 Regularly test security of systems and networks"
     }
+  },
+  "economics": {
+    "in_scope_now": 95,
+    "achievable_floor": 63,
+    "removable": 32,
+    "posture_now": "SAQ-D",
+    "posture_floor": "SAQ-D",
+    "effort_now": {
+      "qsa_days": 63.8,
+      "est_cost": 159625
+    },
+    "effort_floor": {
+      "qsa_days": 47.8,
+      "est_cost": 119625
+    },
+    "cost_saving": 40000,
+    "assumptions": {
+      "qsa_day_rate": 2500.0,
+      "days_per_cde_system": 0.5,
+      "days_per_connected": 0.15,
+      "roc_threshold": 1000
+    }
+  },
+  "sankey": {
+    "nodes": [
+      {
+        "id": "src:6CWC",
+        "label": "6CWC",
+        "band": 0,
+        "reach": 29
+      },
+      {
+        "id": "src:8CCF",
+        "label": "8CCF",
+        "band": 0,
+        "reach": 28
+      },
+      {
+        "id": "src:8MEC",
+        "label": "8MEC",
+        "band": 0,
+        "reach": 27
+      },
+      {
+        "id": "src:8CCCM",
+        "label": "8CCCM",
+        "band": 0,
+        "reach": 3
+      },
+      {
+        "id": "src:8CEMS",
+        "label": "8CEMS",
+        "band": 0,
+        "reach": 2
+      },
+      {
+        "id": "src:8DFB",
+        "label": "8DFB",
+        "band": 0,
+        "reach": 2
+      },
+      {
+        "id": "src:9CPC",
+        "label": "9CPC",
+        "band": 0,
+        "reach": 2
+      },
+      {
+        "id": "src:8EFW",
+        "label": "8EFW",
+        "band": 0,
+        "reach": 1
+      },
+      {
+        "id": "src:other",
+        "label": "55 other sources",
+        "band": 0
+      },
+      {
+        "id": "relays",
+        "label": "relays (carry & forward PAN)",
+        "band": 1
+      },
+      {
+        "id": "consumers",
+        "label": "terminal consumers",
+        "band": 2
+      }
+    ],
+    "links": [
+      {
+        "source": "src:6CWC",
+        "target": "relays",
+        "value": 9
+      },
+      {
+        "source": "src:6CWC",
+        "target": "consumers",
+        "value": 20
+      },
+      {
+        "source": "src:8CCF",
+        "target": "relays",
+        "value": 8
+      },
+      {
+        "source": "src:8CCF",
+        "target": "consumers",
+        "value": 20
+      },
+      {
+        "source": "src:8MEC",
+        "target": "relays",
+        "value": 8
+      },
+      {
+        "source": "src:8MEC",
+        "target": "consumers",
+        "value": 19
+      },
+      {
+        "source": "src:8CCCM",
+        "target": "relays",
+        "value": 2
+      },
+      {
+        "source": "src:8CCCM",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:8CEMS",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:8CEMS",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:8DFB",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:8DFB",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:9CPC",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:9CPC",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:8EFW",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:other",
+        "target": "consumers",
+        "value": 2
+      },
+      {
+        "source": "relays",
+        "target": "consumers",
+        "value": 23
+      }
+    ],
+    "source_count": 63,
+    "scope": 95
   }
 }

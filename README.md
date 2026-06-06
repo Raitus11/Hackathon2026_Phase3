@@ -26,9 +26,15 @@ tokenization most reduces PCI scope.
    everyone because downstream systems are fed by several PAN sources — which is
    exactly why the minimal *set* matters more than any single source.
 6. **Minimum-intervention planner.** A greedy maximum-coverage optimizer
-   (Nemhauser–Wolsey–Fisher 1978; provably within (1−1/e) of optimal on this
-   monotone submodular objective) finds the fewest sources to tokenize for the most
-   descope. **Clean-stream model:** a downstream system descopes only when *every*
+   (Nemhauser–Wolsey–Fisher 1978) finds the fewest sources to tokenize for the most
+   descope. **Honest bound:** because a downstream system descopes only when *every*
+   true PAN source reaching it emits CRN (a conjunctive "AND" condition), marginal
+   returns *increase* as the source front is covered — the freed-systems objective is
+   **supermodular, not submodular**, so the (1−1/e) greedy guarantee does **not** apply
+   here. We therefore report greedy as a transparent, interpretable heuristic and show
+   the honest result alongside the cumulative + saturation descope curves and the
+   per-source exposure metrics, which carry the intervention story. **Clean-stream
+   model:** a downstream system descopes only when *every*
    clear-PAN source reaching it emits CRN; a tokenized source itself stays in the
    CDE as a tokenization point but drops from live PAN (tier 4) to non-reversible
    token (tier 3); systems that genuinely need PAN remain in the CDE and

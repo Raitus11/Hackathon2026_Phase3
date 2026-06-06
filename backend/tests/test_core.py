@@ -245,3 +245,32 @@ def test_always_cde_systems_never_descope():
     imp = analytics.what_if(art.G, art.pan_sources, scores, ["SRC"])
     assert "TRK" not in imp["descoped_systems"]           # full-track stays in CDE
     assert "TRK" not in imp["sources_downgraded"]         # and never tier-downgraded
+
+
+def test_scope_categories_and_requirement_mapping():
+    """Decision layer F2: every in-scope system is CDE; CDE count == scope size;
+    a full-track holder triggers the prohibited-SAD-storage family."""
+    art = build_graph(_toy_with_track())
+    scores = compute_scores(art.G)
+    H = analytics._flatten(art.G)
+    scope = analytics.pci_scope(H, art.pan_sources)
+    cats = analytics.scope_categories(art.G, art.pan_sources, scope, scores)
+    assert cats["counts"]["cde"] == len(scope)            # CDE == in scope
+    # categories partition the whole node universe
+    assert sum(cats["counts"].values()) == art.G.number_of_nodes()
+    assert "req3_sad" in cats["per_node"]["TRK"]["families"]  # full-track -> SAD storage risk
+
+
+def test_scope_economics_floor_bounded():
+    """Decision layer F1: the achievable floor never exceeds current scope and the
+    floor effort is never greater than current effort (tokenization only removes)."""
+    art = build_graph(_toy_with_track())
+    scores = compute_scores(art.G)
+    H = analytics._flatten(art.G)
+    scope = analytics.pci_scope(H, art.pan_sources)
+    cats = analytics.scope_categories(art.G, art.pan_sources, scope, scores)
+    sat = analytics.saturation_curve(art.G, art.pan_sources, scores, points=6)
+    econ = analytics.scope_economics(cats, sat, scores)
+    assert econ["achievable_floor"] <= econ["in_scope_now"]
+    assert econ["effort_floor"]["qsa_days"] <= econ["effort_now"]["qsa_days"]
+    assert econ["cost_saving"] >= 0

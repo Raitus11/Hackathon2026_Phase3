@@ -378,6 +378,9 @@ function Overview({ d, onPick }) {
   const before = imp.scope_before, after = imp.scope_after, maxv = Math.max(before, 1)
   return (
     <div className="space-y-5">
+      <ScopeEconomics d={d} />
+      <SankeyFlow d={d} onPick={onPick} />
+      <CategoryBar d={d} />
       <div className="flex flex-wrap gap-3">
         <KPI label="Systems exposed to clear PAN" value={fmt(h.systems_exposed_to_clear_pan)}
           sub={`${h.scope_metadata_confirmed} metadata-confirmed · ${h.scope_inferred_only} inferred-only`} tone="pan" delay={0}
@@ -727,6 +730,7 @@ function Drill({ d, selected, onPick }) {
               <div className="text-[11px] uppercase tracking-widest text-faint">System</div>
               <div className="disp font-black text-3xl text-pan">{node.id}</div>
               <div className="text-sm text-dim mb-3">{node.name || '(name not in BAM)'}</div>
+              <RequirementBadges node={node} />
               <Row k="Risk score" v={node.risk} t="text-pan" />
               <Row k="Sensitivity tier" v={node.tier + ' / 4'} />
               <Row k="Downstream reach" v={node.reach} />
@@ -931,6 +935,7 @@ function Planner({ d, live, onPick }) {
 
       <SaturationCurve plan={d.plan} />
       <BlockComparison plan={d.plan} onPick={onPick} />
+      <SegmentationCard d={d} onPick={onPick} />
     </div>
   )
 }
@@ -1617,7 +1622,7 @@ function HiddenScope({ d, onPick }) {
             <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
               <th>System</th><th title="Downstream systems it feeds PAN to">Propagates to</th>
               <th title="App's own stated origin of the PAN (DS6)">Stated source</th>
-              <th>BAM flag</th><th title="What Splunk found in Sept–Dec logs">Splunk finding</th></tr></thead>
+              <th>BAM flag</th><th title="What Splunk found in Sept–Dec logs">Splunk finding</th><th title="PCI DSS v4.0.1 requirement families this system should satisfy but does not">v4.0.1 gap</th></tr></thead>
             <tbody>{rows.map(x => (
               <tr key={x.system} className="hh mono" onClick={() => onPick(x.system)}>
                 <td className="text-panhot font-semibold">{x.system}<span className="text-faint text-[10px] ml-1.5">{(x.name || '').slice(0, 18)}</span></td>
@@ -1625,6 +1630,7 @@ function HiddenScope({ d, onPick }) {
                 <td className="text-dim">{x.stated_source || '—'}</td>
                 <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-line text-dim">PCI = No</span></td>
                 <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-panhot/15 text-panhot">{x.finding || 'True PAN'}</span></td>
+                <td><ReqChips reqs={x.triggered_requirements} /></td>
               </tr>))}</tbody>
           </table>
         </div>
@@ -1679,6 +1685,237 @@ export default function App() {
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.
         <b className="text-dim"> What it does not:</b> remediate controls, assert business need, or treat inferred signals as ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.
       </footer>
+    </div>
+  )
+}
+
+/* ============================ DECISION LAYER COMPONENTS (F1–F5) ============================ */
+
+const REQ_SHORT = {
+  req3: 'Req 3', req4: 'Req 4', req3_sad: 'Req 3.2 (SAD)',
+  req7_8: 'Req 7/8', req10: 'Req 10', req11: 'Req 11',
+}
+function ReqChips({ reqs }) {
+  if (!reqs || !reqs.length) return null
+  return (
+    <div className="flex flex-wrap gap-1">
+      {reqs.map(r => (
+        <span key={r} className="mono text-[10px] px-1.5 py-0.5 rounded border border-panhot/40 text-panhot bg-panhot/5">
+          {REQ_SHORT[r] || r}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+/* F1 — scope economics (the exec headline) */
+function ScopeEconomics({ d }) {
+  const e = d.economics
+  if (!e || !e.in_scope_now) return null
+  const a = e.assumptions || {}
+  const money = n => (typeof n === 'number' ? n.toLocaleString(undefined, { maximumFractionDigits: 0 }) : n)
+  const crossesPosture = e.posture_now !== e.posture_floor
+  return (
+    <div className="card p-5">
+      <div className="flex items-baseline justify-between flex-wrap gap-2">
+        <div className="disp font-bold text-lg">PCI audit surface — what it costs, and the floor</div>
+        <div className="text-[11px] text-faint">all figures are labeled estimates · see assumptions</div>
+      </div>
+      <div className="flex items-end gap-3 mt-3 flex-wrap">
+        <div className="bg-panel2 rounded-lg px-4 py-3">
+          <div className="disp text-3xl font-black text-pan">{fmt(e.in_scope_now)}</div>
+          <div className="text-[11px] text-dim">in PCI scope now (CDE)</div>
+        </div>
+        <div className="disp text-2xl text-faint pb-3">→</div>
+        <div className="bg-panel2 rounded-lg px-4 py-3">
+          <div className="disp text-3xl font-black text-safe">{fmt(e.achievable_floor)}</div>
+          <div className="text-[11px] text-dim">achievable floor (full tokenization)</div>
+        </div>
+        <div className="bg-panel2 rounded-lg px-4 py-3">
+          <div className="disp text-3xl font-black text-cool">{fmt(e.removable)}</div>
+          <div className="text-[11px] text-dim">systems removable from scope</div>
+        </div>
+        <div className="bg-panel2 rounded-lg px-4 py-3">
+          <div className="disp text-2xl font-black text-safe">~{money(e.cost_saving)}</div>
+          <div className="text-[11px] text-dim">est. assessment saving ({e.effort_now?.qsa_days}→{e.effort_floor?.qsa_days} QSA-days)</div>
+        </div>
+      </div>
+      {crossesPosture && (
+        <div className="text-xs text-safe mt-3">
+          Reaching the floor changes the assessment posture from <b>{e.posture_now}</b> to <b>{e.posture_floor}</b>.
+        </div>
+      )}
+      <div className="text-[11px] text-faint mt-3">
+        Assumptions (override via env): {money(a.qsa_day_rate)}/QSA-day · {a.days_per_cde_system} day/CDE system ·
+        {' '}{a.days_per_connected} day/connected-to system · ROC above {fmt(a.roc_threshold)} in-scope.
+        Floor = current scope minus the maximum fully-descoped count on the saturation curve.
+      </div>
+    </div>
+  )
+}
+
+/* F2 — scope category bar (CDE / connected-to / out) */
+function CategoryBar({ d }) {
+  const c = d.categories && d.categories.counts
+  const fam = (d.categories && d.categories.family_counts) || {}
+  const labels = (d.categories && d.categories.family_labels) || {}
+  if (!c) return null
+  const total = (c.cde || 0) + (c.connected || 0) + (c.out || 0) || 1
+  const seg = [
+    ['In scope (CDE)', c.cde, 'bg-pan', 'text-pan'],
+    ['Connected-to', c.connected, 'bg-cool', 'text-cool'],
+    ['Out of scope', c.out, 'bg-safe', 'text-safe'],
+  ]
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">PCI scope categories (v4.0.1)</div>
+      <div className="text-[11px] text-faint mb-3">
+        The three official PCI SSC categories. Connected-to systems are also in scope — they can affect
+        the CDE. Tokenization moves systems CDE → connected-to → out.
+      </div>
+      <div className="flex h-5 rounded-full overflow-hidden bg-panel2">
+        {seg.map(([lbl, v, bg]) => (
+          <div key={lbl} className={'h-full ' + bg} title={`${lbl}: ${v}`}
+            style={{ width: (100 * (v || 0) / total) + '%', transition: 'width .8s cubic-bezier(.2,.8,.2,1)' }} />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-4 mt-2 text-xs">
+        {seg.map(([lbl, v, , tc]) => (
+          <span key={lbl} className={tc}><b className="mono">{fmt(v || 0)}</b> <span className="text-dim">{lbl}</span></span>
+        ))}
+      </div>
+      {Object.keys(fam).length > 0 && (
+        <div className="mt-4">
+          <div className="text-[11px] text-dim mb-1">Requirement families triggered across in-scope systems:</div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+            {Object.entries(fam).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+              <span key={k} title={labels[k] || k}>
+                <b className="mono text-panhot">{fmt(v)}</b> <span className="text-dim">{REQ_SHORT[k] || k}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* per-system scope-category + requirements badge (Drill) */
+function RequirementBadges({ node }) {
+  if (!node) return null
+  const cat = node.category
+  const tone = cat === 'cde' ? 'text-pan border-pan/40 bg-pan/5'
+    : cat === 'connected' ? 'text-cool border-cool/40 bg-cool/5'
+      : 'text-safe border-safe/40 bg-safe/5'
+  const label = cat === 'cde' ? 'In scope (CDE)' : cat === 'connected' ? 'Connected-to' : 'Out of scope'
+  return (
+    <div className="mb-3">
+      <span className={'mono text-[11px] px-2 py-0.5 rounded border ' + tone}>{label}</span>
+      <div className="mt-1"><ReqChips reqs={node.triggered_requirements} /></div>
+    </div>
+  )
+}
+
+/* F4 — segmentation choke points (second lever; Planner) */
+function SegmentationCard({ d, onPick }) {
+  const rows = (d.structure && d.structure.segmentation_candidates) || []
+  if (!rows.length) return null
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Segmentation choke points (alternative lever)</div>
+      <div className="text-[11px] text-faint mb-3">
+        Articulation points of the in-scope PAN subgraph: network-isolating the PAN feed at one of these
+        removes its whole downstream branch from CDE scope. Segmentation is the other canonical
+        scope-reduction lever besides tokenization.
+      </div>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-dim text-xs text-left border-b border-line">
+            <th className="py-1">System</th><th>Branch isolated</th><th>Reach</th><th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 8).map(r => (
+            <tr key={r.system} className="border-b border-line/40 hover:bg-panel2/40">
+              <td className="py-1.5"><button className="mono text-pan hover:underline" onClick={() => onPick(r.system)}>{r.system}</button></td>
+              <td className="mono text-cool">{fmt(r.branch_size)} systems</td>
+              <td className="mono text-dim">{fmt(r.downstream_reach)}</td>
+              <td className="text-xs text-dim">{r.is_true_source ? 'true source' : 'relay'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/* F3 — Sankey flow (hand-rolled SVG; no d3-sankey dependency) */
+function SankeyFlow({ d, onPick }) {
+  const ref = useRef(null)
+  const sk = d.sankey
+  useEffect(() => {
+    if (!sk || !sk.nodes || !ref.current) return
+    const W = 760, H = 360, padX = 12, bandX = [padX + 90, W / 2 - 40, W - padX - 110]
+    const colByBand = ['#d98b1f', '#3f6fd1', '#0f9b8e']  // pan / cool / safe
+    const nodes = sk.nodes.map(n => ({ ...n }))
+    const links = sk.links.map(l => ({ ...l }))
+    const byId = Object.fromEntries(nodes.map(n => [n.id, n]))
+
+    const outSum = {}, inSum = {}
+    links.forEach(l => { outSum[l.source] = (outSum[l.source] || 0) + l.value; inSum[l.target] = (inSum[l.target] || 0) + l.value })
+    nodes.forEach(n => { n.value = Math.max(outSum[n.id] || 0, inSum[n.id] || 0) || 1 })
+
+    const bands = [0, 1, 2].map(b => nodes.filter(n => n.band === b))
+    const maxBandTotal = Math.max(...bands.map(col => col.reduce((s, n) => s + n.value, 0)), 1)
+    const scale = (H - 40) / maxBandTotal
+    const gap = 10
+    bands.forEach(col => {
+      let y = 20
+      col.sort((a, b) => b.value - a.value)
+      col.forEach(n => { n.h = Math.max(n.value * scale, 6); n.y = y; n.x = bandX[n.band]; y += n.h + gap })
+    })
+
+    const svg = d3.select(ref.current).html('').append('svg')
+      .attr('width', '100%').attr('viewBox', [0, 0, W, H]).style('max-height', H + 'px')
+
+    const linkG = svg.append('g').attr('fill-opacity', 0.28)
+    const srcCursor = {}, tgtCursor = {}
+    links.sort((a, b) => b.value - a.value).forEach(l => {
+      const s = byId[l.source], t = byId[l.target]
+      if (!s || !t) return
+      const sh = l.value * scale, th = l.value * scale
+      const sy = (srcCursor[l.source] = (srcCursor[l.source] || s.y)); srcCursor[l.source] += sh
+      const ty = (tgtCursor[l.target] = (tgtCursor[l.target] || t.y)); tgtCursor[l.target] += th
+      const x0 = s.x + 14, x1 = t.x, xc = (x0 + x1) / 2
+      const path = `M${x0},${sy} C${xc},${sy} ${xc},${ty} ${x1},${ty} L${x1},${ty + th} C${xc},${ty + th} ${xc},${sy + sh} ${x0},${sy + sh} Z`
+      linkG.append('path').attr('d', path).attr('fill', colByBand[s.band])
+        .append('title').text(`${s.label} → ${t.label}: ${l.value}`)
+    })
+
+    const g = svg.append('g')
+    nodes.forEach(n => {
+      g.append('rect').attr('x', n.x).attr('y', n.y).attr('width', 14).attr('height', n.h)
+        .attr('rx', 3).attr('fill', colByBand[n.band]).style('cursor', n.band === 0 ? 'pointer' : 'default')
+        .on('click', () => { if (n.band === 0 && n.id.startsWith('src:') && n.id !== 'src:other') onPick(n.id.slice(4)) })
+        .append('title').text(`${n.label}: ${n.value}`)
+      const anchor = n.band === 2 ? 'end' : 'start'
+      const tx = n.band === 2 ? n.x - 6 : n.x + 20
+      if (n.h >= 12) g.append('text').attr('x', tx).attr('y', n.y + n.h / 2 + 3).attr('text-anchor', anchor)
+        .attr('font-size', 10).attr('fill', '#9fb0c6').attr('font-family', 'ui-monospace,monospace')
+        .text(n.label.length > 22 ? n.label.slice(0, 21) + '…' : n.label)
+    })
+  }, [sk, onPick])
+
+  if (!sk || !sk.nodes) return null
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">How clear PAN flows through the estate</div>
+      <div className="text-[11px] text-faint mb-2">
+        A few true sources spray real card numbers across nearly everything. Width = systems on that path.
+        Left = the widest PAN sources (click to drill) · middle = relays that carry &amp; forward · right = terminal consumers.
+        {sk.source_count ? ` ${fmt(sk.source_count)} true sources feed ${fmt(sk.scope)} in-scope systems.` : ''}
+      </div>
+      <div ref={ref} />
     </div>
   )
 }

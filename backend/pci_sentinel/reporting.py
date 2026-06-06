@@ -39,6 +39,19 @@ def _ts():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
+def _pdf_table(rows, widths):
+    """A consistently-styled reportlab table (mono first column in PAN, zebra rows)."""
+    t = Table(rows, colWidths=widths)
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), DIM), ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("FONTNAME", (0, 1), (0, -1), "Courier-Bold"), ("TEXTCOLOR", (0, 1), (0, -1), PAN),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f6f8fb")]),
+        ("GRID", (0, 0), (-1, -1), 0.3, LINE), ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
+    return t
+
+
 # ----------------------------------------------------------------------------- graph image
 def _graph_png(art, scores, viz, max_nodes=70) -> io.BytesIO:
     """Render the PAN-flow neighbourhood: heavy hitters + their downstream, coloured by
@@ -127,6 +140,25 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
                        f"<b>{br.get('inferred_only')}</b> are inferred-only candidate scope from survey/Splunk "
                        f"signals (kept separate, never treated as ground truth).", small))
 
+    # audit-scope economics — the business headline (in scope -> floor -> cost)
+    econ = getattr(result, "economics", {}) or {}
+    if econ.get("in_scope_now"):
+        ass = econ.get("assumptions", {})
+        posture_txt = (f", and shifts the assessment posture {econ['posture_now']} → {econ['posture_floor']}"
+                       if econ.get("posture_now") != econ.get("posture_floor") else "")
+        E.append(Paragraph("Audit-scope economics", h2))
+        E.append(Paragraph(
+            f"PCI audit surface today: <b>{econ['in_scope_now']}</b> in-scope (CDE) systems — assessment "
+            f"posture <b>{econ['posture_now']}</b>. The data-permitted floor, if the entire true-PAN-source "
+            f"front is tokenized, is <b>{econ['achievable_floor']}</b> systems "
+            f"(<b>{econ['removable']}</b> removable), moving effort from "
+            f"<b>{econ['effort_now']['qsa_days']}</b> to <b>{econ['effort_floor']['qsa_days']}</b> "
+            f"assessor-days (~{econ['cost_saving']:,} estimated saving{posture_txt}). "
+            f"Figures are labeled estimates: {ass.get('qsa_day_rate', 0):,.0f}/assessor-day, "
+            f"{ass.get('days_per_cde_system')} day per CDE system, {ass.get('days_per_connected')} day per "
+            f"connected-to system, ROC above {ass.get('roc_threshold', 0):,} in-scope. Floor = current scope "
+            f"minus the maximum fully-descoped count on the saturation curve.", body))
+
     E.append(Paragraph("Executive summary", h2))
     E.append(Paragraph(result.explanation, body))
 
@@ -177,6 +209,23 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
         f"narrowed). {imp.get('retained_via_detokenization_count', 0)} system(s) "
         f"genuinely need PAN and remain in the CDE, de-tokenizing via centralized RISE/APG services.", body))
 
+    # PCI scope categories + requirement families (v4.0.1)
+    cats = getattr(result, "categories", {}) or {}
+    if cats.get("counts"):
+        c = cats["counts"]
+        E.append(Paragraph("PCI scope categories (v4.0.1)", h2))
+        E.append(Paragraph(
+            f"Under the three official PCI SSC categories: <b>{c.get('cde', 0)}</b> in scope (CDE — handle "
+            f"cardholder data), <b>{c.get('connected', 0)}</b> connected-to (can affect a CDE system, also in "
+            f"scope), and <b>{c.get('out', 0)}</b> out of scope. Tokenizing a true source moves systems "
+            f"CDE → connected-to → out. The v4.0.1 requirement families triggered across in-scope systems:", body))
+        labels, fc = cats.get("family_labels", {}), cats.get("family_counts", {})
+        if fc:
+            frows = [["Requirement family", "Systems triggering"]]
+            for k, v in sorted(fc.items(), key=lambda kv: -kv[1]):
+                frows.append([labels.get(k, k), str(v)])
+            E.append(_pdf_table(frows, [128 * mm, 34 * mm]))
+
     # embedded graph
     try:
         img = _graph_png(art, scores, result.viz)
@@ -203,6 +252,20 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     E.append(Paragraph("Ranked by downstream reach (distribution blast radius). Solo descope = systems freed if only that source "
                        "is tokenized; it is small everywhere because downstream systems are fed by several PAN sources, which is "
                        "why the minimum-intervention set (above) matters more than any single source.", small))
+
+    # segmentation choke points (alternative lever)
+    seg = (getattr(result, "structure", {}) or {}).get("segmentation_candidates") or []
+    if seg:
+        E.append(Paragraph("Segmentation choke points (alternative lever)", h2))
+        E.append(Paragraph(
+            "Articulation points of the in-scope PAN subgraph: network-isolating the PAN feed at one of these "
+            "removes its whole downstream branch from CDE scope — the other canonical scope-reduction lever "
+            "besides tokenization.", body))
+        srows = [["System", "Branch isolated", "Downstream reach", "Role"]]
+        for s in seg[:10]:
+            srows.append([s["system"], str(s["branch_size"]), str(s.get("downstream_reach", 0)),
+                          "true source" if s.get("is_true_source") else "relay"])
+        E.append(_pdf_table(srows, [34 * mm, 36 * mm, 36 * mm, 30 * mm]))
 
     # hidden PCI
     E.append(Paragraph("Hidden PCI — clear PAN in non-PCI-flagged systems", h2))
@@ -272,20 +335,25 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
     ], [38, 26])
 
     # Systems
+    cat_node = (getattr(result, "categories", {}) or {}).get("per_node", {})
     rows = []
     for n in result.viz.get("nodes", []):
         # NOTE: read the keys _viz_payload actually emits (tier/reach/scope_prov/true_source),
         # not the analytics-internal names — that mismatch is what left these columns blank.
+        cat = n.get("category") or cat_node.get(n["id"], {}).get("category") or ""
+        cat_label = {"cde": "CDE (in scope)", "connected": "connected-to", "out": "out of scope"}.get(cat, cat)
+        reqs = n.get("triggered_requirements") or cat_node.get(n["id"], {}).get("families", [])
         rows.append([n["id"], n.get("risk"), n.get("tier"), n.get("reach"),
                      "yes" if n.get("carries_pan") else "no", "yes" if n.get("in_scope") else "no",
                      (n.get("scope_prov") or ("out of scope" if not n.get("in_scope") else "")),
+                     cat_label, ", ".join(reqs),
                      "yes" if n.get("hidden_pci") else "no",
                      "yes" if n.get("true_source") else "no"])
     rows.sort(key=lambda r: -(r[1] or 0))
     sheet(wb.create_sheet("Systems"),
           ["System", "Risk", "Sensitivity tier", "Downstream reach", "Carries PAN", "In scope",
-           "Scope basis", "Hidden PCI", "True source"], rows,
-          [12, 8, 14, 16, 12, 10, 18, 11, 12])
+           "Scope basis", "PCI category", "Triggered requirements", "Hidden PCI", "True source"], rows,
+          [12, 8, 14, 16, 12, 10, 18, 16, 30, 11, 12])
 
     # Heavy hitters
     sheet(wb.create_sheet("HeavyHitters"),
@@ -338,6 +406,49 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
             ", ".join(row.get("solo_systems", []))]
            for row in exp.get("per_source", [])],
           [14, 16, 22, 14, 16, 22, 8, 48])
+
+    # Economics — audit-scope cost model (current vs achievable floor)
+    econ = getattr(result, "economics", {}) or {}
+    if econ.get("in_scope_now"):
+        ass = econ.get("assumptions", {})
+        sheet(wb.create_sheet("Economics"), ["Metric", "Value"], [
+            ["In PCI scope now (CDE)", econ["in_scope_now"]],
+            ["Achievable floor (full tokenization)", econ["achievable_floor"]],
+            ["Systems removable from scope", econ["removable"]],
+            ["Assessment posture now", econ["posture_now"]],
+            ["Assessment posture at floor", econ["posture_floor"]],
+            ["Assessor-days now", econ["effort_now"]["qsa_days"]],
+            ["Assessor-days at floor", econ["effort_floor"]["qsa_days"]],
+            ["Est. cost now", econ["effort_now"]["est_cost"]],
+            ["Est. cost at floor", econ["effort_floor"]["est_cost"]],
+            ["Est. saving", econ["cost_saving"]],
+            ["[assumption] rate / assessor-day", ass.get("qsa_day_rate")],
+            ["[assumption] days / CDE system", ass.get("days_per_cde_system")],
+            ["[assumption] days / connected-to system", ass.get("days_per_connected")],
+            ["[assumption] ROC threshold (in-scope)", ass.get("roc_threshold")],
+        ], [40, 26])
+
+    # ScopeCategories — counts + requirement-family tallies (v4.0.1)
+    cats = getattr(result, "categories", {}) or {}
+    if cats.get("counts"):
+        c = cats["counts"]
+        labels, fc = cats.get("family_labels", {}), cats.get("family_counts", {})
+        crows = [["In scope (CDE)", c.get("cde", 0)],
+                 ["Connected-to (also in scope)", c.get("connected", 0)],
+                 ["Out of scope", c.get("out", 0)], ["", ""]]
+        for k, v in sorted(fc.items(), key=lambda kv: -kv[1]):
+            crows.append([labels.get(k, k), v])
+        sheet(wb.create_sheet("ScopeCategories"), ["Category / requirement family", "Systems"],
+              crows, [56, 12])
+
+    # Segmentation — articulation choke points and the branch each would isolate
+    seg = (getattr(result, "structure", {}) or {}).get("segmentation_candidates") or []
+    if seg:
+        sheet(wb.create_sheet("Segmentation"),
+              ["System", "Branch isolated", "Downstream reach", "Risk", "Role"],
+              [[s["system"], s["branch_size"], s.get("downstream_reach", 0), s.get("risk", 0),
+                "true source" if s.get("is_true_source") else "relay"] for s in seg],
+              [14, 16, 18, 10, 14])
 
     out = io.BytesIO(); wb.save(out); out.seek(0)
     return out.read()

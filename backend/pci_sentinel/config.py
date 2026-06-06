@@ -35,6 +35,32 @@ class ScoringWeights:
             raise ValueError(f"Scoring weights must sum to 1.0; got {total:.4f}")
 
 
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+@dataclass(frozen=True)
+class CostModel:
+    """Parameters for the audit-scope cost model (scope_economics). Every value is a
+    LABELED ESTIMATE, overridable via environment, and surfaced on screen in the
+    `assumptions` block — never presented as an organization's real figures.
+
+      * qsa_day_rate         — blended assessor/internal day rate (currency-agnostic).
+      * days_per_cde_system  — effort to assess one in-scope (CDE) system.
+      * days_per_connected   — effort to assess one connected-to/impacting system.
+      * roc_threshold        — in-scope count above which the posture is a full ROC
+                               rather than a self-assessment (SAQ-D); crossing it on
+                               the way to the floor is a qualitative win to highlight.
+    """
+    qsa_day_rate: float = field(default_factory=lambda: _env_float("PCISENTINEL_QSA_DAY_RATE", 2500.0))
+    days_per_cde_system: float = field(default_factory=lambda: _env_float("PCISENTINEL_DAYS_PER_CDE", 0.5))
+    days_per_connected: float = field(default_factory=lambda: _env_float("PCISENTINEL_DAYS_PER_CONN", 0.15))
+    roc_threshold: int = field(default_factory=lambda: _env_int("PCISENTINEL_ROC_THRESHOLD", 1000))
+
+
 @dataclass(frozen=True)
 class Settings:
     # Data-flow edge convention. The source columns define:
@@ -53,6 +79,7 @@ class Settings:
     tier_none: int = 0
 
     weights: ScoringWeights = field(default_factory=ScoringWeights)
+    cost: CostModel = field(default_factory=CostModel)
 
     # Provenance labels (kept first-class per rubric criterion #5).
     PROV_METADATA: str = "metadata"   # DS1/DS2/DS3 — authoritative BAM

@@ -675,17 +675,24 @@ def hidden_scope(G) -> dict:
     Splunk finding, the app's stated source, and how far the leaked PAN then
     propagates) so each BAM miss is auditable, not just counted."""
     H = _flatten(G)
+    from . import pci_requirements as req
     hidden, detail = [], []
     for n, d in G.nodes(data=True):
         if d.get("pan_in_logs_observed") and not d.get("pci_flag"):
             hidden.append(n)
             reach = len(nx.descendants(H, n)) if n in H else 0
+            # A hidden-PCI system handles clear PAN, so it is a CDE system with NO
+            # PCI controls applied — an active v4.0.1 gap, not merely missing scope.
+            fams = req.families_for({**dict(d), "carries_pan": True, "pan_in_logs": True}, "cde")
             detail.append({
                 "system": n,
                 "name": d.get("app_name", ""),
                 "downstream_reach": reach,            # how far the leaked PAN can travel onward
                 "stated_source": d.get("splunk_stated_source", ""),
                 "finding": d.get("splunk_finding", "") or "True PAN in logs",
+                "triggered_requirements": fams,        # v4.0.1 families it should satisfy but does not
+                "risk_note": "Clear PAN with no PCI controls applied — Req 3/4 (unprotected), "
+                             "Req 10 (PAN in logs), Req 11 (untested).",
             })
     hidden.sort()
     detail.sort(key=lambda x: (-x["downstream_reach"], x["system"]))
@@ -852,3 +859,183 @@ def graph_structure_metrics(G, pan_sources: set, scores: dict, hh: list) -> dict
         "pan_subgraph_edges": P.number_of_edges(),
         "weight_sensitivity": weight_sensitivity(scores),
     }
+
+
+# ============================================================================
+# DECISION LAYER (added): scope categories, requirement mapping, cost economics,
+# segmentation candidates, and an aggregated Sankey payload. All deterministic.
+# ============================================================================
+
+def scope_categories(G, pan_sources: set, scope: set, scores: dict) -> dict:
+    """Classify every system into the three official PCI SSC scope categories and
+    attach the v4.0.1 requirement families it triggers (see pci_requirements).
+
+      * CDE          — in PCI scope: it receives/processes/transmits CHD. In a
+                       PAN-data-flow graph, every in-scope node handles CHD, so
+                       `scope` == the CDE set.
+      * connected-to — NOT in scope, but has a data-flow edge (either direction)
+                       touching a CDE node, so it could affect a CDE system.
+      * out-of-scope — neither.
+
+    Tokenizing a true source moves named systems CDE -> connected-to -> out; that
+    movement is the business benefit the cost model (scope_economics) prices.
+    """
+    from . import pci_requirements as req
+    H = _flatten(G)
+    scope = set(scope)
+
+    cat = {}
+    for n in H.nodes():
+        if n in scope:
+            cat[n] = "cde"
+    for n in H.nodes():
+        if n in cat:
+            continue
+        neighbours = set(H.successors(n)) | set(H.predecessors(n))
+        cat[n] = "connected" if (neighbours & scope) else "out"
+
+    per_node, fam_counts = {}, {}
+    for n in H.nodes():
+        fams = req.families_for(H.nodes[n], cat[n])
+        per_node[n] = {"category": cat[n], "families": fams}
+        for f in fams:
+            fam_counts[f] = fam_counts.get(f, 0) + 1
+
+    counts = {
+        "cde": sum(1 for c in cat.values() if c == "cde"),
+        "connected": sum(1 for c in cat.values() if c == "connected"),
+        "out": sum(1 for c in cat.values() if c == "out"),
+    }
+    return {
+        "per_node": per_node,
+        "counts": counts,
+        "family_counts": fam_counts,
+        "family_labels": req.FAMILIES,
+    }
+
+
+def scope_economics(categories: dict, saturation: dict, scores: dict) -> dict:
+    """Translate scope into audit effort/cost: current state vs the achievable floor.
+
+    The floor is the smallest CDE the data permits via tokenization: scope_before
+    minus the maximum fully-descoped count on the saturation curve (tokenizing the
+    whole true-source front). Effort scales with system count by category at a
+    configurable QSA-day rate. Every constant is a LABELED ESTIMATE surfaced in
+    `assumptions` and overridable via env (see config.CostModel) — never presented
+    as the organization's real numbers.
+    """
+    c = SETTINGS.cost
+    cnt = categories.get("counts", {})
+    cde_now = cnt.get("cde", 0)
+    conn = cnt.get("connected", 0)
+
+    def effort(cde, connected):
+        days = cde * c.days_per_cde_system + connected * c.days_per_connected
+        return {"qsa_days": round(days, 1), "est_cost": round(days * c.qsa_day_rate)}
+
+    curve = (saturation or {}).get("curve", [])
+    max_descoped = max((p.get("fully_descoped", 0) for p in curve), default=0)
+    before = (saturation or {}).get("scope_before", cde_now)
+    floor_cde = max(0, before - max_descoped)
+
+    cur = effort(cde_now, conn)
+    flr = effort(floor_cde, conn)
+    return {
+        "in_scope_now": cde_now,
+        "achievable_floor": floor_cde,
+        "removable": max(0, cde_now - floor_cde),
+        "posture_now": "ROC" if cde_now > c.roc_threshold else "SAQ-D",
+        "posture_floor": "ROC" if floor_cde > c.roc_threshold else "SAQ-D",
+        "effort_now": cur,
+        "effort_floor": flr,
+        "cost_saving": cur["est_cost"] - flr["est_cost"],
+        "assumptions": {
+            "qsa_day_rate": c.qsa_day_rate,
+            "days_per_cde_system": c.days_per_cde_system,
+            "days_per_connected": c.days_per_connected,
+            "roc_threshold": c.roc_threshold,
+        },
+    }
+
+
+def segmentation_candidates(G, pan_sources: set, scope: set, scores: dict, top_k: int = 10) -> list:
+    """Articulation points of the in-scope PAN subgraph, ranked by the size of the
+    branch they would isolate. Segmenting (network-isolating) the PAN feed at such a
+    choke point removes its whole downstream branch from CDE scope — the second
+    canonical PCI scope-reduction lever besides tokenization.
+
+    Reuses the same articulation-point computation as graph_structure_metrics, adding
+    the branch size (descendants within scope) so it reads as an ACTION, not a metric.
+    """
+    H = _flatten(G)
+    scope = set(scope)
+    P = H.subgraph(scope).copy()
+    if P.number_of_nodes() == 0:
+        return []
+    try:
+        arts = set(nx.articulation_points(P.to_undirected()))
+    except Exception:
+        return []
+    rows = []
+    for a in arts:
+        branch = nx.descendants(P, a)
+        rows.append({
+            "system": a,
+            "branch_size": len(branch),
+            "downstream_reach": scores.get(a, {}).get("downstream_reach", 0),
+            "risk": scores.get(a, {}).get("risk", 0.0),
+            "is_true_source": bool(scores.get(a, {}).get("is_true_source", False)),
+        })
+    rows.sort(key=lambda r: (-r["branch_size"], -r["downstream_reach"]))
+    return rows[:top_k]
+
+
+def sankey_payload(G, pan_sources: set, scope: set, scores: dict, max_sources: int = 8) -> dict:
+    """Aggregated 3-band PAN flow for a legible Sankey (true sources -> relays ->
+    terminal consumers). Aggregation keeps it readable at enterprise scale: the top
+    `max_sources` origins by reach are shown individually, the rest bucketed as
+    'other sources'. Link value = number of in-scope systems on that path.
+
+    Bands:
+      0  true PAN sources (origins)
+      1  relays — in scope, forward PAN to another in-scope system
+      2  terminal consumers — in scope, no in-scope successor
+    """
+    H = _flatten(G)
+    scope = set(scope)
+    origins = _true_pan_sources(H, set(pan_sources))
+    by_reach = sorted(origins, key=lambda s: -len(nx.descendants(H, s)))
+    top = by_reach[:max_sources]
+    rest = by_reach[max_sources:]
+
+    def forwards(n):
+        return any(m in scope for m in H.successors(n))
+
+    nodes = [{"id": f"src:{s}", "label": s, "band": 0,
+              "reach": scores.get(s, {}).get("downstream_reach", 0)} for s in top]
+    if rest:
+        nodes.append({"id": "src:other", "label": f"{len(rest)} other sources", "band": 0})
+    nodes += [
+        {"id": "relays", "label": "relays (carry & forward PAN)", "band": 1},
+        {"id": "consumers", "label": "terminal consumers", "band": 2},
+    ]
+
+    links = []
+    groups = [(f"src:{s}", [s]) for s in top]
+    if rest:
+        groups.append(("src:other", rest))
+    for sid, members in groups:
+        reached = set()
+        for x in members:
+            reached |= (nx.descendants(H, x) & scope)
+        relays = {n for n in reached if forwards(n)}
+        cons = reached - relays
+        if relays:
+            links.append({"source": sid, "target": "relays", "value": len(relays)})
+        if cons:
+            links.append({"source": sid, "target": "consumers", "value": len(cons)})
+    relay_to_consumer = sum(1 for n in scope if forwards(n))
+    if relay_to_consumer:
+        links.append({"source": "relays", "target": "consumers", "value": relay_to_consumer})
+    return {"nodes": nodes, "links": links,
+            "source_count": len(origins), "scope": len(scope)}

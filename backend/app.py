@@ -41,6 +41,7 @@ def _full(r):
         "impact": r.impact, "cycles": r.cycles, "unresolved_signals_sample": r.unresolved_signals,
         "explanation": r.explanation, "audit": r.audit, "structure": r.structure,
         "plan": r.plan,
+        "categories": r.categories, "economics": r.economics, "sankey": r.sankey,
     }
 
 

@@ -33,6 +33,7 @@ snap = {
     "agents": agents_mod.ROSTER,
     "suggested_questions": chat_mod.suggested_questions(r),
     "plan": r.plan, "whatif_top3": whatif_top3, "structure": r.structure,
+    "categories": r.categories, "economics": r.economics, "sankey": r.sankey,
 }
 
 for out in sys.argv[1:]:
