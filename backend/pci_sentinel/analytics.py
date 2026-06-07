@@ -451,7 +451,8 @@ def source_exposure_impact(G, pan_sources: set, scores: dict, top_k: int = 25) -
     }
 
 
-def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25) -> list:
+def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25,
+                             candidate_k: int | None = None) -> list:
     """Greedy cumulative descope curve: tokenize true sources in greedy max-marginal
     order and record, at each step, how many systems are FULLY descoped and how many
     have lost a clear-PAN feed (exposure narrowed). THIS is the headline finding — it
@@ -463,7 +464,15 @@ def cumulative_descope_curve(G, pan_sources: set, scores: dict, max_k: int = 25)
     origins = _true_pan_sources(H, set(pan_sources))
     # candidate ordering = origins by reach (interpretable, bounds cost)
     cache = {s: ({s} | nx.descendants(H, s)) for s in origins}
-    candidates = sorted(origins, key=lambda s: -len(cache[s]))[:max_k]
+    # The candidate POOL is independent of the step budget `max_k`. Greedy must be
+    # free to choose ANY true source at every step; tying the pool to `max_k` (as a
+    # prior version did) silently shrank the search whenever a caller passed a small
+    # budget — e.g. the optimizer's gap baseline calls this with max_k=10, which
+    # truncated the pool to the top-10 origins by reach and made this curve disagree
+    # with the all-origins roadmap, manufacturing a fake greedy-vs-optimal gap. The
+    # pool now defaults to every origin; `candidate_k` only caps it for speed at scale.
+    pool_n = len(origins) if candidate_k is None else candidate_k
+    candidates = sorted(origins, key=lambda s: -len(cache[s]))[:pool_n]
 
     def scope_after(tok):
         rem = origins - set(tok)

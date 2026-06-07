@@ -274,3 +274,48 @@ def test_scope_economics_floor_bounded():
     assert econ["achievable_floor"] <= econ["in_scope_now"]
     assert econ["effort_floor"]["qsa_days"] <= econ["effort_now"]["qsa_days"]
     assert econ["cost_saving"] >= 0
+
+
+# ---- V-021 optimizer greedy baseline == shipped roadmap greedy (anti-contradiction) ----
+def _sample_art():
+    """Build from the bundled sample CSVs; skip if they are not present (e.g. on the
+    air-gapped office box where only the real dataset lives)."""
+    import os, glob
+    here = os.path.dirname(__file__)
+    sample = os.path.abspath(os.path.join(here, "..", "..", "sample_data"))
+    paths = sorted(glob.glob(os.path.join(sample, "*.csv")))
+    if not paths:
+        pytest.skip("sample_data CSVs not available in this environment")
+    files = []
+    for p in paths:
+        with open(p, encoding="utf-8-sig") as fh:
+            files.append((os.path.basename(p), fh.read()))
+    art = build_graph(ingest_files(files))
+    return art, compute_scores(art.G)
+
+
+def test_greedy_baselines_agree_across_callers():
+    """The optimizer's greedy gap-baseline (descope_frontier, k_max=10) MUST equal the
+    shipped roadmap greedy (cumulative_descope_curve, max_k=25) at every shared budget.
+
+    Regression: a prior version tied the candidate POOL size to `max_k`, so the frontier
+    silently searched only the top-10 origins by reach while the roadmap searched all of
+    them. The two greedy curves then disagreed (e.g. 29 vs 30 systems freed at k=6) across
+    the XLSX TokenizationPlan and Optimization sheets and the PDF, manufacturing an
+    optimal-vs-greedy gap the roadmap itself contradicted. The candidate pool is now
+    independent of the step budget; this guards the property."""
+    from pci_sentinel import optimize
+    art, scores = _sample_art()
+    G, pan = art.G, art.pan_sources
+    roadmap = {r["k"]: r["cumulative_descoped"]
+               for r in analytics.cumulative_descope_curve(G, pan, scores, max_k=25)}
+    fr = optimize.descope_frontier(G, pan, scores, k_max=10)
+    for row in fr["frontier"]:
+        k = row["k"]
+        if k in roadmap:
+            assert row["greedy_descoped"] == roadmap[k], (
+                f"greedy baseline disagrees with the shipped roadmap at k={k}: "
+                f"frontier reports {row['greedy_descoped']}, roadmap reports {roadmap[k]}")
+        # an exact optimum can never fall below greedy, and every gap is non-negative
+        assert row["optimal_descoped"] >= row["greedy_descoped"]
+        assert row["gap"] >= 0
