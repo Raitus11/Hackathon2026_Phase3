@@ -171,6 +171,18 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     except Exception:
         pass
 
+    # Certified-OPTIMAL tokenization frontier (exact MILP / branch-and-bound) plus the
+    # greedy optimality gap. This is the rigorous answer to the supermodularity caveat:
+    # rather than rely on greedy (which has no (1-1/e) guarantee under conjunctive
+    # AND-coverage), we solve the problem to proven optimality and quantify how far
+    # greedy falls short. Guarded so it can only blank its own panel.
+    try:
+        from . import optimize as _opt
+        plan["optimization"] = _opt.descope_frontier(
+            art.G, art.pan_sources, scores, k_max=10)
+    except Exception:
+        pass
+
     # ---- decision layer: scope categories, requirement mapping, cost economics,
     # segmentation candidates, Sankey. Each guarded independently so a failure in one
     # can only blank its own panel, never the spine.
@@ -197,6 +209,16 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
             art.G, art.pan_sources, scope, scores)
     except Exception:
         structure = analytics.graph_structure_metrics(art.G, art.pan_sources, scores, hh)
+
+    # Max-flow / min-cut segmentation lever (Menger): the minimum integration edges to
+    # sever to ring-fence each high-value target from every PAN source. Orthogonal to
+    # tokenization; guarded so it can only blank its own panel.
+    try:
+        from . import optimize as _opt
+        structure["segmentation_min_cut"] = _opt.segmentation_min_cut(
+            art.G, art.pan_sources, top=6)
+    except Exception:
+        pass
 
     return RunResult(
         quality=ing.quality, graph_stats=art.stats, dag_stats=dagr.stats,

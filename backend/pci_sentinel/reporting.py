@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 from . import analytics
+from . import report_charts
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
@@ -37,6 +38,27 @@ LINE = colors.HexColor("#d6deea")
 
 def _ts():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def _rl(buf, w_mm, h_mm):
+    """Wrap a PNG BytesIO as a reportlab Image at the given mm box (preserve ratio)."""
+    return RLImage(buf, width=w_mm * mm, height=h_mm * mm, kind="proportional")
+
+
+def _two_col(left_buf, right_buf, w_mm=83, h_mm=64):
+    """Two charts side by side in a borderless table."""
+    cells = [[_rl(left_buf, w_mm, h_mm) if left_buf else "",
+              _rl(right_buf, w_mm, h_mm) if right_buf else ""]]
+    t = Table(cells, colWidths=[(w_mm + 3) * mm, (w_mm + 3) * mm])
+    t.setStyle(TableStyle([("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                           ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                           ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    return t
+
+
+def _caption(text, style):
+    return Paragraph(text, style)
 
 
 def _pdf_table(rows, widths):
@@ -98,6 +120,11 @@ def _graph_png(art, scores, viz, max_nodes=70) -> io.BytesIO:
 
 # ----------------------------------------------------------------------------- PDF
 def build_pdf(result, art, scores, plan: dict) -> bytes:
+    # The enriched plan (optimization frontier, source_exposure, block_comparison,
+    # saturation_curve) is attached to result.plan in finalize(); callers may pass only
+    # the raw minimal_tokenization_plan. Merge so the report always has the rich fields,
+    # with the caller's plan taking precedence on shared core keys.
+    plan = {**(getattr(result, "plan", {}) or {}), **(plan or {})}
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=16 * mm, bottomMargin=14 * mm,
                             leftMargin=16 * mm, rightMargin=16 * mm,
@@ -140,6 +167,38 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
                        f"<b>{br.get('inferred_only')}</b> are inferred-only candidate scope from survey/Splunk "
                        f"signals (kept separate, never treated as ground truth).", small))
 
+    # ---------------------------------------------------------------- visual decision dashboard
+    # Business-analyst figures: every chart answers one question and labels the number AND %.
+    E.append(Paragraph("Decision dashboard", h2))
+    try:
+        c_comp = report_charts.chart_scope_composition(result)
+        if c_comp:
+            E.append(_rl(c_comp, 170, 58))
+            E.append(_caption("Where the in-scope number comes from, and how each system is classified "
+                              "under PCI DSS v4.0.1 (CDE / connected-to / out).", small))
+    except Exception:
+        pass
+    try:
+        c_red = report_charts.chart_scope_reduction(result)
+        c_eco = report_charts.chart_economics(result)
+        if c_red or c_eco:
+            E.append(Spacer(1, 4))
+            E.append(_two_col(c_red, c_eco, w_mm=82, h_mm=62))
+            E.append(_caption("Left: systems removable from PCI scope if the full true-source front is "
+                              "tokenized. Right: the assessor-day and cost effect at current assumptions "
+                              "(all figures labelled estimates).", small))
+    except Exception:
+        pass
+    try:
+        c_hid = report_charts.chart_hidden_scope(result)
+        if c_hid:
+            E.append(Spacer(1, 4))
+            E.append(_rl(c_hid, 170, 70))
+            E.append(_caption("Systems BAM records as PCI=No but Splunk shows carrying clear PAN, ranked by "
+                              "how far that leaked PAN can propagate — the scope the catalogue misses.", small))
+    except Exception:
+        pass
+
     # audit-scope economics — the business headline (in scope -> floor -> cost)
     econ = getattr(result, "economics", {}) or {}
     if econ.get("in_scope_now"):
@@ -164,15 +223,49 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
 
     # tokenization leverage
     E.append(Paragraph("Where tokenization has the greatest leverage", h2))
+
+    # CERTIFIED-OPTIMAL frontier (centrepiece): exact solver, not greedy.
+    opt = plan.get("optimization") or {}
+    fr = opt.get("frontier") or []
+    if fr:
+        try:
+            c_fr = report_charts.chart_optimal_vs_greedy(opt)
+            if c_fr:
+                E.append(_rl(c_fr, 170, 80))
+        except Exception:
+            pass
+        ms = opt.get("milestones_min_sources", {})
+        best = max(fr, key=lambda r: r.get("gap", 0))
+        E.append(Paragraph(
+            f"We do not settle for a greedy heuristic here. Because a system descopes only when EVERY true "
+            f"PAN source reaching it emits CRN (a conjunctive condition), the freed-systems objective is "
+            f"<b>supermodular</b> — the (1−1/e) greedy guarantee does not hold. Instead the minimum-intervention "
+            f"problem is solved to <b>certified optimality</b> as a 0/1 integer program "
+            f"(<i>{opt.get('method', 'exact')}</i>): maximize systems fully descoped subject to a budget of k "
+            f"tokenized sources. The curve above is the provably-best scope reduction at every budget. "
+            f"At k={best.get('k')}, the optimal plan frees <b>{best.get('optimal_descoped')}</b> systems versus "
+            f"greedy's <b>{best.get('greedy_descoped')}</b> — a <b>{best.get('gap')}-system</b> gap greedy never "
+            f"finds, because that win only materializes once a whole set of sources is tokenized together. "
+            f"Minimum sources to free 50% of descopable systems: <b>{ms.get('50pct', '—')}</b>; to free 100%: "
+            f"<b>{ms.get('100pct', '—')}</b>.", body))
+        rows = [["Budget k", "Optimal descoped", "Greedy descoped", "Gap", "% of descopable"]]
+        for r in fr[1:]:
+            rows.append([str(r["k"]), str(r["optimal_descoped"]), str(r["greedy_descoped"]),
+                         (f"+{r['gap']}" if r["gap"] else "0"), f"{r['pct_of_descopable']}%"])
+        E.append(_pdf_table(rows, [22 * mm, 38 * mm, 38 * mm, 18 * mm, 34 * mm]))
+        E.append(_caption("Optimal = provably-best source set at that budget (exact solver, verified against "
+                          "the engine's clean-stream recomputation). Greedy = incremental max-marginal pick. "
+                          "Where the gap is large, a greedy roadmap would under-deliver at that budget.", small))
+        E.append(Spacer(1, 6))
+
     E.append(Paragraph(
-        f"A minimum-intervention optimizer (greedy max-marginal full-descope over the true PAN sources) "
-        f"finds that tokenizing <b>{plan.get('k')}</b> source system(s) fully descopes "
+        f"As an interpretable baseline, a greedy max-marginal optimizer over the true PAN sources "
+        f"tokenizes <b>{plan.get('k')}</b> source system(s) to fully descope "
         f"<b>{plan.get('total_descoped')}</b> of {plan.get('descopable')} descopable systems "
         f"({plan.get('before')} → {plan.get('after')} in PCI scope). A system goes fully safe only when every "
-        f"true PAN source reaching it emits CRN — a conjunctive condition, so full descope ramps only once most "
-        f"of the source front is tokenized (the curve below). Greedy is used as a transparent heuristic: the "
-        f"freed-systems objective is supermodular under this AND-coverage, so the (1−1/e) submodular guarantee "
-        f"does not apply and is not claimed.", body))
+        f"true PAN source reaching it emits CRN — the conjunctive condition that makes full descope ramp only "
+        f"once most of the source front is tokenized (the curve below). Greedy is reported transparently as a "
+        f"heuristic; the certified optimum above is the defensible target.", body))
     # Cumulative descope curve (always populated, even when single-source full descope is 0).
     # Falls back to greedy steps if the curve is unavailable.
     curve = plan.get("cumulative_curve") or []
@@ -208,6 +301,18 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
         f"<b>{imp.get('parent_reduction', 0)}</b> have their true-source-parent count reduced (exposure "
         f"narrowed). {imp.get('retained_via_detokenization_count', 0)} system(s) "
         f"genuinely need PAN and remain in the CDE, de-tokenizing via centralized RISE/APG services.", body))
+
+    # per-source 'block this parent -> who benefits' scatter
+    try:
+        c_se = report_charts.chart_source_exposure(plan)
+        if c_se:
+            E.append(Spacer(1, 4))
+            E.append(_rl(c_se, 170, 76))
+            E.append(_caption("Each bubble is one true PAN source. Right = feeds more systems; higher = riskier; "
+                              "bigger bubble = more systems that lose a clear-PAN feed if it is tokenized. Green "
+                              "sources free at least one system on their own; amber narrow exposure only.", small))
+    except Exception:
+        pass
 
     # PCI scope categories + requirement families (v4.0.1)
     cats = getattr(result, "categories", {}) or {}
@@ -300,6 +405,7 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
 
 # ----------------------------------------------------------------------------- XLSX
 def build_xlsx(result, art, scores, plan: dict) -> bytes:
+    plan = {**(getattr(result, "plan", {}) or {}), **(plan or {})}
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
 
@@ -406,6 +512,33 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
             ", ".join(row.get("solo_systems", []))]
            for row in exp.get("per_source", [])],
           [14, 16, 22, 14, 16, 22, 8, 48])
+
+    # Optimization — certified-optimal vs greedy descope frontier (exact solver)
+    opt = plan.get("optimization") or {}
+    fr = opt.get("frontier") or []
+    if fr:
+        ws_o = wb.create_sheet("Optimization")
+        sheet(ws_o, ["Budget k", "Optimal descoped", "Greedy descoped", "Gap",
+                     "% of descopable", "Optimal source set"],
+              [[r["k"], r["optimal_descoped"], r["greedy_descoped"], r["gap"],
+                r["pct_of_descopable"], ", ".join(r.get("optimal_sources", []))] for r in fr],
+              [10, 18, 18, 8, 16, 60])
+        ws_o.append([])
+        ws_o.append(["Method", opt.get("method", "")])
+        ws_o.append(["Greedy efficiency at its halt point (%)", opt.get("greedy_efficiency_pct")])
+        ws_o.append(["Max greedy gap (systems)", opt.get("max_greedy_gap")])
+        ms = opt.get("milestones_min_sources", {})
+        for k, v in ms.items():
+            ws_o.append([f"Min sources to free {k}", v])
+
+    # Segmentation (min-cut) — edges to sever to ring-fence each high-value target
+    mc = (getattr(result, "structure", {}) or {}).get("segmentation_min_cut") or {}
+    if mc.get("cuts"):
+        sheet(wb.create_sheet("Segmentation_MinCut"),
+              ["Target system", "Min edges to sever", "Protects downstream reach", "Edges to sever (sample)"],
+              [[c["target"], c.get("min_cut_edges"), c.get("downstream_reach"),
+                "; ".join(f"{e[0]}->{e[1]}" for e in c.get("edges_to_sever", []))]
+               for c in mc["cuts"]], [16, 18, 24, 60])
 
     # Economics — audit-scope cost model (current vs achievable floor)
     econ = getattr(result, "economics", {}) or {}
