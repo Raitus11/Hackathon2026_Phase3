@@ -1553,12 +1553,26 @@ function VerdictBanner({ d, onTab, onPick }) {
       </div>
       <div className="text-sm text-dim mt-1.5 leading-relaxed">
         {fmt(h.systems_exposed_to_clear_pan)} systems sit in PCI scope ({h.scope_metadata_confirmed} confirmed · {h.scope_inferred_only} inferred).
-        {topDist && <> The widest PAN distributor is{' '}
-          <button onClick={() => onPick(topDist.system)} className="mono text-pan hover:underline">{topDist.system}</button>
-          {' '}(reaches {topDist.downstream_reach} systems).</>}
-        {topMiss && topMiss.downstream_reach > 0 && <> Strikingly, the widest <b>BAM-missed</b> distributor,{' '}
-          <button onClick={() => onPick(topMiss.system)} className="mono text-panhot hover:underline">{topMiss.system}</button>
-          {' '}(reaches {topMiss.downstream_reach} systems), is itself one of those misses.</>}
+        {topDist && (() => {
+          const sameTop = topMiss && topMiss.system === topDist.system
+          // When the widest distributor overall is itself a system BAM never flagged,
+          // state it once — that single fact IS the striking point. A prior version
+          // printed the distributor twice (reading as a tautology) whenever the widest
+          // overall and the widest BAM-missed system coincided; and "is itself one of
+          // those misses" was redundant on the widest BAM-missed system in any case.
+          return sameTop ? (
+            <> The widest PAN distributor,{' '}
+              <button onClick={() => onPick(topDist.system)} className="mono text-panhot hover:underline">{topDist.system}</button>
+              {' '}(reaches {topDist.downstream_reach} systems), is itself flagged <b>PCI = No</b> in BAM — the single most exposed distributor on the estate is scope the catalogue never recorded.</>
+          ) : (
+            <> The widest PAN distributor is{' '}
+              <button onClick={() => onPick(topDist.system)} className="mono text-pan hover:underline">{topDist.system}</button>
+              {' '}(reaches {topDist.downstream_reach} systems).
+              {topMiss && topMiss.downstream_reach > 0 && <> The widest distributor BAM never flagged is{' '}
+                <button onClick={() => onPick(topMiss.system)} className="mono text-panhot hover:underline">{topMiss.system}</button>
+                {' '}(reaches {topMiss.downstream_reach} systems) — unmanaged scope no compliance program is tracking.</>}</>
+          )
+        })()}
         {levers.length > 0 && <> Tokenizing the {levers.length} highest-leverage true sources
           ({levers.map((s, i) => <span key={s}><button onClick={() => onPick(s)} className="mono text-pan hover:underline">{s}</button>{i < levers.length - 1 ? ', ' : ''}</span>)})
           fully descopes <b className="text-safe">{imp.nodes_descoped}</b> and strips a clear-PAN feed from <b className="text-safe">{imp.feeds_removed ?? '—'}</b> more — full descope is small because the estate is saturated (every source reaches nearly all systems), which is the finding, not a failure.</>}

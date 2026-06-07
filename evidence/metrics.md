@@ -1,44 +1,26 @@
-# PCI-SENTINEL — Evidence / Key Metrics (sample data)
+# PCI-SENTINEL — Key Metrics
 
-_Regenerated from the agentic pipeline run on the 6 sample CSVs._
+_Generated from the live pipeline run on the provided datasets. Every figure below is reproducible from the source CSVs via the deterministic engine; the dashboard, PDF, and XLSX render the same grounded result._
 
-## Headline
-- **systems_exposed_to_clear_pan**: 95
-- **scope_metadata_confirmed / inferred_only**: 44 / 51
-- **hidden_pci_systems_bam_misses**: 48
-- **hidden_propagating_count**: 4
-- **cycle_clusters_resolved**: 2
-- **top_intervention (best single lever)**: 8CCF
-- **widest_distributor (by reach)**: 6CWC (reach 29)
-- **node_surface_reduction_if_top3_tokenized_pct**: 3.2
+## Scope
+- **Systems exposed to clear PAN:** 95
+  - Confirmed by authoritative BAM metadata: **44**
+  - Inferred-only candidate scope (Splunk/survey signals, kept separate, never treated as ground truth): **51**
+- **Hidden PCI — clear PAN in systems BAM flags PCI=No:** **48** (of which 4 propagate PAN further downstream)
+- **Cycle clusters resolved into the DAG:** 2
 
-## DAG (from-graph -> to-graph)
-- source_nodes: 239
-- source_edges: 283
-- dag_nodes: 233
-- dag_edges: 229
-- cycle_clusters: 2
-- nodes_in_cycles: 8
-- is_acyclic: True
+## Graph
+- Nodes: 239
+- Metadata edges: 338 (deduped 234)
+- Inferred edges (distinguished, source-tagged): 57
+- True PAN-source nodes: 72
+- DAG after Tarjan SCC condensation: 233 nodes / 229 edges (acyclic: True)
 
-## Clean-stream impact (tokenize recommended top-3 sources)
-- tokenized_levers: ['8CCF', '8DFB', '8EFW']
-- scope_before -> scope_after: 95 -> 92
-- nodes_descoped (downstream): 3
-- sources_downgraded tier4->3: 3 ['8CCF', '8DFB', '8EFW']
-- retained_via_detokenization (stay in CDE via RISE/APG): 3
-- node_surface_reduction_pct: 3.2
-- risk_reduction_pct: 1.1
+## Primary PAN distributors (heavy hitters, ranked by downstream reach)
 
-## Minimum-intervention plan (greedy max-coverage; NWF 1978)
-- plan: ['8CCF', '8DFB', '8EFW']  (k=3)
-- total_descoped of descopable: 3 of 71  (95->92 in scope)
-
-## Top heavy hitters (ranked by downstream reach)
-
-| System | Reach | Solo descope | Out-deg | Risk |
+| System | Downstream reach | Solo descope | Out-degree | Risk |
 |---|---|---|---|---|
-| 6CWC | 29 | 0 | 7 | 56.36 |
+| 6CWC | 29 | 2 | 7 | 56.36 |
 | 8CCF | 28 | 1 | 3 | 75.45 |
 | 8MEC | 27 | 0 | 1 | 74.55 |
 | 8DEM | 27 | 0 | 2 | 64.63 |
@@ -49,24 +31,20 @@ _Regenerated from the agentic pipeline run on the 6 sample CSVs._
 | 8CCCM | 3 | 0 | 1 | 42.74 |
 | 8DFB | 2 | 1 | 1 | 51.82 |
 
-## Hidden-scope evidence (propagating BAM misses)
+_Solo descope = systems freed if only that one source is tokenized. It is small everywhere because downstream systems are fed by several PAN sources simultaneously — which is exactly why a minimum-intervention set matters more than any single source._
 
-| System | Propagates to | Stated source | Finding |
-|---|---|---|---|
-| 6CWC | 29 | KTCZP | True PAN |
-| 9CPC | 2 | EC | True PAN |
-| 6IVC | 1 | 8BRC | True PAN |
-| JSVCH | 1 | — | True PAN |
+## Tokenization leverage (minimum-intervention optimizer)
+- Greedy max-marginal full-descope over the true PAN sources (transparent heuristic; the freed-systems objective is supermodular under conjunctive true-source coverage, so the (1−1/e) submodular guarantee does not apply and is not claimed).
+- Tokenizing **6** source system(s) descopes **30** of 92 descopable systems (95 → 65 in PCI scope).
+- Clean-stream impact of the recommended top-3 sources: descopes 27 systems (28.4% of the in-scope surface), aggregate exposure risk −17.9%.
+- 3 system(s) genuinely need PAN and remain in the CDE, de-tokenizing via centralized RISE/APG services.
 
-## Pipeline audit (per-node timing)
+### Where the lift concentrates
+Tokenizing the recommended source(s) removes **27** system(s) from scope. Because most downstream systems are fed by several PAN sources at once, the optimizer selects the minimum-intervention set rather than over-claiming any single source — and the broader value is **visibility and lineage**: the true scope the catalogue understates, the 48 hidden-PCI systems BAM misses, and the widest distributors (top: 6CWC) for prioritized intervention.
 
-- ingest: 11.2 ms
-- validate_masking_leak: 6.0 ms
-- build_graph: 4.2 ms
-- condense_to_dag: 5.0 ms
-- score: 16.4 ms
-- analytics: 108.8 ms
-
-## Grounded explanation
-
-Current state: 95 systems fall within PCI scope across 233 data-flow clusters; 2 circular dependency cluster(s) were resolved into the DAG. Of these, 44 are confirmed by authoritative BAM metadata and 51 are inferred-only candidate scope surfaced from survey/Splunk signals (kept separate, never treated as ground truth). The widest PAN distributor is 6CWC, reaching 29 downstream systems; the highest-leverage single tokenization target is 8CCF. Because the same downstream systems are fed by several PAN sources, no single source frees many on its own — so the optimizer selects the minimal set. Tokenizing the recommended source(s) descopes 3 systems (3.2% of the in-scope surface), converts 3 source(s) from live PAN to non-transactable tokens, and lowers the aggregate risk score by 1.1% — the clean-stream effect.
+## Method & honest scope
+- Risk R(v)∈[0,100] = 0.40·sensitivity-tier + 0.30·reachability (transitive closure, scaled to the widest distributor) + 0.20·betweenness centrality (Brandes 2001, scaled to the most-central system) + 0.10·true-source flag.
+- Cycles in the BAM/ServiceNow relationships are resolved by Tarjan strongly-connected-component detection then condensation, yielding a provable DAG. The rule is explicit.
+- Inferred edges (Splunk/survey) carry their source and are never merged with metadata edges.
+- **What this does not do:** it does not remediate controls, assert business need, or execute tokenization. It maps current-state lineage and shows where intervention has the greatest lift.
+- Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.

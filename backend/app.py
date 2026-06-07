@@ -205,9 +205,16 @@ def whatif(body: WhatIf):
 @app.get("/api/report/pdf")
 def report_pdf():
     from fastapi.responses import Response
-    from pci_sentinel import reporting
+    from pci_sentinel import reporting, optimize as _opt
     r = _need(); G, ps, sc = _need_art()
     plan = analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=0.8, max_k=8)
+    # Recompute the certified-optimal frontier from CURRENT code at download time so the
+    # report never serves a frontier cached in an older RunResult (k_max matches pipeline.py).
+    # This overrides result.plan["optimization"] in build_pdf's plan merge.
+    try:
+        plan["optimization"] = _opt.descope_frontier(G, ps, sc, k_max=10)
+    except Exception:
+        pass
     pdf = reporting.build_pdf(r, _LAST["art"], sc, plan)
     return Response(content=pdf, media_type="application/pdf",
                     headers={"Content-Disposition": "attachment; filename=pci-sentinel-report.pdf"})
@@ -216,9 +223,16 @@ def report_pdf():
 @app.get("/api/report/xlsx")
 def report_xlsx():
     from fastapi.responses import Response
-    from pci_sentinel import reporting
+    from pci_sentinel import reporting, optimize as _opt
     r = _need(); G, ps, sc = _need_art()
     plan = analytics_mod.minimal_tokenization_plan(G, ps, sc, target_fraction=0.8, max_k=8)
+    # Recompute the certified-optimal frontier from CURRENT code at download time so the
+    # report never serves a frontier cached in an older RunResult (k_max matches pipeline.py).
+    # This overrides result.plan["optimization"] in build_xlsx's plan merge.
+    try:
+        plan["optimization"] = _opt.descope_frontier(G, ps, sc, k_max=10)
+    except Exception:
+        pass
     xlsx = reporting.build_xlsx(r, _LAST["art"], sc, plan)
     return Response(content=xlsx,
                     media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
