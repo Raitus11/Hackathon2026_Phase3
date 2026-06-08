@@ -1,0 +1,1 @@
+python -B -c "import json,urllib.request; d=json.load(urllib.request.urlopen('http://localhost:8000/api/plan?target=0.8')); m=d.get('decision_memo',{}); print('generated=',m.get('generated')); print(m.get('text','<no memo>'))"
