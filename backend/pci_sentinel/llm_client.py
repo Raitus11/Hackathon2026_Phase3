@@ -1,24 +1,45 @@
 """Generic LLM abstraction.
 
-The inference provider and model are resolved at runtime from environment
-variables only; no provider name or model id is embedded in source. The
-deterministic engine never depends on this — the LLM is used solely to turn
-already-computed, grounded results into natural-language explanation (Hybrid
-Intelligence: deterministic work is verifiable; the model only narrates it).
+The inference backend, endpoint, credentials and model are resolved at runtime
+from environment variables only; no backend name, vendor name or model id is
+embedded in source. The deterministic engine never depends on this — the model
+is used solely to turn already-computed, grounded results into natural-language
+explanation (Hybrid Intelligence: deterministic work is verifiable; the model
+only narrates it).
+
+Backends (selected by PCISENTINEL_LLM_BACKEND):
+  offline   Templated, fully-grounded explanation built from the engine's own
+            numbers. Zero external dependencies. Default, and the safe fallback.
+  http      OpenAI-compatible REST endpoint (POST /chat/completions, bearer auth).
+  sdk       A pluggable Python client whose module and class are themselves named
+            in the environment, constructed with model_name=<MODEL> and invoked as
+            client.invoke(messages).content. Used for gated enterprise gateways
+            that perform their own token exchange / TLS from the same environment.
+
+Any value other than "offline" / "http" / "openai" selects the sdk backend, so a
+deployment may use whatever label it likes in its (un-shipped) .env. If the chosen
+backend is unavailable for any reason, the client degrades to offline so a run
+never breaks.
 
 Environment:
-  PCISENTINEL_LLM_BASE_URL   OpenAI-compatible endpoint of the chosen provider
-  PCISENTINEL_LLM_API_KEY    credential
-  PCISENTINEL_LLM_MODEL      model identifier (kept in config/env, never hard-coded)
+  PCISENTINEL_LLM_BACKEND     offline | http | sdk   (default: auto)
+  PCISENTINEL_LLM_MODEL       model identifier (kept in config/env, never hard-coded)
 
-If unset, the client runs in deterministic 'offline' mode and returns a
-templated, fully-grounded explanation built from the engine's own numbers, so
-the system is demonstrable with zero external dependencies.
+  # http backend
+  PCISENTINEL_LLM_BASE_URL    OpenAI-compatible endpoint
+  PCISENTINEL_LLM_API_KEY     bearer credential
+
+  # sdk backend
+  PCISENTINEL_LLM_SDK_MODULE  importable module that provides the client class
+  PCISENTINEL_LLM_SDK_CLASS   client class name; constructed with model_name=<MODEL>
+                              (the client reads its own endpoint / credentials /
+                              trust cert from the environment)
 """
 from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.request
 
 
@@ -27,31 +48,28 @@ class LLMClient:
         self.base_url = os.environ.get("PCISENTINEL_LLM_BASE_URL", "").rstrip("/")
         self.api_key = os.environ.get("PCISENTINEL_LLM_API_KEY", "")
         self.model = os.environ.get("PCISENTINEL_LLM_MODEL", "")
-        self.online = bool(self.base_url and self.api_key and self.model)
+        backend = os.environ.get("PCISENTINEL_LLM_BACKEND", "").strip().lower()
+        if not backend:
+            backend = "http" if (self.base_url and self.api_key and self.model) else "offline"
+        self.backend = backend
+        self.online = backend != "offline"
+        self._sdk = None
+        self._rate_limited_until = 0.0
+
+    # ---- public API (signatures unchanged) -------------------------------
 
     def explain(self, system_prompt: str, grounded_facts: dict) -> str:
         if not self.online:
             return self._offline(grounded_facts)
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": "Explain ONLY using these grounded facts; "
-                                            "do not invent numbers:\n" + json.dumps(grounded_facts, indent=2)},
-            ],
-            "temperature": 0.2,
-        }
-        req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
-            data=json.dumps(payload).encode(),
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                data = json.loads(r.read())
-            return data["choices"][0]["message"]["content"]
-        except Exception as e:  # noqa: BLE001 - never let narration break the run
-            return self._offline(grounded_facts) + f"\n\n[note: live explanation unavailable: {e}]"
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "Explain ONLY using these grounded facts; do not invent "
+                                        "numbers:\n" + json.dumps(grounded_facts, indent=2)},
+        ]
+        text = self._complete(messages)
+        if not text:
+            return self._offline(grounded_facts) + "\n\n[note: live explanation unavailable]"
+        return text
 
     def chat(self, question: str, facts: dict, history=None) -> str:
         """Answer a free-form question grounded ONLY in the computed facts."""
@@ -64,22 +82,94 @@ class LLMClient:
         sys = ("You are a PCI scope analyst. Answer the question using ONLY the JSON facts provided "
                "from a completed data-flow analysis. Cite system IDs where relevant. If the facts do "
                "not contain the answer, say so plainly — never invent systems, numbers, or edges.")
-        msgs = [{"role": "system", "content": sys}]
+        messages = [{"role": "system", "content": sys}]
         for h in (history or [])[-6:]:
             if h.get("role") in ("user", "assistant") and h.get("content"):
-                msgs.append({"role": h["role"], "content": str(h["content"])[:2000]})
-        msgs.append({"role": "user", "content": "FACTS:\n" + json.dumps(facts, indent=2) +
-                     "\n\nQUESTION: " + question})
-        payload = {"model": self.model, "messages": msgs, "temperature": 0.2}
+                messages.append({"role": h["role"], "content": str(h["content"])[:2000]})
+        messages.append({"role": "user", "content": "FACTS:\n" + json.dumps(facts, indent=2) +
+                         "\n\nQUESTION: " + question})
+        text = self._complete(messages)
+        if not text:
+            return ("Could not reach the inference provider. Try a scope, heavy-hitter, hidden-PCI, "
+                    "or per-system question.")
+        return text
+
+    # ---- backend dispatch -------------------------------------------------
+
+    def _complete(self, messages: list) -> str | None:
+        """Route to the configured backend; return text, or None so the caller falls back."""
+        if time.time() < self._rate_limited_until:
+            return None
+        try:
+            if self.backend in ("http", "openai"):
+                return self._http_complete(messages)
+            return self._sdk_complete(messages)
+        except Exception:  # noqa: BLE001 - narration must never break the run
+            return None
+
+    # ---- http backend (OpenAI-compatible REST) ---------------------------
+
+    def _http_complete(self, messages: list) -> str | None:
+        payload = {"model": self.model, "messages": messages, "temperature": 0.2}
         req = urllib.request.Request(
-            f"{self.base_url}/chat/completions", data=json.dumps(payload).encode(),
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"})
+            f"{self.base_url}/chat/completions",
+            data=json.dumps(payload).encode(),
+            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+        )
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 data = json.loads(r.read())
             return data["choices"][0]["message"]["content"]
         except Exception as e:  # noqa: BLE001
-            return f"Could not reach the inference provider ({e}). Try a scope, heavy-hitter, hidden-PCI, or per-system question."
+            if self._is_rate_limit(e):
+                self._rate_limited_until = time.time() + 60
+            return None
+
+    # ---- sdk backend (pluggable enterprise client) -----------------------
+
+    def _sdk_client(self):
+        if self._sdk is not None:
+            return self._sdk
+        # Optional: load endpoint / credentials / trust-cert into the environment
+        # for an SDK that reads them itself. Best-effort; absence is not an error.
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            import importlib
+            mod_name = os.environ.get("PCISENTINEL_LLM_SDK_MODULE", "")
+            cls_name = os.environ.get("PCISENTINEL_LLM_SDK_CLASS", "")
+            if not mod_name or not cls_name:
+                return None
+            client_cls = getattr(importlib.import_module(mod_name), cls_name)
+            self._sdk = client_cls(model_name=self.model) if self.model else client_cls()
+            return self._sdk
+        except Exception:  # noqa: BLE001 - missing SDK / bad config -> offline fallback
+            return None
+
+    def _sdk_complete(self, messages: list) -> str | None:
+        client = self._sdk_client()
+        if client is None:
+            return None
+        try:
+            result = client.invoke(messages)
+        except Exception as e:  # noqa: BLE001
+            if self._is_rate_limit(e):
+                self._rate_limited_until = time.time() + 60
+            return None
+        content = getattr(result, "content", None)
+        if content:
+            return content
+        return result if isinstance(result, str) else None
+
+    # ---- helpers ----------------------------------------------------------
+
+    @staticmethod
+    def _is_rate_limit(e: Exception) -> bool:
+        s = str(e).lower()
+        return "rate_limit" in s or "429" in s
 
     @staticmethod
     def _offline(f: dict) -> str:
