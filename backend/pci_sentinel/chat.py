@@ -20,6 +20,19 @@ _SUGGESTED = [
     "Which systems are hidden PCI (BAM misses)?",
 ]
 
+# First-touch routing: greetings and "who/what are you" questions get a grounded
+# orientation instead of falling through to the model's strict "not in the facts"
+# refusal. Deterministic, so this path cannot hallucinate either.
+_GREETING_TOKENS = {"hi", "hello", "hey", "yo", "hiya", "sup", "howdy", "greetings", "hallo", "hii"}
+_GREETING_PHRASES = ("good morning", "good afternoon", "good evening", "hey there", "hi there")
+_IDENTITY_PHRASES = ("who are you", "who r u", "what are you", "what r u", "your name",
+                     "what can you do", "what do you do", "what can you answer",
+                     "what can i ask", "what is this", "how do i use", "what do you know")
+# Keywords that mean the message is a real PCI question, not a bare greeting.
+_TOPIC_KEYWORDS = ("scope", "how many", "confirmed", "inferred", "hitter", "biggest",
+                   "distributor", "hidden", "splunk", "bam", "tokeniz", "tokenis", "descope",
+                   "crn", "why", "reach", "risk", "leverage", "intervention", "impact")
+
 
 def suggested_questions(result):
     """A few safe, answerable prompts seeded with real system IDs from the run."""
@@ -70,6 +83,26 @@ def answer(result, question: str, history=None) -> dict:
     hidden = result.hidden or {}
 
     # --- deterministic intents ---------------------------------------------
+    # 0) greeting / identity / capability  -> grounded orientation (no model)
+    _toks = re.findall(r"[a-z']+", ql)
+    _has_topic = any(k in ql for k in _TOPIC_KEYWORDS)
+    _is_greeting = bool(_toks) and _toks[0] in _GREETING_TOKENS and not _has_topic
+    _is_greeting = _is_greeting or (any(p in ql for p in _GREETING_PHRASES) and not _has_topic)
+    _is_identity = any(p in ql for p in _IDENTITY_PHRASES) or ql in ("help", "help me", "?")
+    if (_is_greeting or _is_identity) and not ids:
+        top = ", ".join(h["system"] for h in hh[:3]) or "n/a"
+        return {"answer":
+                "I'm the PCI-scope analyst for this run. I answer only from the computed data-flow "
+                "analysis — I don't invent systems, edges, or numbers, so anything I say traces back to "
+                "the graph and scores. "
+                f"This run places {head.get('systems_exposed_to_clear_pan')} systems in PCI scope "
+                f"({br.get('metadata_confirmed')} confirmed by BAM metadata, {br.get('inferred_only')} "
+                f"inferred-only) and finds {hidden.get('hidden_pci_count')} hidden-PCI systems BAM never "
+                f"flagged. The widest PAN distributors are {top}. "
+                "Ask me about scope counts, the biggest distributors, hidden PCI, the impact of tokenizing "
+                "a source, or name any system ID (e.g. \"why is <ID> in scope?\").",
+                "grounded_on": ["headline", "scope_breakdown"] + [h["system"] for h in hh[:3]]}
+
     # 1) scope counts
     if any(k in ql for k in ["scope", "how many", "confirmed", "inferred"]) and not ids:
         return {"answer":
