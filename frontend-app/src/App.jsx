@@ -85,7 +85,6 @@ function filterGraph(viz, mode, heavyList) {
 function useData() {
   const [data, setData] = useState(null)
   const [src, setSrc] = useState('snapshot')
-  const [gen, setGen] = useState(false)   // backend generative? (sdk) — from /health
   const [agents, setAgents] = useState(AGENTS_FALLBACK)
   const [suggested, setSuggested] = useState(SUGGESTED_FALLBACK)
   const [uploading, setUploading] = useState(false)
@@ -111,8 +110,6 @@ function useData() {
               explanation: expl.explanation || SNAPSHOT.explanation })
     if (ag && ag.agents) setAgents(ag.agents)
     if (sg && sg.questions) setSuggested(sg.questions)
-    const h = await fetch('/health').then(r => r.json()).catch(() => null)
-    setGen(!!(h && h.generative))
     setSrc('live')
   }
 
@@ -862,7 +859,7 @@ function DecisionMemo({ plan }) {
   )
 }
 
-function Planner({ d, live, generative, onPick }) {
+function Planner({ d, live, onPick }) {
   const candidates = useMemo(() => {
     const ids = d.heavy_hitters.map(h => h.system)
     const seen = new Set(ids)
@@ -1741,7 +1738,7 @@ export default function App() {
             className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
           <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
           <span title="AI narration mode: generative (enterprise gateway) vs deterministic templates with identical numbers"
-            className={'mono text-[11px] px-2 py-1 rounded ' + (gen ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{gen ? '✦ AI: generative' : '○ AI: deterministic'}</span>
+            className={'mono text-[11px] px-2 py-1 rounded ' + ((data && data.plan && data.plan.decision_memo && data.plan.decision_memo.generated) ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{(data && data.plan && data.plan.decision_memo && data.plan.decision_memo.generated) ? '✦ AI: generative' : '○ AI: deterministic'}</span>
         </div>
       </header>
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
@@ -1751,7 +1748,7 @@ export default function App() {
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
-      {tab === 'planner' && <Planner d={d} live={src === 'live'} generative={gen} onPick={pick} />}
+      {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
