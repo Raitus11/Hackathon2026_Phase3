@@ -174,7 +174,7 @@ def answer(result, question: str, history=None) -> dict:
 
     # --- fallback ----------------------------------------------------------
     llm = LLMClient()
-    if not llm.online:
+    if not llm.generative:
         top = ", ".join(h["system"] for h in hh[:3])
         return {"answer":
                 f"Here's what the analysis shows: {head.get('systems_exposed_to_clear_pan')} systems in PCI "

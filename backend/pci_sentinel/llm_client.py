@@ -21,6 +21,15 @@ deployment may use whatever label it likes in its (un-shipped) .env. If the chos
 backend is unavailable for any reason, the client degrades to offline so a run
 never breaks.
 
+Generative gating
+-----------------
+`self.generative` is the single switch that decides whether the model is allowed
+to *write* anything. It is true ONLY for the sdk backend. Everywhere else the
+client returns deterministic, fully-grounded templates with identical numbers, so
+a run never depends on a network call and the demo can neither hang nor
+hallucinate. To later allow another backend to generate, widen the predicate in
+__init__ in ONE place (e.g. self.backend in ("sdk", "http")) — no call site changes.
+
 The local .env is loaded into the process environment at import time, BEFORE the
 backend selector is read, so a freshly-started server picks up the configured
 backend without the launching shell having to export anything.
@@ -60,11 +69,9 @@ def _load_env() -> None:
         from dotenv import load_dotenv
     except Exception:  # noqa: BLE001 - dotenv optional; env may already be set
         return
-    # .env lives in the backend run dir, i.e. one level up from this package dir.
     backend_env = Path(__file__).resolve().parent.parent / ".env"
     if backend_env.is_file():
         load_dotenv(backend_env, override=False)
-    # Fallback: upward search from the current working directory.
     load_dotenv(override=False)
 
 
@@ -74,9 +81,6 @@ _load_env()
 
 class LLMClient:
     def __init__(self):
-        # Belt-and-suspenders: ensure .env is loaded even if this class is
-        # constructed before the module-level load took effect (e.g. odd import
-        # ordering or a different cwd). Idempotent; never overrides real env vars.
         _load_env()
         self.base_url = os.environ.get("PCISENTINEL_LLM_BASE_URL", "").rstrip("/")
         self.api_key = os.environ.get("PCISENTINEL_LLM_API_KEY", "")
@@ -86,13 +90,17 @@ class LLMClient:
             backend = "http" if (self.base_url and self.api_key and self.model) else "offline"
         self.backend = backend
         self.online = backend != "offline"
+        # The ONE place that decides whether the model may generate text.
+        # Generation is allowed only for the enterprise-gateway (sdk) backend;
+        # every other backend returns deterministic, fully-grounded templates.
+        self.generative = (self.backend == "sdk")
         self._sdk = None
         self._rate_limited_until = 0.0
 
     # ---- public API (signatures unchanged) -------------------------------
 
     def explain(self, system_prompt: str, grounded_facts: dict) -> str:
-        if not self.online:
+        if not self.generative:
             return self._offline(grounded_facts)
         messages = [
             {"role": "system", "content": system_prompt},
@@ -106,7 +114,7 @@ class LLMClient:
 
     def chat(self, question: str, facts: dict, history=None) -> str:
         """Answer a free-form question grounded ONLY in the computed facts."""
-        if not self.online:
+        if not self.generative:
             return ("I can answer that precisely once an inference provider is configured. "
                     "From the computed analysis I can already tell you about scope counts, the "
                     "metadata-confirmed vs inferred-only split, the heavy-hitter PAN distributors, "
@@ -127,10 +135,26 @@ class LLMClient:
                     "or per-system question.")
         return text
 
+    def generate(self, system_prompt: str, user_content: str) -> str | None:
+        """Low-level grounded generation for callers that supply their own prompt
+        AND their own deterministic fallback (e.g. narrate.py).
+
+        Returns the model text, or None when the client is not generative or the
+        gateway is unavailable — so the caller falls back to its own template.
+        It NEVER raises and NEVER substitutes a different template, so the caller
+        stays in full control of what the deterministic output looks like.
+        """
+        if not self.generative:
+            return None
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ]
+        return self._complete(messages)
+
     # ---- backend dispatch -------------------------------------------------
 
     def _complete(self, messages: list) -> str | None:
-        """Route to the configured backend; return text, or None so the caller falls back."""
         if time.time() < self._rate_limited_until:
             return None
         try:
