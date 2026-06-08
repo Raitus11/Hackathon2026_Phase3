@@ -85,6 +85,7 @@ function filterGraph(viz, mode, heavyList) {
 function useData() {
   const [data, setData] = useState(null)
   const [src, setSrc] = useState('snapshot')
+  const [gen, setGen] = useState(false)   // backend generative? (sdk) — from /health
   const [agents, setAgents] = useState(AGENTS_FALLBACK)
   const [suggested, setSuggested] = useState(SUGGESTED_FALLBACK)
   const [uploading, setUploading] = useState(false)
@@ -110,6 +111,8 @@ function useData() {
               explanation: expl.explanation || SNAPSHOT.explanation })
     if (ag && ag.agents) setAgents(ag.agents)
     if (sg && sg.questions) setSuggested(sg.questions)
+    const h = await fetch('/health').then(r => r.json()).catch(() => null)
+    setGen(!!(h && h.generative))
     setSrc('live')
   }
 
@@ -802,7 +805,64 @@ function Drill({ d, selected, onPick }) {
 }
 
 /* ============================ PLANNER (optimizer + what-if) ============================ */
-function Planner({ d, live, onPick }) {
+/* AI Decision Memo — grounded remediation narration + the saturation-cliff sparkline.
+   Reads the memo the backend built once (plan.decision_memo). Renders nothing if absent,
+   so it is safe in snapshot mode before the snapshot is regenerated. Hand-rolled SVG only
+   (no new npm dependency — Artifactory lock). */
+function CliffSpark({ curve }) {
+  if (!curve || curve.length < 2) return null
+  const W = 220, H = 54, P = 5
+  const ys = curve.map(p => p.fully_descoped ?? 0)
+  const maxY = Math.max(...ys, 1)
+  const x = i => P + (i / (curve.length - 1)) * (W - 2 * P)
+  const y = v => H - P - (v / maxY) * (H - 2 * P)
+  const pts = curve.map((p, i) => `${x(i).toFixed(1)},${y(ys[i]).toFixed(1)}`).join(' ')
+  let ci = 1, best = -1
+  for (let i = 1; i < ys.length; i++) { const d = ys[i] - ys[i - 1]; if (d > best) { best = d; ci = i } }
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block">
+      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.6" className="text-safe" />
+      <line x1={x(ci).toFixed(1)} y1={P} x2={x(ci).toFixed(1)} y2={H - P} stroke="currentColor" strokeWidth="0.75" strokeDasharray="2 2" className="text-pan" />
+      <circle cx={x(ci).toFixed(1)} cy={y(ys[ci]).toFixed(1)} r="2.6" fill="currentColor" className="text-pan" />
+    </svg>
+  )
+}
+
+function DecisionMemo({ plan }) {
+  const memo = plan && plan.decision_memo
+  if (!memo || !memo.text) return null
+  const curve = plan && plan.saturation_curve && plan.saturation_curve.curve
+  const chips = memo.grounded_on || []
+  return (
+    <div className="card p-5 border border-pan/30">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="disp font-bold text-lg flex items-center gap-2">
+          AI Decision Memo
+          <span className={'mono text-[10px] px-2 py-0.5 rounded ' + (memo.generated ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{memo.generated ? '✦ AI-generated' : '○ deterministic narration'}</span>
+        </div>
+        {typeof memo.tokens === 'number' && memo.tokens > 0 && <span className="mono text-[10px] text-faint">~{memo.tokens.toLocaleString()} tokens</span>}
+      </div>
+      <div className="text-[10px] text-faint mt-0.5">Grounded narration over the computed figures — the model phrases numbers it never computes; deterministic mode renders the identical numbers as a template.</div>
+      <div className="flex flex-col md:flex-row gap-4 mt-3">
+        <p className="text-sm text-dim leading-relaxed flex-1 whitespace-pre-line">{memo.text}</p>
+        {curve && curve.length > 1 && (
+          <div className="shrink-0 self-start">
+            <div className="text-[10px] text-faint mb-1">full descope vs % sources tokenized</div>
+            <CliffSpark curve={curve} />
+            <div className="text-[10px] text-pan mt-1">↑ the descope threshold</div>
+          </div>
+        )}
+      </div>
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {chips.map(c => <span key={c} className="mono text-[10px] px-2 py-0.5 rounded bg-panel2 text-faint border border-line">grounded on: {c}</span>)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Planner({ d, live, generative, onPick }) {
   const candidates = useMemo(() => {
     const ids = d.heavy_hitters.map(h => h.system)
     const seen = new Set(ids)
@@ -846,6 +906,7 @@ function Planner({ d, live, onPick }) {
 
   return (
     <div className="space-y-5">
+      <DecisionMemo plan={plan} />
       <div className="card p-5">
         <div className="disp font-bold text-lg">Tokenization planner <span className="text-faint text-xs font-normal">— where intervention has the greatest reduction</span></div>
         <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
@@ -1679,6 +1740,8 @@ export default function App() {
           <button onClick={() => { reset(); setTab('pipeline') }}
             className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
           <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
+          <span title="AI narration mode: generative (enterprise gateway) vs deterministic templates with identical numbers"
+            className={'mono text-[11px] px-2 py-1 rounded ' + (gen ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{gen ? '✦ AI: generative' : '○ AI: deterministic'}</span>
         </div>
       </header>
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
@@ -1688,7 +1751,7 @@ export default function App() {
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} />}
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
-      {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
+      {tab === 'planner' && <Planner d={d} live={src === 'live'} generative={gen} onPick={pick} />}
       {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}

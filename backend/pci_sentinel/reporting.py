@@ -221,6 +221,15 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     E.append(Paragraph("Executive summary", h2))
     E.append(Paragraph(result.explanation, body))
 
+    # AI Decision Memo — grounded remediation memo (built once in finalize(); on the
+    # sdk backend this is live model prose, otherwise the deterministic template with
+    # identical numbers). Rendered only if present so the section never appears empty.
+    _memo = (getattr(result, "decision_memo", {}) or {})
+    if _memo.get("text"):
+        _tag = "AI-generated" if _memo.get("generated") else "deterministic narration"
+        E.append(Paragraph(f"AI decision memo — recommended sequence ({_tag})", h2))
+        E.append(Paragraph(_memo["text"], body))
+
     # tokenization leverage
     E.append(Paragraph("Where tokenization has the greatest leverage", h2))
 
@@ -396,7 +405,9 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     E.append(Spacer(1, 6))
     E.append(HRFlowable(width="100%", thickness=0.5, color=LINE, spaceAfter=4))
     E.append(Paragraph("PCI-SENTINEL · deterministic engine + grounded narration · figures reproducible from the "
-                       "source CSVs.", small))
+                       "source CSVs." + (
+                           f" Grounded narration: ~{(getattr(result, 'decision_memo', {}) or {}).get('tokens', 0):,} tokens."
+                           if (getattr(result, 'decision_memo', {}) or {}).get('tokens') else ""), small))
 
     doc.build(E)
     buf.seek(0)

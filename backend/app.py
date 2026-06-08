@@ -22,6 +22,7 @@ from pydantic import BaseModel
 from pci_sentinel import agents as agents_mod
 from pci_sentinel import chat as chat_mod
 from pci_sentinel import analytics as analytics_mod
+from pci_sentinel import narrate as narrate_mod
 from pci_sentinel.llm_client import LLMClient
 from pci_sentinel.orchestrator import start_run, resume_run, store as _store
 from pci_sentinel.security import PanLeakError
@@ -48,8 +49,12 @@ def _full(r):
 @app.get("/health")
 def health():
     llm = LLMClient()
-    return {"status": "ok", "has_run": _LAST["result"] is not None,
-            "llm_mode": "live" if llm.online else "deterministic-fallback"}
+    r = _LAST["result"]
+    memo = (getattr(r, "decision_memo", {}) or {}) if r is not None else {}
+    return {"status": "ok", "has_run": r is not None,
+            "llm_mode": "live" if llm.online else "deterministic-fallback",
+            "generative": llm.generative,
+            "narration_tokens": memo.get("tokens", 0)}
 
 
 @app.get("/api/agents")
@@ -188,7 +193,29 @@ def plan(target: float = 0.8, max_k: int = 8):
             p["block_comparison"] = analytics_mod.block_set_comparison(G, ps, sc, sets)
     except Exception:
         pass
+    # Attach the AI Decision Memo built once in finalize() so the live /api/plan carries
+    # it too (the UI reads it from here). This serves the PERSISTED memo — no per-call
+    # gateway hit. A fresh re-read is an explicit action via /api/decision-memo?live=1.
+    try:
+        r = _LAST["result"]
+        if r is not None and getattr(r, "decision_memo", None):
+            p["decision_memo"] = r.decision_memo
+    except Exception:
+        pass
     return p
+
+
+@app.get("/api/decision-memo")
+def decision_memo(live: int = 0):
+    """The AI Decision Memo. Default: the memo built at analysis time (no gateway call).
+    ?live=1: regenerate now against the current plan — only produces fresh model prose
+    when the backend is generative (sdk); otherwise it returns the deterministic template."""
+    r = _need()
+    if not live:
+        return r.decision_memo or {}
+    p = plan(0.8, 8)  # reuse the enriched-plan builder above
+    llm = LLMClient()
+    return narrate_mod.decision_memo(llm, narrate_mod.build_memo_facts(p, r.headline))
 
 
 class WhatIf(BaseModel):
