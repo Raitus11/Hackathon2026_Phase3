@@ -1738,7 +1738,7 @@ export default function App() {
             className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
           <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
           <span title="AI narration mode: generative (enterprise gateway) vs deterministic templates with identical numbers"
-            className={'mono text-[11px] px-2 py-1 rounded ' + ((data && data.plan && data.plan.decision_memo && data.plan.decision_memo.generated) ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{(data && data.plan && data.plan.decision_memo && data.plan.decision_memo.generated) ? '✦ AI: generative' : '○ AI: deterministic'}</span>
+            className={'mono text-[11px] px-2 py-1 rounded ' + ((d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{(d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? '✦ AI: generative' : '○ AI: deterministic'}</span>
         </div>
       </header>
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
