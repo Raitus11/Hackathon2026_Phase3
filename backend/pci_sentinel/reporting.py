@@ -8,6 +8,7 @@ the dashboard. The PDF is the non-technical decision-support artifact (Documenta
 from __future__ import annotations
 
 import io
+import re
 from datetime import datetime, timezone
 
 # headless rendering for the embedded graph
@@ -59,6 +60,75 @@ def _two_col(left_buf, right_buf, w_mm=83, h_mm=64):
 
 def _caption(text, style):
     return Paragraph(text, style)
+
+
+# ---------------------------------------------------------------------------
+# Markdown -> ReportLab flowables.
+# The grounded narration (executive summary, decision memo) can come back from
+# the model as light Markdown (## headings, **bold**, * bullets). ReportLab's
+# Paragraph only understands a small set of inline HTML tags, so feeding raw
+# Markdown to it prints the literal markers. This converts the common Markdown
+# the narrators emit into proper flowables. Deterministic-template prose carries
+# no Markdown, so it passes through unchanged (paragraph-split only).
+# ---------------------------------------------------------------------------
+
+_MD_H = re.compile(r"^\s*#{1,6}\s+(.*)$")
+_MD_BULLET = re.compile(r"^\s*[\*\-+]\s+(.*)$")
+_MD_NUM = re.compile(r"^\s*\d+[.)]\s+(.*)$")
+
+
+def _md_inline(s: str) -> str:
+    """Escape for ReportLab, then re-apply bold/italic from Markdown markers."""
+    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)        # **bold**
+    s = re.sub(r"__(.+?)__", r"<b>\1</b>", s)            # __bold__
+    s = re.sub(r"(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)", r"<i>\1</i>", s)  # *italic*
+    s = re.sub(r"`([^`]+)`", r"\1", s)                   # strip inline code ticks
+    return s.strip()
+
+
+def _md_split_lines(text: str):
+    """Recover line structure even if newlines were flattened into spaces:
+    break before heading markers and before bullets that follow sentence
+    punctuation, so a single run still decomposes into headings/bullets/prose."""
+    t = (text or "").replace("\r\n", "\n").replace("\r", "\n")
+    t = re.sub(r"\s+(#{1,6}\s)", r"\n\1", t)                 # break before headings
+    t = re.sub(r"([.:;)])\s+([\*\-+]\s)", r"\1\n\2", t)      # break before bullets after punctuation
+    return t.split("\n")
+
+
+def _md_flowables(text, body_style):
+    """Convert light Markdown into a list of reportlab Paragraph flowables."""
+    head = ParagraphStyle("md_head", parent=body_style, fontName="Helvetica-Bold",
+                          fontSize=body_style.fontSize + 1, textColor=INK,
+                          spaceBefore=6, spaceAfter=2)
+    bullet = ParagraphStyle("md_bullet", parent=body_style, leftIndent=12,
+                            bulletIndent=2, spaceAfter=1)
+    out, para = [], []
+
+    def flush():
+        if para:
+            out.append(Paragraph(" ".join(para), body_style))
+            para.clear()
+
+    for raw in _md_split_lines(text):
+        line = raw.strip()
+        if not line:
+            flush()
+            continue
+        m = _MD_H.match(line)
+        if m:
+            flush()
+            out.append(Paragraph(_md_inline(m.group(1)), head))
+            continue
+        m = _MD_BULLET.match(line) or _MD_NUM.match(line)
+        if m:
+            flush()
+            out.append(Paragraph("&bull;&nbsp;" + _md_inline(m.group(1)), bullet))
+            continue
+        para.append(_md_inline(line))
+    flush()
+    return out or [Paragraph(_md_inline(text or ""), body_style)]
 
 
 def _pdf_table(rows, widths):
@@ -219,7 +289,7 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
             f"minus the maximum fully-descoped count on the saturation curve.", body))
 
     E.append(Paragraph("Executive summary", h2))
-    E.append(Paragraph(result.explanation, body))
+    E.extend(_md_flowables(result.explanation or "", body))
 
     # AI Decision Memo — grounded remediation memo (built once in finalize(); on the
     # sdk backend this is live model prose, otherwise the deterministic template with
@@ -228,7 +298,7 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
     if _memo.get("text"):
         _tag = "AI-generated" if _memo.get("generated") else "deterministic narration"
         E.append(Paragraph(f"AI decision memo — recommended sequence ({_tag})", h2))
-        E.append(Paragraph(_memo["text"], body))
+        E.extend(_md_flowables(_memo["text"], body))
 
     # tokenization leverage
     E.append(Paragraph("Where tokenization has the greatest leverage", h2))
