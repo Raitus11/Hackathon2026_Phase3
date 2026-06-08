@@ -122,7 +122,10 @@ _MEMO_SYS = (
     "sources is tokenized, then jumps; (2) state that tokenizing the top source still removes a "
     "clear-PAN feed from many systems now (feeds_removed) even before that threshold; (3) contrast "
     "blocking the widest conduits by betweenness (which descopes ~0) with tokenizing the true "
-    "sources (which descopes and removes feeds); (4) end with a recommended sequence. Be decisive."
+    "sources (which descopes and removes feeds); (4) end with a recommended sequence. Be decisive. "
+    "Keep three numbers distinct and never conflate them: the SINGLE top source's solo descope "
+    "(solo_descope), the full greedy SET's total descope (greedy_plan.total_descoped), and the "
+    "saturation THRESHOLD jump (the curve)."
 )
 
 
@@ -152,26 +155,33 @@ def _memo_template(f: dict) -> str:
     top = sources[0] if sources else {}
     feeds = top.get("feeds_removed")
     parent_red = top.get("parent_reduction")
+    solo = top.get("solo_descope")
+    solo_txt = f"{solo}" if solo is not None else "few"
+    plan_list = ", ".join((plan.get("plan") or [])[:6]) or first
 
     paras = []
 
-    # (1) the cliff
+    # (1) the cliff — keep solo (single source), threshold (curve), and plan-total distinct
     cliff = _find_cliff(f.get("saturation_curve"))
     if cliff:
         pre, post = cliff["pre"], cliff["post"]
         paras.append(
             f"Recommended action: tokenize PAN at the true source. Tokenizing the single "
-            f"highest-leverage source ({first}) fully descopes "
-            f"{total_descoped if total_descoped is not None else 'few'} system(s) today — which "
-            f"looks like little, but it is a threshold effect, not a failure. Full descope holds at "
-            f"~{pre.get('fully_descoped')} systems until roughly {pre.get('pct_sources')}% of the "
-            f"{tsc or 'true'} sources are tokenized, then rises sharply to {post.get('fully_descoped')} "
-            f"systems at ~{post.get('pct_sources')}% (k={post.get('k')}). Scope reduction is a program "
-            f"that pays off as the source front is cleared, not a single switch.")
+            f"highest-leverage source ({first}) alone fully descopes {solo_txt} system(s) today — "
+            f"small, but that is a threshold effect, not a failure. Full descope holds near "
+            f"{pre.get('fully_descoped')} until roughly {pre.get('pct_sources')}% of the {tsc or 'true'} "
+            f"sources are tokenized, then rises sharply to {post.get('fully_descoped')} at "
+            f"~{post.get('pct_sources')}% (k={post.get('k')})."
+            + (f" The recommended greedy set ({plan_list}) descopes {total_descoped}."
+               if total_descoped is not None else "")
+            + " Scope reduction is a program that pays off as the source front is cleared, not a single switch.")
     else:
         paras.append(
-            f"Recommended action: tokenize PAN at the true source. The highest-leverage source is "
-            f"{first}; full descope accrues as the true-source front is progressively converted.")
+            f"Recommended action: tokenize PAN at the true source. Tokenizing the highest-leverage source "
+            f"({first}) alone descopes {solo_txt} system(s); full descope accrues as the true-source front "
+            f"({plan_list}) is progressively converted"
+            + (f", reaching {total_descoped} with the recommended set" if total_descoped is not None else "")
+            + ".")
 
     # (2) the exposure gap
     if feeds is not None:

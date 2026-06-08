@@ -11,7 +11,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-from . import analytics, dag_transform, graph_build, ingest as ingest_mod
+from . import analytics, dag_transform, graph_build, ingest as ingest_mod, narrate
 from .llm_client import LLMClient
 from .scoring import compute_scores
 from .security import scan_for_leaks
@@ -38,6 +38,7 @@ class RunResult:
     categories: dict = field(default_factory=dict)
     economics: dict = field(default_factory=dict)
     sankey: dict = field(default_factory=dict)
+    decision_memo: dict = field(default_factory=dict)
 
 
 def _audit(log, stage, t0, **extra):
@@ -183,6 +184,21 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     except Exception:
         pass
 
+    # ---- AI Decision Memo: grounded narration over the plan / per-source exposure /
+    # saturation / block-set numbers the engine just computed (Hybrid Intelligence —
+    # the model only phrases figures it never computes). Generative ONLY on the sdk
+    # backend; on every other backend `narrate.decision_memo` returns a deterministic
+    # template with the IDENTICAL numbers. Reuses the `llm` already constructed above
+    # (one extra build-time call). Guarded so a gateway hiccup, an un-generative
+    # backend, or a missing analytics axis can only fall back to the template — it can
+    # never crash finalize().
+    decision_memo = {}
+    try:
+        decision_memo = narrate.decision_memo(llm, narrate.build_memo_facts(plan, headline))
+        plan["decision_memo"] = decision_memo
+    except Exception:
+        pass
+
     # ---- decision layer: scope categories, requirement mapping, cost economics,
     # segmentation candidates, Sankey. Each guarded independently so a failure in one
     # can only blank its own panel, never the spine.
@@ -229,7 +245,8 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
         headline=headline, hidden=hidden,
         structure=structure,
         plan=plan or {},
-        categories=categories, economics=economics, sankey=sankey)
+        categories=categories, economics=economics, sankey=sankey,
+        decision_memo=decision_memo)
 
 
 def run(files: list, recommend_top: int = 3) -> RunResult:
