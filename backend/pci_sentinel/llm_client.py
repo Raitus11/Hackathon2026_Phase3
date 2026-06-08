@@ -21,6 +21,10 @@ deployment may use whatever label it likes in its (un-shipped) .env. If the chos
 backend is unavailable for any reason, the client degrades to offline so a run
 never breaks.
 
+The local .env is loaded into the process environment at import time, BEFORE the
+backend selector is read, so a freshly-started server picks up the configured
+backend without the launching shell having to export anything.
+
 Environment:
   PCISENTINEL_LLM_BACKEND     offline | http | sdk   (default: auto)
   PCISENTINEL_LLM_MODEL       model identifier (kept in config/env, never hard-coded)
@@ -41,10 +45,39 @@ import json
 import os
 import time
 import urllib.request
+from pathlib import Path
+
+
+def _load_env() -> None:
+    """Load the backend .env into os.environ before any selector is read.
+
+    Best-effort and idempotent: tries the .env next to the backend root (one
+    level above this package), then a normal upward search from the cwd. Absence
+    of python-dotenv or of any .env is not an error — the client simply runs on
+    whatever is already in the environment (and ultimately the offline fallback).
+    """
+    try:
+        from dotenv import load_dotenv
+    except Exception:  # noqa: BLE001 - dotenv optional; env may already be set
+        return
+    # .env lives in the backend run dir, i.e. one level up from this package dir.
+    backend_env = Path(__file__).resolve().parent.parent / ".env"
+    if backend_env.is_file():
+        load_dotenv(backend_env, override=False)
+    # Fallback: upward search from the current working directory.
+    load_dotenv(override=False)
+
+
+# Load once at import so module-level construction also sees the configured backend.
+_load_env()
 
 
 class LLMClient:
     def __init__(self):
+        # Belt-and-suspenders: ensure .env is loaded even if this class is
+        # constructed before the module-level load took effect (e.g. odd import
+        # ordering or a different cwd). Idempotent; never overrides real env vars.
+        _load_env()
         self.base_url = os.environ.get("PCISENTINEL_LLM_BASE_URL", "").rstrip("/")
         self.api_key = os.environ.get("PCISENTINEL_LLM_API_KEY", "")
         self.model = os.environ.get("PCISENTINEL_LLM_MODEL", "")
@@ -130,13 +163,6 @@ class LLMClient:
     def _sdk_client(self):
         if self._sdk is not None:
             return self._sdk
-        # Optional: load endpoint / credentials / trust-cert into the environment
-        # for an SDK that reads them itself. Best-effort; absence is not an error.
-        try:
-            from dotenv import load_dotenv
-            load_dotenv()
-        except Exception:  # noqa: BLE001
-            pass
         try:
             import importlib
             mod_name = os.environ.get("PCISENTINEL_LLM_SDK_MODULE", "")
