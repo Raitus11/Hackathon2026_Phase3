@@ -1310,7 +1310,7 @@
   "audit": [
     {
       "stage": "ingest",
-      "ms": 13.4,
+      "ms": 8.5,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -1326,12 +1326,12 @@
     },
     {
       "stage": "validate_masking_leak",
-      "ms": 4.6,
+      "ms": 4.5,
       "clean": true
     },
     {
       "stage": "build_graph",
-      "ms": 2.8,
+      "ms": 4.4,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -1346,7 +1346,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 2.5,
+      "ms": 3.4,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -1357,12 +1357,12 @@
     },
     {
       "stage": "score",
-      "ms": 15.4,
+      "ms": 12.8,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 51.0,
+      "ms": 35.9,
       "scope": 95,
       "heavy_hitters": 10,
       "hidden_pci": 48
@@ -13114,17 +13114,14 @@
   ],
   "plan": {
     "before": 95,
-    "descopable": 92,
-    "after": 65,
-    "total_descoped": 30,
-    "k": 6,
+    "descopable": 32,
+    "after": 68,
+    "total_descoped": 27,
+    "k": 3,
     "plan": [
       "6CWC",
       "8CCF",
-      "8MEC",
-      "8DFB",
-      "8EFW",
-      "8LNQ"
+      "8MEC"
     ],
     "steps": [
       {
@@ -13135,7 +13132,7 @@
         "scope_after": 93,
         "solo_descope": 2,
         "exclusive_reach": 2,
-        "pct_of_descopable": 2.2
+        "pct_of_descopable": 6.2
       },
       {
         "step": 2,
@@ -13145,7 +13142,7 @@
         "scope_after": 92,
         "solo_descope": 1,
         "exclusive_reach": 1,
-        "pct_of_descopable": 3.3
+        "pct_of_descopable": 9.4
       },
       {
         "step": 3,
@@ -13155,37 +13152,7 @@
         "scope_after": 68,
         "solo_descope": 0,
         "exclusive_reach": 0,
-        "pct_of_descopable": 29.3
-      },
-      {
-        "step": 4,
-        "tokenize": "8DFB",
-        "marginal_descoped": 1,
-        "cumulative_descoped": 28,
-        "scope_after": 67,
-        "solo_descope": 1,
-        "exclusive_reach": 1,
-        "pct_of_descopable": 30.4
-      },
-      {
-        "step": 5,
-        "tokenize": "8EFW",
-        "marginal_descoped": 1,
-        "cumulative_descoped": 29,
-        "scope_after": 66,
-        "solo_descope": 1,
-        "exclusive_reach": 1,
-        "pct_of_descopable": 31.5
-      },
-      {
-        "step": 6,
-        "tokenize": "8LNQ",
-        "marginal_descoped": 1,
-        "cumulative_descoped": 30,
-        "scope_after": 65,
-        "solo_descope": 0,
-        "exclusive_reach": 0,
-        "pct_of_descopable": 32.6
+        "pct_of_descopable": 84.4
       }
     ],
     "target_fraction": 0.8,
@@ -13244,12 +13211,12 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW"
+          "8LNQ"
         ],
-        "last_source": "8EFW",
+        "last_source": "8LNQ",
         "cumulative_descoped": 29,
         "marginal_descoped": 1,
-        "cumulative_feeds_removed": 33
+        "cumulative_feeds_removed": 32
       },
       {
         "k": 6,
@@ -13258,10 +13225,10 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
-          "8LNQ"
+          "8LNQ",
+          "8EFW"
         ],
-        "last_source": "8LNQ",
+        "last_source": "8EFW",
         "cumulative_descoped": 30,
         "marginal_descoped": 1,
         "cumulative_feeds_removed": 33
@@ -13273,8 +13240,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM"
         ],
         "last_source": "8CCCM",
@@ -13289,8 +13256,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS"
         ],
@@ -13306,8 +13273,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC"
@@ -13324,14 +13291,14 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH"
+          "6IVC"
         ],
-        "last_source": "JSVCH",
+        "last_source": "6IVC",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13343,15 +13310,15 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
-          "6IVC"
+          "6IVC",
+          "JSVCH"
         ],
-        "last_source": "6IVC",
+        "last_source": "JSVCH",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13363,13 +13330,13 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE"
         ],
         "last_source": "8FVE",
@@ -13384,17 +13351,17 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV"
+          "KPO"
         ],
-        "last_source": "8EIV",
+        "last_source": "KPO",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13406,18 +13373,18 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM"
+          "KPO",
+          "6PNXUI"
         ],
-        "last_source": "8ECMM",
+        "last_source": "6PNXUI",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13429,19 +13396,19 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED"
+          "KPO",
+          "6PNXUI",
+          "KDUZ"
         ],
-        "last_source": "JAED",
+        "last_source": "KDUZ",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13453,20 +13420,20 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT"
         ],
-        "last_source": "JAGC",
+        "last_source": "8DEKT",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13478,21 +13445,21 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT",
+          "8BUJ"
         ],
-        "last_source": "8TCU",
+        "last_source": "8BUJ",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13504,22 +13471,22 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT",
+          "8BUJ",
+          "8DUDR"
         ],
-        "last_source": "JAOCP",
+        "last_source": "8DUDR",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13531,23 +13498,23 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG"
         ],
-        "last_source": "LDR",
+        "last_source": "LDUCG",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13559,24 +13526,24 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG",
+          "8NC1"
         ],
-        "last_source": "HCV369",
+        "last_source": "8NC1",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13588,25 +13555,25 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369",
-          "8DEKT"
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
+          "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG",
+          "8NC1",
+          "8TCU"
         ],
-        "last_source": "8DEKT",
+        "last_source": "8TCU",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13618,23 +13585,23 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369",
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
           "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG",
+          "8NC1",
+          "8TCU",
           "8BCKS"
         ],
         "last_source": "8BCKS",
@@ -13649,27 +13616,27 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369",
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
           "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG",
+          "8NC1",
+          "8TCU",
           "8BCKS",
-          "8REFM"
+          "JAED"
         ],
-        "last_source": "8REFM",
+        "last_source": "JAED",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13681,28 +13648,28 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369",
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
           "8DEKT",
+          "8BUJ",
+          "8DUDR",
+          "LDUCG",
+          "8NC1",
+          "8TCU",
           "8BCKS",
-          "8REFM",
-          "LDUCG"
+          "JAED",
+          "LZRKY"
         ],
-        "last_source": "LDUCG",
+        "last_source": "LZRKY",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13714,29 +13681,29 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8EFW",
           "8LNQ",
+          "8EFW",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "JSVCH",
           "6IVC",
+          "JSVCH",
           "8FVE",
-          "8EIV",
-          "8ECMM",
-          "JAED",
-          "JAGC",
-          "8TCU",
-          "JAOCP",
-          "LDR",
-          "HCV369",
+          "KPO",
+          "6PNXUI",
+          "KDUZ",
           "8DEKT",
-          "8BCKS",
-          "8REFM",
+          "8BUJ",
+          "8DUDR",
           "LDUCG",
-          "JLFXM"
+          "8NC1",
+          "8TCU",
+          "8BCKS",
+          "JAED",
+          "LZRKY",
+          "JCOC"
         ],
-        "last_source": "JLFXM",
+        "last_source": "JCOC",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13837,16 +13804,6 @@
           "solo_systems": []
         },
         {
-          "system": "JSVCH",
-          "downstream_reach": 1,
-          "solo_descope": 0,
-          "feeds_removed": 1,
-          "parent_reduction": 1,
-          "risk": 30.91,
-          "is_true_source": true,
-          "solo_systems": []
-        },
-        {
           "system": "6IVC",
           "downstream_reach": 1,
           "solo_descope": 0,
@@ -13857,12 +13814,12 @@
           "solo_systems": []
         },
         {
-          "system": "8FVE",
+          "system": "JSVCH",
           "downstream_reach": 1,
           "solo_descope": 0,
           "feeds_removed": 1,
           "parent_reduction": 1,
-          "risk": 50.91,
+          "risk": 30.91,
           "is_true_source": true,
           "solo_systems": []
         },
@@ -13877,32 +13834,42 @@
           "solo_systems": []
         },
         {
-          "system": "8EIV",
-          "downstream_reach": 0,
+          "system": "8FVE",
+          "downstream_reach": 1,
           "solo_descope": 0,
-          "feeds_removed": 0,
-          "parent_reduction": 0,
-          "risk": 20.0,
+          "feeds_removed": 1,
+          "parent_reduction": 1,
+          "risk": 50.91,
           "is_true_source": true,
           "solo_systems": []
         },
         {
-          "system": "8ECMM",
-          "downstream_reach": 0,
-          "solo_descope": 0,
-          "feeds_removed": 0,
-          "parent_reduction": 0,
-          "risk": 50.0,
-          "is_true_source": true,
-          "solo_systems": []
-        },
-        {
-          "system": "JAED",
+          "system": "KPO",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
           "parent_reduction": 0,
           "risk": 30.0,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "6PNXUI",
+          "downstream_reach": 0,
+          "solo_descope": 0,
+          "feeds_removed": 0,
+          "parent_reduction": 0,
+          "risk": 30.0,
+          "is_true_source": true,
+          "solo_systems": []
+        },
+        {
+          "system": "KDUZ",
+          "downstream_reach": 0,
+          "solo_descope": 0,
+          "feeds_removed": 0,
+          "parent_reduction": 0,
+          "risk": 20.0,
           "is_true_source": true,
           "solo_systems": []
         }
@@ -14020,6 +13987,200 @@
         "scope_before": 95,
         "scope_after": 95
       }
+    },
+    "optimization": {
+      "method": "scipy.milp (HiGHS, exact)",
+      "objective": "max systems fully descoped s.t. <= k true sources tokenized (supermodular AND-coverage; solved to certified optimality)",
+      "descopable": 32,
+      "scope_before": 95,
+      "true_source_count": 63,
+      "distinct_ancestor_sets": 7,
+      "k_max": 10,
+      "frontier": [
+        {
+          "k": 0,
+          "optimal_descoped": 0,
+          "greedy_descoped": 0,
+          "gap": 0,
+          "optimal_sources": [],
+          "certified": true,
+          "pct_of_descopable": 0.0
+        },
+        {
+          "k": 1,
+          "optimal_descoped": 2,
+          "greedy_descoped": 2,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 6.2
+        },
+        {
+          "k": 2,
+          "optimal_descoped": 3,
+          "greedy_descoped": 3,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCF"
+          ],
+          "certified": true,
+          "pct_of_descopable": 9.4
+        },
+        {
+          "k": 3,
+          "optimal_descoped": 27,
+          "greedy_descoped": 27,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCF",
+            "8MEC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 84.4
+        },
+        {
+          "k": 4,
+          "optimal_descoped": 28,
+          "greedy_descoped": 28,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCF",
+            "8EFW",
+            "8MEC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 87.5
+        },
+        {
+          "k": 5,
+          "optimal_descoped": 29,
+          "greedy_descoped": 29,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCF",
+            "8DFB",
+            "8EFW",
+            "8MEC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 90.6
+        },
+        {
+          "k": 6,
+          "optimal_descoped": 30,
+          "greedy_descoped": 30,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCF",
+            "8DFB",
+            "8EFW",
+            "8LNQ",
+            "8MEC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 93.8
+        },
+        {
+          "k": 7,
+          "optimal_descoped": 30,
+          "greedy_descoped": 30,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCCM",
+            "8CCF",
+            "8CEMS",
+            "8EFW",
+            "8MEC",
+            "9CPC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 93.8
+        },
+        {
+          "k": 8,
+          "optimal_descoped": 31,
+          "greedy_descoped": 30,
+          "gap": 1,
+          "optimal_sources": [
+            "6CWC",
+            "8CCCM",
+            "8CCF",
+            "8CEMS",
+            "8DFB",
+            "8EFW",
+            "8MEC",
+            "9CPC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 96.9
+        },
+        {
+          "k": 9,
+          "optimal_descoped": 32,
+          "greedy_descoped": 32,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCCM",
+            "8CCF",
+            "8CEMS",
+            "8DFB",
+            "8EFW",
+            "8LNQ",
+            "8MEC",
+            "9CPC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 100.0
+        },
+        {
+          "k": 10,
+          "optimal_descoped": 32,
+          "greedy_descoped": 32,
+          "gap": 0,
+          "optimal_sources": [
+            "6CWC",
+            "8CCCM",
+            "8CCF",
+            "8CEMS",
+            "8DFB",
+            "8EFW",
+            "8LNQ",
+            "8MEC",
+            "9CPC"
+          ],
+          "certified": true,
+          "pct_of_descopable": 100.0
+        }
+      ],
+      "milestones_min_sources": {
+        "25pct": 3,
+        "50pct": 3,
+        "75pct": 3,
+        "100pct": 9
+      },
+      "max_greedy_gap": 1,
+      "greedy_efficiency_pct": 100.0,
+      "all_certified": true
+    },
+    "decision_memo": {
+      "text": "Recommended action: tokenize PAN at the true source. Tokenizing the single highest-leverage source (6CWC) alone fully descopes 2 system(s) today \u2014 small, but that is a threshold effect, not a failure. Full descope begins with the very first sources tokenized, reaching 27 at ~7.9% of the 63 sources (k=5). The recommended greedy set (6CWC, 8CCF, 8MEC) descopes 27. Scope reduction is a program that pays off as the source front is cleared, not a single switch. Exposure falls immediately, even before that threshold. Tokenizing 6CWC strips a clear-PAN feed from 29 downstream systems and reduces the true-source-parent count on 27 systems. Exposure narrows across the estate even where a system's scope status has not yet changed \u2014 this is the marginal benefit of each tokenization, and the right way to rank them. Targeting matters. Blocking the three widest conduits by betweenness (8AQB, 8BCC, 8AFN) fully descopes 0 systems, whereas tokenizing the true-source set (6CWC, 8CCF, 8MEC) descopes 27 and removes 30 clear-PAN feeds. Blocking high-traffic relays does not reduce scope; converting the systems that originate PAN does. Sequence: begin with 6CWC and proceed down the ranked true-source list; each step lowers aggregate exposure now and advances toward the descope threshold. Plan for the full true-source front to realise the larger descope. (Descopable surface: 32 of 95 in-scope systems.)",
+      "grounded_on": [
+        "saturation_curve",
+        "source_exposure",
+        "block_comparison",
+        "greedy_plan"
+      ],
+      "tokens": 1601,
+      "generated": false
     }
   },
   "whatif_top3": {
@@ -14148,10 +14309,10 @@
     "choke_points": [
       "6CWC",
       "8CCF",
-      "8BKV",
       "8BCC",
       "8AFN",
       "8AQB",
+      "8BKV",
       "8CEMS",
       "8BFL",
       "8A",
@@ -14348,13 +14509,6 @@
         "is_true_source": true
       },
       {
-        "system": "8AFN",
-        "branch_size": 26,
-        "downstream_reach": 26,
-        "risk": 67.42,
-        "is_true_source": false
-      },
-      {
         "system": "8BCC",
         "branch_size": 26,
         "downstream_reach": 26,
@@ -14366,6 +14520,13 @@
         "branch_size": 26,
         "downstream_reach": 26,
         "risk": 83.64,
+        "is_true_source": false
+      },
+      {
+        "system": "8AFN",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 67.42,
         "is_true_source": false
       },
       {
@@ -14383,13 +14544,6 @@
         "is_true_source": false
       },
       {
-        "system": "8A",
-        "branch_size": 1,
-        "downstream_reach": 1,
-        "risk": 0.94,
-        "is_true_source": false
-      },
-      {
         "system": "8BFL",
         "branch_size": 1,
         "downstream_reach": 1,
@@ -14397,13 +14551,111 @@
         "is_true_source": false
       },
       {
-        "system": "8OHM",
+        "system": "8A",
+        "branch_size": 1,
+        "downstream_reach": 1,
+        "risk": 0.94,
+        "is_true_source": false
+      },
+      {
+        "system": "8BCKS",
         "branch_size": 0,
         "downstream_reach": 0,
         "risk": 40.0,
         "is_true_source": false
       }
-    ]
+    ],
+    "segmentation_min_cut": {
+      "cuts": [
+        {
+          "target": "8DEM",
+          "min_cut_edges": 1,
+          "edges_to_sever": [
+            [
+              "6CWC",
+              "8DEM"
+            ]
+          ],
+          "downstream_reach": 27
+        },
+        {
+          "target": "8BCC",
+          "min_cut_edges": 1,
+          "edges_to_sever": [
+            [
+              "8AQB",
+              "8BCC"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "8BY",
+          "min_cut_edges": 1,
+          "edges_to_sever": [
+            [
+              "6PNX",
+              "8BY"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "8AFN",
+          "min_cut_edges": 2,
+          "edges_to_sever": [
+            [
+              "8BKV",
+              "8AQB"
+            ],
+            [
+              "8DEM",
+              "8AQB"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "8AQB",
+          "min_cut_edges": 2,
+          "edges_to_sever": [
+            [
+              "8BKV",
+              "8AQB"
+            ],
+            [
+              "8DEM",
+              "8AQB"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "8BKV",
+          "min_cut_edges": 4,
+          "edges_to_sever": [
+            [
+              "8CCF",
+              "8BKV"
+            ],
+            [
+              "6CWC",
+              "8BKV"
+            ],
+            [
+              "6CWC",
+              "8DEM"
+            ],
+            [
+              "8MEC",
+              "8BKV"
+            ]
+          ],
+          "downstream_reach": 26
+        }
+      ],
+      "note": "min edges to sever so no true PAN source reaches the target (max-flow/min-cut, unit capacities; Menger's theorem)"
+    }
   },
   "categories": {
     "per_node": {
@@ -16164,20 +16416,20 @@
         "reach": 2
       },
       {
-        "id": "src:8DFB",
-        "label": "8DFB",
-        "band": 0,
-        "reach": 2
-      },
-      {
         "id": "src:9CPC",
         "label": "9CPC",
         "band": 0,
         "reach": 2
       },
       {
-        "id": "src:8EFW",
-        "label": "8EFW",
+        "id": "src:8DFB",
+        "label": "8DFB",
+        "band": 0,
+        "reach": 2
+      },
+      {
+        "id": "src:6IVC",
+        "label": "6IVC",
         "band": 0,
         "reach": 1
       },
@@ -16249,16 +16501,6 @@
         "value": 1
       },
       {
-        "source": "src:8DFB",
-        "target": "relays",
-        "value": 1
-      },
-      {
-        "source": "src:8DFB",
-        "target": "consumers",
-        "value": 1
-      },
-      {
         "source": "src:9CPC",
         "target": "relays",
         "value": 1
@@ -16269,7 +16511,22 @@
         "value": 1
       },
       {
-        "source": "src:8EFW",
+        "source": "src:8DFB",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:8DFB",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:6IVC",
+        "target": "consumers",
+        "value": 1
+      },
+      {
+        "source": "src:other",
         "target": "relays",
         "value": 1
       },

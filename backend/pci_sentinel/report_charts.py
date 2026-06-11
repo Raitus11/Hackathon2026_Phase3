@@ -16,17 +16,17 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 # palette (matches reporting.py)
-INK = "#0f1622"
-PAN = "#d98b1f"
-SAFE = "#0f9b8e"
-HOT = "#d64545"
-COOL = "#3f6fd1"
-DIM = "#5b6b82"
-GRID = "#e6ebf2"
-LIGHT = "#eef2f7"
+INK = "#1F2329"
+PAN = "#C77800"
+SAFE = "#0E7C4A"
+HOT = "#D71E28"
+COOL = "#2563EB"
+DIM = "#5A6472"
+GRID = "#ECE9E2"
+LIGHT = "#F6F4EF"
 
 plt.rcParams.update({
-    "font.size": 9, "axes.edgecolor": "#c7d0dc", "axes.linewidth": 0.8,
+    "font.size": 9, "axes.edgecolor": "#CFC9BE", "axes.linewidth": 0.8,
     "axes.titlesize": 10, "axes.titleweight": "bold", "axes.titlecolor": INK,
     "axes.labelcolor": DIM, "xtick.color": DIM, "ytick.color": DIM,
     "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.7,
@@ -115,7 +115,7 @@ def chart_scope_composition(result) -> io.BytesIO | None:
     if (cde + conn + out) > 0:
         tot2 = cde + conn + out
         ax.barh(0, cde, color=HOT, label="CDE (in scope)")
-        ax.barh(0, conn, left=cde, color="#e89a4a", label="connected-to")
+        ax.barh(0, conn, left=cde, color="#E8A33D", label="connected-to")
         ax.barh(0, out, left=cde + conn, color=SAFE, label="out of scope")
         for val, left in ((cde, 0), (conn, cde), (out, cde + conn)):
             if val:

@@ -165,13 +165,25 @@ def _memo_template(f: dict) -> str:
     cliff = _find_cliff(f.get("saturation_curve"))
     if cliff:
         pre, post = cliff["pre"], cliff["post"]
+        pre_pct = pre.get("pct_sources") or 0
+        if pre_pct < 1:
+            # the biggest jump is at (or right after) the very first sources — there is
+            # no flat plateau to describe, so "holds near 0 until roughly 0.0%" would be
+            # degenerate. Phrase the ramp honestly instead.
+            threshold_txt = (
+                f"Full descope begins with the very first sources tokenized, reaching "
+                f"{post.get('fully_descoped')} at ~{post.get('pct_sources')}% of the "
+                f"{tsc or 'true'} sources (k={post.get('k')}).")
+        else:
+            threshold_txt = (
+                f"Full descope holds near {pre.get('fully_descoped')} until roughly "
+                f"{pre_pct}% of the {tsc or 'true'} sources are tokenized, then rises "
+                f"sharply to {post.get('fully_descoped')} at ~{post.get('pct_sources')}% "
+                f"(k={post.get('k')}).")
         paras.append(
             f"Recommended action: tokenize PAN at the true source. Tokenizing the single "
             f"highest-leverage source ({first}) alone fully descopes {solo_txt} system(s) today — "
-            f"small, but that is a threshold effect, not a failure. Full descope holds near "
-            f"{pre.get('fully_descoped')} until roughly {pre.get('pct_sources')}% of the {tsc or 'true'} "
-            f"sources are tokenized, then rises sharply to {post.get('fully_descoped')} at "
-            f"~{post.get('pct_sources')}% (k={post.get('k')})."
+            f"small, but that is a threshold effect, not a failure. " + threshold_txt
             + (f" The recommended greedy set ({plan_list}) descopes {total_descoped}."
                if total_descoped is not None else "")
             + " Scope reduction is a program that pays off as the source front is cleared, not a single switch.")

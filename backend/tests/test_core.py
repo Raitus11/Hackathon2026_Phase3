@@ -1,4 +1,4 @@
-"""V-checks (Marco). Run: PYTHONPATH=. pytest -q"""
+"""V-checks — validation suite. Run: PYTHONPATH=. pytest -q"""
 import networkx as nx
 import pytest
 
@@ -319,3 +319,71 @@ def test_greedy_baselines_agree_across_callers():
         # an exact optimum can never fall below greedy, and every gap is non-negative
         assert row["optimal_descoped"] >= row["greedy_descoped"]
         assert row["gap"] >= 0
+
+
+# ---- V-022 ONE descopable denominator across every surface (anti-contradiction) ----
+def test_descopable_denominator_consistent_across_surfaces():
+    """The Planner roadmap, the certified-optimal frontier, the saturation curve and
+    the Economics card must all report the SAME 'descopable / removable' quantity.
+
+    Regression: the roadmap previously excluded only always-CDE elements from its
+    denominator, while the optimizer (and the saturation-curve ceiling, and therefore
+    Economics 'removable') also excluded the true PAN origins — which can never
+    descope because a tokenized origin remains in the CDE as the tokenization point.
+    The surfaces then disagreed by exactly |tokenizable origins| (a 37-system gap on
+    a ~4k-system estate; 60 on the bundled sample). One denominator, every surface."""
+    from pci_sentinel import optimize
+    art, scores = _sample_art()
+    G, pan = art.G, art.pan_sources
+
+    plan = analytics.minimal_tokenization_plan(G, pan, scores,
+                                               target_fraction=1.0, max_k=8)
+    frontier = optimize.descope_frontier(G, pan, scores, k_max=6)
+    sat = analytics.saturation_curve(G, pan, scores, points=8)
+    H = analytics._flatten(art.G)
+    scope = analytics.pci_scope(H, pan)
+    cats = analytics.scope_categories(G, pan, scope, scores)
+    econ = analytics.scope_economics(cats, sat, scores)
+
+    sat_max = max((p["fully_descoped"] for p in sat["curve"]), default=0)
+    assert plan["descopable"] == frontier["descopable"], (
+        f"Planner says {plan['descopable']} descopable, optimizer says "
+        f"{frontier['descopable']} — the denominators have diverged again")
+    assert plan["descopable"] == sat_max, (
+        f"Planner denominator {plan['descopable']} != saturation-curve ceiling {sat_max}")
+    assert econ["removable"] == plan["descopable"], (
+        f"Economics 'removable' {econ['removable']} != Planner descopable {plan['descopable']}")
+    # and the denominator excludes the origins themselves (tokenization points stay)
+    origins = analytics._true_pan_sources(H, set(pan))
+    assert plan["descopable"] <= len(scope) - len(origins & scope)
+
+
+def test_descopable_excludes_tokenization_points_toy():
+    """A tokenized origin stays in the CDE as the tokenization point, so it must not
+    be counted as descopable. Toy chain S -> A -> B (PAN flows provider->consumer ==
+    Child -> Parent): one origin (S), two descopable downstream systems — descopable
+    is 2, never 3."""
+    # DS1 rows: Parent = consumer, Child = provider (PAN flows Child -> Parent).
+    # App ids are 2-6 chars by schema (extract_app_id), hence SRC/RLY/LEAF.
+    ds1 = ("Parent App ID,Child App ID\n"
+           "RLY,SRC\n"
+           "LEAF,RLY\n")
+    ds4 = ("APPLICATION_MNEMONIC_DISTRIBUTED_ID,APPLICATION_NAME,PCI,"
+           "PCI_PRIMARYACCOUNTNUMBER_PROCESSTRANSMIT\n"
+           "SRC,Origin,YES,YES\n"
+           "RLY,Relay,YES,YES\n"
+           "LEAF,Leaf,YES,YES\n")
+    art = build_graph(ingest_files([
+        ("DS1_PCI_Apps_PCI_to_PCI_Dependencies.csv", ds1),
+        ("DS4_BAM_Report_All_Apps_with_Cardholder_Data.csv", ds4),
+    ]))
+    scores = compute_scores(art.G)
+    plan = analytics.minimal_tokenization_plan(art.G, art.pan_sources, scores,
+                                               target_fraction=1.0, max_k=3)
+    H = analytics._flatten(art.G)
+    origins = analytics._true_pan_sources(H, set(art.pan_sources))
+    assert origins == {"SRC"}
+    assert plan["before"] == 3
+    assert plan["descopable"] == 2      # RLY and LEAF; never the tokenization point SRC
+    # tokenizing the single origin fully descopes everything descopable
+    assert plan["total_descoped"] == plan["descopable"]

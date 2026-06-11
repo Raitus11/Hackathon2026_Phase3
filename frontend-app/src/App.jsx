@@ -431,7 +431,7 @@ function Overview({ d, onPick }) {
                   <td className="text-txt">{r.downstream_reach}</td>
                   <td className={(r.solo_descope ?? r.exclusive_reach) > 0 ? 'text-safe' : 'text-faint'}>{r.solo_descope ?? r.exclusive_reach}</td>
                   <td>{r.out_degree}</td>
-                  <td><span className="px-2 py-0.5 rounded" style={{ background: 'rgba(245,166,35,' + (r.risk / 120) + ')' }}>{r.risk}</span></td>
+                  <td><span className="px-2 py-0.5 rounded" style={{ background: 'rgba(215,30,40,' + (r.risk / 120) + ')', color: r.risk > 55 ? '#fff' : '#1F2329' }}>{r.risk}</span></td>
                 </tr>))}</tbody>
             </table>
           </div>
@@ -498,7 +498,7 @@ function GraphView({ d, selected, onPick }) {
     const svg = d3.select(ref.current).html('').append('svg').attr('width', W).attr('height', H).attr('viewBox', [0, 0, W, H])
     svg.append('defs').append('marker').attr('id', 'arrow').attr('viewBox', '0 -5 10 10').attr('refX', 16)
       .attr('refY', 0).attr('markerWidth', 5).attr('markerHeight', 5).attr('orient', 'auto')
-      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#3f5169')
+      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#9AA4B2')
     const g = svg.append('g')
     svg.call(d3.zoom().scaleExtent([.2, 4]).on('zoom', e => g.attr('transform', e.transform)))
     let L = base.L.map(e => ({ ...e }))
@@ -507,7 +507,7 @@ function GraphView({ d, selected, onPick }) {
     const Lv = L.filter(e => idset.has(e.source) && idset.has(e.target))
     const N = base.N.map(n => ({ ...n }))
     const deg = {}; Lv.forEach(e => { deg[e.source] = (deg[e.source] || 0) + 1; deg[e.target] = (deg[e.target] || 0) + 1 })
-    const color = n => n.hidden_pci ? '#ff5c5c' : n.true_source ? '#f5a623' : n.carries_pan ? '#f7c873' : n.in_scope ? '#5b8def' : '#3a4a63'
+    const color = n => n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6'
     const isRoot = n => focused && n.id === focusId
     const rad = n => isRoot(n) ? 11 : (heavySet.has(n.id) ? 6 : 3) + Math.sqrt(n.reach || 0) * 1.7
     const adj = new Map()
@@ -519,13 +519,13 @@ function GraphView({ d, selected, onPick }) {
       .force('collide', d3.forceCollide().radius(n => rad(n) + 3))
     const link = g.append('g').selectAll('line').data(Lv).join('line')
       .attr('class', 'lk').attr('marker-end', 'url(#arrow)')
-      .attr('stroke', e => e.provenance === 'inferred' ? '#f5a623' : '#2c3e57')
+      .attr('stroke', e => e.provenance === 'inferred' ? '#B45309' : '#9AA4B2')
       .attr('stroke-opacity', e => e.provenance === 'inferred' ? .85 : .5)
       .attr('stroke-width', e => Math.min(3, 1 + (e.count || 1) * .25))
       .attr('stroke-dasharray', e => e.provenance === 'inferred' ? '4 3' : null)
     const node = g.append('g').selectAll('circle').data(N).join('circle')
       .attr('class', 'node').attr('r', rad).attr('fill', color)
-      .attr('stroke', n => isRoot(n) ? '#2dd4bf' : n.hidden_pci ? '#ff5c5c' : (heavySet.has(n.id) ? '#fff' : (n.scope_prov === 'inferred' ? '#f5a623' : '#0a0e14')))
+      .attr('stroke', n => isRoot(n) ? '#0E7C4A' : n.hidden_pci ? '#8F0E1E' : (heavySet.has(n.id) ? '#1F2329' : (n.scope_prov === 'inferred' ? '#B45309' : '#FFFFFF')))
       .attr('stroke-width', n => isRoot(n) ? 3.5 : heavySet.has(n.id) ? 2 : (n.hidden_pci ? 2 : (n.scope_prov === 'inferred' ? 1.5 : 1)))
       .attr('stroke-dasharray', n => (n.scope_prov === 'inferred' && !n.hidden_pci && !heavySet.has(n.id)) ? '2 2' : null)
       .on('click', (e, n) => onPick(n.id))
@@ -549,7 +549,7 @@ function GraphView({ d, selected, onPick }) {
     const label = g.append('g').selectAll('text').data(labelData).join('text')
       .text(n => n.id)
       .attr('font-size', n => isRoot(n) ? 12 : heavySet.has(n.id) ? 10 : 9)
-      .attr('fill', n => isRoot(n) ? '#2dd4bf' : heavySet.has(n.id) ? '#e6edf6' : '#8aa0bd')
+      .attr('fill', n => isRoot(n) ? '#0E7C4A' : heavySet.has(n.id) ? '#1F2329' : '#5A6472')
       .attr('class', 'mono').attr('dx', n => isRoot(n) ? 13 : 8).attr('dy', 3)
     sim.on('tick', () => {
       link.attr('x1', e => e.source.x).attr('y1', e => e.source.y).attr('x2', e => e.target.x).attr('y2', e => e.target.y)
@@ -560,7 +560,7 @@ function GraphView({ d, selected, onPick }) {
   useEffect(() => {
     if (!selected) return
     d3.select(ref.current).selectAll('circle')
-      .attr('stroke', n => n.id === selected ? '#2dd4bf' : (n.hidden_pci ? '#ff5c5c' : (heavySet.has(n.id) ? '#fff' : (n.scope_prov === 'inferred' ? '#f5a623' : '#0a0e14'))))
+      .attr('stroke', n => n.id === selected ? '#0E7C4A' : (n.hidden_pci ? '#8F0E1E' : (heavySet.has(n.id) ? '#1F2329' : (n.scope_prov === 'inferred' ? '#B45309' : '#FFFFFF'))))
       .attr('stroke-width', n => n.id === selected ? 3.5 : (heavySet.has(n.id) ? 2 : (n.hidden_pci ? 2 : 1)))
   }, [selected, heavySet])
 
@@ -632,14 +632,14 @@ function GraphView({ d, selected, onPick }) {
 
       <div className="px-2 text-[11px] text-dim mb-1">{focusId ? focusHelp : modeHelp[mode]}</div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 text-[11px] text-dim items-center">
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-white" style={{ background: '#f5a623' }} />true PAN source (★ heavy hitter)</span>
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#f7c873' }} />carries PAN</span>
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#ff5c5c' }} />hidden PCI (BAM miss)</span>
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#5b8def' }} />in scope</span>
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '1.5px dashed #f5a623' }} />inferred-only scope</span>
-        {focusId && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '2px solid #2dd4bf' }} />focused app</span>}
-        <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#2c3e57" strokeWidth="2" markerEnd="" /></svg>metadata →</span>
-        <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#f5a623" strokeWidth="2" strokeDasharray="4 3" /></svg>inferred →</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-txt/40" style={{ background: '#D71E28' }} />true PAN source (★ heavy hitter)</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#E8A33D' }} />carries PAN</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#8F0E1E' }} />hidden PCI (BAM miss)</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2563EB' }} />in scope</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '1.5px dashed #B45309' }} />inferred-only scope</span>
+        {focusId && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '2px solid #0E7C4A' }} />focused app</span>}
+        <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#9AA4B2" strokeWidth="2" markerEnd="" /></svg>metadata →</span>
+        <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#B45309" strokeWidth="2" strokeDasharray="4 3" /></svg>inferred →</span>
         <span className="ml-auto text-faint">arrow = PAN flow (provider→consumer) · hover = isolate · scroll = zoom</span>
       </div>
       <div ref={ref} style={{ width: '100%' }} />
@@ -664,14 +664,14 @@ function MiniGraph({ node, ins, outs, onPick }) {
   const yFor = (i, n) => 24 + i * ((H - 48) / Math.max(1, n - 1 || 1))
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="mt-2">
-      {left.map((e, i) => <line key={'li' + i} x1="58" y1={yFor(i, left.length)} x2={cx} y2={cy} stroke={e.provenance === 'inferred' ? '#f5a623' : '#2c3e57'} strokeWidth="1.2" strokeDasharray={e.provenance === 'inferred' ? '4 3' : null} />)}
-      {right.map((e, i) => <line key={'ro' + i} x1={cx} y1={cy} x2={W - 58} y2={yFor(i, right.length)} stroke={e.provenance === 'inferred' ? '#f5a623' : '#2c3e57'} strokeWidth="1.2" strokeDasharray={e.provenance === 'inferred' ? '4 3' : null} />)}
-      {left.map((e, i) => <g key={'lt' + i} className="cursor-pointer" onClick={() => onPick(e.source)}><circle cx="50" cy={yFor(i, left.length)} r="5" fill="#5b8def" /><text x="44" y={yFor(i, left.length) + 3} textAnchor="end" fontSize="8" fill="#8aa0bd" className="mono">{e.source}</text></g>)}
-      {right.map((e, i) => <g key={'rt' + i} className="cursor-pointer" onClick={() => onPick(e.target)}><circle cx={W - 50} cy={yFor(i, right.length)} r="5" fill="#5b8def" /><text x={W - 44} y={yFor(i, right.length) + 3} fontSize="8" fill="#8aa0bd" className="mono">{e.target}</text></g>)}
-      <circle cx={cx} cy={cy} r="9" fill={node.hidden_pci ? '#ff5c5c' : node.true_source ? '#f5a623' : '#f7c873'} stroke="#2dd4bf" strokeWidth="2" />
-      <text x={cx} y={cy - 14} textAnchor="middle" fontSize="9" fill="#e6edf6" className="mono">{node.id}</text>
-      <text x="50" y="14" textAnchor="middle" fontSize="8" fill="#56657d">providers</text>
-      <text x={W - 50} y="14" textAnchor="middle" fontSize="8" fill="#56657d">consumers</text>
+      {left.map((e, i) => <line key={'li' + i} x1="58" y1={yFor(i, left.length)} x2={cx} y2={cy} stroke={e.provenance === 'inferred' ? '#B45309' : '#9AA4B2'} strokeWidth="1.2" strokeDasharray={e.provenance === 'inferred' ? '4 3' : null} />)}
+      {right.map((e, i) => <line key={'ro' + i} x1={cx} y1={cy} x2={W - 58} y2={yFor(i, right.length)} stroke={e.provenance === 'inferred' ? '#B45309' : '#9AA4B2'} strokeWidth="1.2" strokeDasharray={e.provenance === 'inferred' ? '4 3' : null} />)}
+      {left.map((e, i) => <g key={'lt' + i} className="cursor-pointer" onClick={() => onPick(e.source)}><circle cx="50" cy={yFor(i, left.length)} r="5" fill="#2563EB" /><text x="44" y={yFor(i, left.length) + 3} textAnchor="end" fontSize="8" fill="#5A6472" className="mono">{e.source}</text></g>)}
+      {right.map((e, i) => <g key={'rt' + i} className="cursor-pointer" onClick={() => onPick(e.target)}><circle cx={W - 50} cy={yFor(i, right.length)} r="5" fill="#2563EB" /><text x={W - 44} y={yFor(i, right.length) + 3} fontSize="8" fill="#5A6472" className="mono">{e.target}</text></g>)}
+      <circle cx={cx} cy={cy} r="9" fill={node.hidden_pci ? '#8F0E1E' : node.true_source ? '#D71E28' : '#E8A33D'} stroke="#0E7C4A" strokeWidth="2" />
+      <text x={cx} y={cy - 14} textAnchor="middle" fontSize="9" fill="#1F2329" className="mono">{node.id}</text>
+      <text x="50" y="14" textAnchor="middle" fontSize="8" fill="#8B95A3">providers</text>
+      <text x={W - 50} y="14" textAnchor="middle" fontSize="8" fill="#8B95A3">consumers</text>
     </svg>
   )
 }
@@ -714,7 +714,7 @@ function Drill({ d, selected, onPick }) {
             <button key={n.id} onClick={() => onPick(n.id)}
               className={'w-full flex items-center justify-between text-left px-2 py-1.5 rounded text-sm ' + (n.id === selected ? 'bg-pan/15' : 'hover:bg-panel2')}>
               <span className="flex items-center gap-1.5">
-                <i className="w-2 h-2 rounded-full inline-block" style={{ background: n.hidden_pci ? '#ff5c5c' : n.true_source ? '#f5a623' : n.carries_pan ? '#f7c873' : n.in_scope ? '#5b8def' : '#3a4a63' }} />
+                <i className="w-2 h-2 rounded-full inline-block" style={{ background: n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6' }} />
                 <span className={'mono ' + (n.id === selected ? 'text-pan' : 'text-txt')}>{n.id}</span>
               </span>
               <span className="mono text-[10px] text-faint">{n.risk}</span>
@@ -869,7 +869,13 @@ function Planner({ d, live, onPick }) {
   const exclBy = useMemo(() => Object.fromEntries(d.heavy_hitters.map(h => [h.system, h.exclusive_reach])), [d])
   const [plan, setPlan] = useState(d.plan || null)
   const [target, setTarget] = useState(Math.round((d.plan?.target_fraction || 0.8) * 100))
-  const [selected, setSelected] = useState(() => (d.plan?.plan || []).slice(0, 3))
+  // Open the what-if on the SAME lever set the Overview clean-stream card was computed
+  // for (impact.tokenized_systems), so the two surfaces show identical numbers at load.
+  // A prior version seeded from plan.plan, which can differ from the recommended levers
+  // when greedy halts early and the recommendation pads by exposure — the two tabs then
+  // disagreed by one system (e.g. "need RISE/APG 40 vs 41") before any user action.
+  const [selected, setSelected] = useState(() =>
+    (d.impact?.tokenized_systems?.length ? d.impact.tokenized_systems.slice() : (d.plan?.plan || []).slice(0, 3)))
   const [wi, setWi] = useState(d.whatif_top3 || null)
   const [busy, setBusy] = useState(false)
 
@@ -929,6 +935,7 @@ function Planner({ d, live, onPick }) {
           {plan && (
             <div className="mt-3">
               <div className="text-xs text-dim mb-3">Tokenizing <b className="text-pan">{plan.k}</b> source(s) descopes <b className="text-safe">{plan.total_descoped}</b> of {plan.descopable} descopable systems ({plan.before}→{plan.after} in scope).</div>
+              <div className="text-[11px] text-faint -mt-2 mb-3"><i>Descopable</i> = in-scope minus the systems that can never leave the CDE: the true PAN origins themselves (a tokenized origin stays as the tokenization point) and always-CDE elements (full-track / PIN / detokenizers). The Optimizer, the saturation curve, and the Economics card all use this same denominator.</div>
               <div className="space-y-1.5">
                 {plan.steps.map(s => (
                   <div key={s.step} className="flex items-center gap-2 text-sm">
@@ -1016,17 +1023,17 @@ function SaturationCurve({ plan }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 250 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
-            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#1e2a3d" strokeWidth="0.5" />
-            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#56657d">{Math.round(f * maxY)}</text>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#E6E2DA" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#8B95A3">{Math.round(f * maxY)}</text>
           </g>
         ))}
         {[0, 25, 50, 75, 100].map((p, i) => (
-          <text key={i} x={x(p)} y={H - P.b + 14} textAnchor="middle" fontSize="9" fill="#56657d">{p}%</text>
+          <text key={i} x={x(p)} y={H - P.b + 14} textAnchor="middle" fontSize="9" fill="#8B95A3">{p}%</text>
         ))}
-        <text x={P.l - 34} y={P.t + 4} fontSize="9" fill="#8aa0bd" transform={`rotate(-90 ${P.l - 34} ${H / 2})`}>systems fully descoped</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#8aa0bd">% of true PAN sources tokenized →</text>
-        <polyline points={pts} fill="none" stroke="#2dd4bf" strokeWidth="2" />
-        {sc.curve.map((p, i) => <circle key={i} cx={x(p.pct_sources)} cy={y(p.fully_descoped)} r="3" fill="#2dd4bf"><title>{p.pct_sources}% sources ({p.k}) → {p.fully_descoped} fully descoped</title></circle>)}
+        <text x={P.l - 34} y={P.t + 4} fontSize="9" fill="#5A6472" transform={`rotate(-90 ${P.l - 34} ${H / 2})`}>systems fully descoped</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#5A6472">% of true PAN sources tokenized →</text>
+        <polyline points={pts} fill="none" stroke="#0E7C4A" strokeWidth="2" />
+        {sc.curve.map((p, i) => <circle key={i} cx={x(p.pct_sources)} cy={y(p.fully_descoped)} r="3" fill="#0E7C4A"><title>{p.pct_sources}% sources ({p.k}) → {p.fully_descoped} fully descoped</title></circle>)}
       </svg>
       <div className="text-[11px] text-faint mt-2">Full front ({sc.source_count} sources) → {last?.fully_descoped ?? 0} of {before} fully descoped. The exposure benefit of partial tokenization is in the Block-&-Benefit tab and the heavy-hitter table — non-zero at every step even while full descope stays low.</div>
     </div>
@@ -1077,7 +1084,7 @@ function ScatterReachRisk({ d, onPick }) {
   const hh = new Set(d.heavy_hitters.slice(0, 8).map(h => h.system))
   const x = v => P.l + (v / maxX) * (W - P.l - P.r)
   const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
-  const color = n => n.hidden_pci ? '#ff5c5c' : n.true_source ? '#f5a623' : n.carries_pan ? '#e3a83a' : '#5b8def'
+  const color = n => n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : '#2563EB'
   return (
     <div className="card p-5">
       <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— conduit centrality × risk</span></div>
@@ -1085,22 +1092,22 @@ function ScatterReachRisk({ d, onPick }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
-            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#1e2a3d" strokeWidth="0.5" />
-            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#56657d">{Math.round(f * maxY)}</text>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#E6E2DA" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#8B95A3">{Math.round(f * maxY)}</text>
           </g>
         ))}
-        <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="#8aa0bd" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#8aa0bd">betweenness (conduit centrality) →</text>
+        <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="#5A6472" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#5A6472">betweenness (conduit centrality) →</text>
         {nodes.map((n, i) => {
           const isChoke = chokes.has(n.id)
           const r = hh.has(n.id) ? 7 : 3.6
           if (isChoke) return <rect key={i} x={x(bx(n)) - r} y={y(n.risk || 0) - r} width={2 * r} height={2 * r}
-            fill={color(n)} fillOpacity={0.85} stroke="#2dd4bf" strokeWidth="1.4" rx="1"
+            fill={color(n)} fillOpacity={0.85} stroke="#0E7C4A" strokeWidth="1.4" rx="1"
             style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
             <title>{n.id} · choke point · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title></rect>
           return <circle key={i} cx={x(bx(n))} cy={y(n.risk || 0)} r={r}
             fill={color(n)} fillOpacity={hh.has(n.id) ? 0.95 : 0.55}
-            stroke={hh.has(n.id) ? '#fff' : 'none'} strokeWidth={hh.has(n.id) ? 1 : 0}
+            stroke={hh.has(n.id) ? '#1F2329' : 'none'} strokeWidth={hh.has(n.id) ? 1 : 0}
             style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
             <title>{n.id} · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title>
           </circle>
@@ -1375,29 +1382,29 @@ function BlastGraph({ system, soloSet, adj, byId, color, onPick }) {
   return (
     <div>
       <div className="flex items-center gap-4 mb-1 text-[11px] text-dim flex-wrap">
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2dd4bf' }} />fully freed — leaves PCI scope ({soloN})</span>
-        <span className="flex items-center gap-1"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#5b8def' }} />loses a clear-PAN feed, stays in scope ({feedN})</span>
-        <span className="flex items-center gap-1"><i className="w-3.5 h-3.5 rounded-full inline-block ring-1 ring-white" style={{ background: color }} />blocked source</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#0E7C4A' }} />fully freed — leaves PCI scope ({soloN})</span>
+        <span className="flex items-center gap-1"><i className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#2563EB' }} />loses a clear-PAN feed, stays in scope ({feedN})</span>
+        <span className="flex items-center gap-1"><i className="w-3.5 h-3.5 rounded-full inline-block ring-1 ring-txt/40" style={{ background: color }} />blocked source</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 430 }}>
-        {rings.map((rg, i) => <circle key={'rg' + i} cx={cx} cy={cy} r={rg.r} fill="none" stroke="#1e2a3d" strokeWidth="0.5" strokeDasharray="2 4" />)}
+        {rings.map((rg, i) => <circle key={'rg' + i} cx={cx} cy={cy} r={rg.r} fill="none" stroke="#E6E2DA" strokeWidth="0.5" strokeDasharray="2 4" />)}
         {placed.map((p, i) => <line key={'e' + i} x1={cx} y1={cy} x2={p.x} y2={p.y}
-          stroke={p.solo ? '#2dd4bf' : '#5b8def'} strokeWidth={p.solo ? 1.2 : 0.6} strokeOpacity={p.solo ? 0.65 : 0.3} />)}
+          stroke={p.solo ? '#0E7C4A' : '#2563EB'} strokeWidth={p.solo ? 1.2 : 0.6} strokeOpacity={p.solo ? 0.65 : 0.3} />)}
         {placed.map((p, i) => (
           <g key={'n' + i} style={{ cursor: 'pointer' }} onClick={() => onPick && onPick(p.id)}>
-            <circle cx={p.x} cy={p.y} r={p.solo ? 7 : 4.5} fill={p.solo ? '#2dd4bf' : '#5b8def'} fillOpacity={p.solo ? 1 : 0.82} stroke={p.solo ? '#0a0e14' : 'none'} strokeWidth={p.solo ? 1 : 0}>
+            <circle cx={p.x} cy={p.y} r={p.solo ? 7 : 4.5} fill={p.solo ? '#0E7C4A' : '#2563EB'} fillOpacity={p.solo ? 1 : 0.82} stroke={p.solo ? '#FFFFFF' : 'none'} strokeWidth={p.solo ? 1 : 0}>
               {p.solo && <animate attributeName="r" values="7;10;7" dur="1.9s" repeatCount="indefinite" />}
             </circle>
-            {(p.solo || placed.length <= 30) && <text x={p.x} y={p.y - 9} textAnchor="middle" fontSize="8.5" fill={p.solo ? '#e6edf6' : '#8aa0bd'} className="mono">{p.id}</text>}
+            {(p.solo || placed.length <= 30) && <text x={p.x} y={p.y - 9} textAnchor="middle" fontSize="8.5" fill={p.solo ? '#1F2329' : '#5A6472'} className="mono">{p.id}</text>}
             <title>{p.id}{p.solo ? ' · fully freed' : ' · loses a feed (stays in scope)'}</title>
           </g>
         ))}
         {/* source at center */}
         <circle cx={cx} cy={cy} r="15" fill={color} stroke="#fff" strokeWidth="2.5" />
-        <text x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fill="#0a0e14" className="mono">block</text>
-        <text x={cx} y={cy - 22} textAnchor="middle" fontSize="11" fill="#e6edf6" className="mono">{system}</text>
-        {hidden > 0 && <text x={cx} y={H - 12} textAnchor="middle" fontSize="10" fill="#56657d">+ {hidden} more beneficiaries not shown ({total} total downstream benefit)</text>}
-        {total === 0 && <text x={cx} y={cy + 40} textAnchor="middle" fontSize="11" fill="#56657d">this source feeds no in-scope systems</text>}
+        <text x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fill="#FFFFFF" className="mono">block</text>
+        <text x={cx} y={cy - 22} textAnchor="middle" fontSize="11" fill="#1F2329" className="mono">{system}</text>
+        {hidden > 0 && <text x={cx} y={H - 12} textAnchor="middle" fontSize="10" fill="#8B95A3">+ {hidden} more beneficiaries not shown ({total} total downstream benefit)</text>}
+        {total === 0 && <text x={cx} y={cy + 40} textAnchor="middle" fontSize="11" fill="#8B95A3">this source feeds no in-scope systems</text>}
       </svg>
     </div>
   )
@@ -1534,7 +1541,7 @@ function BlastRadius({ d, onPick }) {
         </div>
       </div>
 
-      {sat && <div className="card p-4 border-l-4" style={{ borderLeftColor: '#5b8def' }}>
+      {sat && <div className="card p-4 border-l-4" style={{ borderLeftColor: '#2563EB' }}>
         <div className="text-sm text-txt"><b className="text-cool">Saturated estate — this is the finding, not a bug.</b> The top {sat.n} true sources each feed ~{sat.pct}% of the in-scope estate, so their per-source numbers are near-identical. Every downstream system has <i>many</i> true-PAN parents, so blocking any one source removes a clear-PAN feed from almost everything yet <b>fully frees almost nothing</b> — which is precisely why piecemeal tokenization can't reduce this estate.</div>
         <div className="text-[12px] text-dim mt-1.5">The signals that <i>do</i> discriminate here: the <span className="text-safe">fully-freed</span> column (only <span className="mono text-safe">{sat.topSolo}</span> frees a system on its own — its single exclusive child), and <b>set-vs-set</b> blocking. See the <b>Planner</b> for the block-set comparison and the saturation curve, which shows full descope only ramps once nearly the whole source front is tokenized.</div>
       </div>}
@@ -1550,7 +1557,7 @@ function BlastRadius({ d, onPick }) {
               return (
                 <div key={r.system} className={'rounded-lg px-2.5 py-2 border cursor-pointer ' + (isA ? 'border-pan bg-pan/10' : isB ? 'border-cool bg-cool/10' : 'border-line hover:border-dim')} onClick={() => setA(r.system)}>
                   <div className="flex items-center gap-2">
-                    <span className="mono text-sm" style={{ color: isA ? '#f5a623' : isB ? '#5b8def' : '#e6edf6' }}>{r.system}</span>
+                    <span className="mono text-sm" style={{ color: isA ? '#D71E28' : isB ? '#2563EB' : '#1F2329' }}>{r.system}</span>
                     {i === 0 && <span className="text-[9px] px-1 rounded bg-safe/15 text-safe">best</span>}
                     <button onClick={(e) => { e.stopPropagation(); setB(isB ? null : r.system) }} className={'ml-auto text-[10px] px-1.5 py-0.5 rounded border ' + (isB ? 'border-cool text-cool' : 'border-line text-faint hover:text-dim')}>vs</button>
                   </div>
@@ -1568,16 +1575,16 @@ function BlastRadius({ d, onPick }) {
         {/* benefit detail */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Card r={ra} color="#f5a623" tag="A · blocked" />
-            {rb && <Card r={rb} color="#5b8def" tag="B · compare" />}
+            <Card r={ra} color="#D71E28" tag="A · blocked" />
+            {rb && <Card r={rb} color="#2563EB" tag="B · compare" />}
           </div>
 
           <div className="card p-4">
             <div className="text-[11px] uppercase tracking-widest text-faint mb-2">Downstream beneficiaries {ra && <span className="text-faint normal-case">· block {ra.system}</span>}</div>
-            <BlastGraph system={ra?.system} soloSet={soloA} adj={adj} byId={byId} color="#f5a623" onPick={onPick} />
+            <BlastGraph system={ra?.system} soloSet={soloA} adj={adj} byId={byId} color="#D71E28" onPick={onPick} />
             {rb && <div className="border-t border-line mt-3 pt-3">
               <div className="text-[11px] uppercase tracking-widest text-faint mb-2">Compare · block {rb.system}</div>
-              <BlastGraph system={rb.system} soloSet={soloB} adj={adj} byId={byId} color="#5b8def" onPick={onPick} />
+              <BlastGraph system={rb.system} soloSet={soloB} adj={adj} byId={byId} color="#2563EB" onPick={onPick} />
             </div>}
           </div>
 
@@ -1603,7 +1610,7 @@ function VerdictBanner({ d, onTab, onPick }) {
   const topDist = (d.heavy_hitters || [])[0] || null       // widest distributor overall
   const levers = imp.tokenized_systems || (d.plan?.plan || []).slice(0, 3)
   return (
-    <div className="card p-4 mb-5 border-l-4" style={{ borderLeftColor: '#ff5c5c' }}>
+    <div className="card p-4 mb-5 border-l-4" style={{ borderLeftColor: '#8F0E1E' }}>
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="disp font-black text-3xl text-panhot">{fmt(h.hidden_pci_systems_bam_misses)}</span>
         <span className="text-txt text-base">systems are handling clear card numbers that BAM never flagged as PCI.</span>
@@ -1670,7 +1677,7 @@ function HiddenScope({ d, onPick }) {
       </div>
 
       {propagating.length > 0 && (
-        <div className="card p-5 border-l-4" style={{ borderLeftColor: '#ff5c5c' }}>
+        <div className="card p-5 border-l-4" style={{ borderLeftColor: '#8F0E1E' }}>
           <div className="disp font-bold text-sm text-panhot">Highest-risk misses — unflagged AND propagating</div>
           <div className="text-[11px] text-faint mb-3">A system BAM doesn't know is PCI, that also feeds PAN to others, hides the most scope. These are where to look first.</div>
           <div className="flex flex-wrap gap-2">
@@ -1722,25 +1729,29 @@ export default function App() {
   const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
   const showBanner = !['pipeline'].includes(tab)
   return (
-    <div className="max-w-[1280px] mx-auto px-5 py-5">
-      <header className="flex items-center gap-4 mb-5">
-        <div className="disp font-black text-2xl tracking-tight">PCI<span className="text-pan">·</span>SENTINEL</div>
-        <div className="text-xs text-faint border-l border-line pl-4 leading-tight">Intelligent mapping of interdependencies across PCI systems<br />cardholder-data lineage · scope reduction · clean-stream targeting</div>
-        <div className="ml-auto flex items-center gap-3">
-          {error && <span onClick={clearError} title="dismiss" className="mono text-[11px] px-2 py-1 rounded bg-panhot/20 text-panhot cursor-pointer max-w-[340px] truncate">⚠ {error}</span>}
-          {src === 'live' && phase === 'done' && (
-            <div className="flex items-center gap-1.5">
-              <a href="/api/report/pdf" className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2" title="Executive PDF report">↓ PDF</a>
-              <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2" title="XLSX data pack">↓ XLSX</a>
-            </div>
-          )}
-          <button onClick={() => { reset(); setTab('pipeline') }}
-            className="mono text-[11px] px-3 py-1.5 rounded border border-line text-pan hover:bg-panel2">↑ New analysis</button>
-          <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-safe/20 text-safe' : 'bg-line text-dim')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
-          <span title="AI narration mode: generative (enterprise gateway) vs deterministic templates with identical numbers"
-            className={'mono text-[11px] px-2 py-1 rounded ' + ((d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{(d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? '✦ AI: generative' : '○ AI: deterministic'}</span>
+    <div className="min-h-full">
+      {/* corporate masthead — brand red band, gold keyline (the page signature) */}
+      <div className="masthead">
+        <div className="max-w-[1280px] mx-auto px-5 py-3 flex items-center gap-4 flex-wrap">
+          <div className="disp font-black text-2xl tracking-tight text-white">PCI<span className="text-gold">·</span>SENTINEL</div>
+          <div className="text-xs text-white/80 border-l border-white/30 pl-4 leading-tight">Intelligent mapping of interdependencies across PCI systems<br />cardholder-data lineage · scope reduction · clean-stream targeting</div>
+          <div className="ml-auto flex items-center gap-2 flex-wrap">
+            {error && <span onClick={clearError} title="dismiss" className="mono text-[11px] px-2 py-1 rounded bg-white text-pan font-semibold cursor-pointer max-w-[340px] truncate shadow-sm">⚠ {error}</span>}
+            {src === 'live' && phase === 'done' && (
+              <div className="flex items-center gap-1.5">
+                <a href="/api/report/pdf" className="mono text-[11px] px-3 py-1.5 rounded bg-white/15 text-white hover:bg-white/25" title="Executive PDF report">↓ PDF</a>
+                <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded bg-white/15 text-white hover:bg-white/25" title="XLSX data pack">↓ XLSX</a>
+              </div>
+            )}
+            <button onClick={() => { reset(); setTab('pipeline') }}
+              className="mono text-[11px] px-3 py-1.5 rounded bg-white text-pan font-semibold hover:bg-gold hover:text-txt transition">↑ New analysis</button>
+            <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
+            <span title="AI narration mode: generative (enterprise gateway) vs deterministic templates with identical numbers"
+              className={'mono text-[11px] px-2 py-1 rounded ' + ((d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? 'bg-gold text-txt font-semibold' : 'bg-white/10 text-white/70')}>{(d.plan && d.plan.decision_memo && d.plan.decision_memo.generated) ? '✦ AI: generative' : '○ AI: deterministic'}</span>
+          </div>
         </div>
-      </header>
+      </div>
+      <div className="max-w-[1280px] mx-auto px-5 py-5">
       <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
         {tabs.map(([k, l]) => <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>)}
       </nav>
@@ -1759,6 +1770,7 @@ export default function App() {
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.
         <b className="text-dim"> What it does not:</b> remediate controls, assert business need, or treat inferred signals as ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.
       </footer>
+      </div>
     </div>
   )
 }
@@ -1930,7 +1942,7 @@ function SankeyFlow({ d, onPick }) {
   useEffect(() => {
     if (!sk || !sk.nodes || !ref.current) return
     const W = 760, H = 360, padX = 12, bandX = [padX + 90, W / 2 - 40, W - padX - 110]
-    const colByBand = ['#d98b1f', '#3f6fd1', '#0f9b8e']  // pan / cool / safe
+    const colByBand = ['#D71E28', '#2563EB', '#0E7C4A']  // pan / cool / safe
     const nodes = sk.nodes.map(n => ({ ...n }))
     const links = sk.links.map(l => ({ ...l }))
     const byId = Object.fromEntries(nodes.map(n => [n.id, n]))
@@ -1975,7 +1987,7 @@ function SankeyFlow({ d, onPick }) {
       const anchor = n.band === 2 ? 'end' : 'start'
       const tx = n.band === 2 ? n.x - 6 : n.x + 20
       if (n.h >= 12) g.append('text').attr('x', tx).attr('y', n.y + n.h / 2 + 3).attr('text-anchor', anchor)
-        .attr('font-size', 10).attr('fill', '#9fb0c6').attr('font-family', 'ui-monospace,monospace')
+        .attr('font-size', 10).attr('fill', '#5A6472').attr('font-family', 'ui-monospace,monospace')
         .text(n.label.length > 22 ? n.label.slice(0, 21) + '…' : n.label)
     })
   }, [sk, onPick])

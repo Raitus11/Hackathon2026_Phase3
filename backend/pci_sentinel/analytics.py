@@ -608,7 +608,20 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
     before_n = len(before)
     origins = _true_pan_sources(H, set(pan_sources))
     independent = {n for n, d in H.nodes(data=True) if _always_cde(d)}
-    descopable = before - independent
+    # DESCOPABLE = systems that could ever leave the CDE under source tokenization.
+    # Two groups can never leave and are excluded from the denominator:
+    #   (a) always-CDE elements (full-track / PIN / detokenizers) — the data dictionary
+    #       is explicit that tokenization does not remove their risk; and
+    #   (b) the TRUE PAN ORIGINS themselves — a tokenized origin REMAINS in the CDE as
+    #       the tokenization point (it still ingests clear PAN to convert it to CRN).
+    # This is the same denominator the certified optimizer uses (optimize._build_atoms:
+    # D = (before - independent) - origins) and the same ceiling the saturation curve
+    # tops out at, so the Planner roadmap, the Optimization frontier, the saturation
+    # curve and the Economics 'removable' figure all report ONE number. A prior version
+    # excluded only (a), silently counting the tokenization points as descopable — the
+    # surfaces then disagreed by exactly |tokenizable origins| (e.g. 1779 vs 1742 = a
+    # 37-system gap on a ~4k-system estate). Guarded by V-022.
+    descopable = (before - independent) - origins
 
     # candidates = top-reach ORIGINS (levers), computed once
     cache = {s: ({s} | nx.descendants(H, s)) for s in origins}

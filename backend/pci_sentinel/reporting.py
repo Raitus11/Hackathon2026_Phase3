@@ -28,13 +28,13 @@ from reportlab.lib.units import mm
 from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
                                 Image as RLImage, HRFlowable)
 
-INK = colors.HexColor("#0f1622")
-PAN = colors.HexColor("#d98b1f")
-SAFE = colors.HexColor("#0f9b8e")
-HOT = colors.HexColor("#d64545")
-COOL = colors.HexColor("#3f6fd1")
-DIM = colors.HexColor("#5b6b82")
-LINE = colors.HexColor("#d6deea")
+INK = colors.HexColor("#1F2329")
+PAN = colors.HexColor("#C77800")
+SAFE = colors.HexColor("#0E7C4A")
+HOT = colors.HexColor("#D71E28")
+COOL = colors.HexColor("#2563EB")
+DIM = colors.HexColor("#5A6472")
+LINE = colors.HexColor("#DDD8CE")
 
 
 def _ts():
@@ -135,10 +135,10 @@ def _pdf_table(rows, widths):
     """A consistently-styled reportlab table (mono first column in PAN, zebra rows)."""
     t = Table(rows, colWidths=widths)
     t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F6F1E7")),
         ("TEXTCOLOR", (0, 0), (-1, 0), DIM), ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("FONTNAME", (0, 1), (0, -1), "Courier-Bold"), ("TEXTCOLOR", (0, 1), (0, -1), PAN),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f6f8fb")]),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAF8F4")]),
         ("GRID", (0, 0), (-1, -1), 0.3, LINE), ("TOPPADDING", (0, 0), (-1, -1), 3),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
     return t
@@ -169,21 +169,21 @@ def _graph_png(art, scores, viz, max_nodes=70) -> io.BytesIO:
 
     def color(nid):
         m = rank.get(nid, {})
-        if m.get("hidden_pci"): return "#d64545"
-        if m.get("is_true_source"): return "#d98b1f"
-        if m.get("carries_pan"): return "#e3a83a"
-        return "#3f6fd1"
+        if m.get("hidden_pci"): return "#8F0E1E"
+        if m.get("is_true_source"): return "#D71E28"
+        if m.get("carries_pan"): return "#E8A33D"
+        return "#2563EB"
     sizes = [120 + 26 * (rank.get(n, {}).get("downstream_reach") or 0) for n in H.nodes()]
-    nx.draw_networkx_edges(H, pos, ax=ax, edge_color="#b9c4d4", arrows=True,
+    nx.draw_networkx_edges(H, pos, ax=ax, edge_color="#9AA4B2", arrows=True,
                            arrowsize=7, width=0.7, alpha=0.7)
     nx.draw_networkx_nodes(H, pos, ax=ax, node_color=[color(n) for n in H.nodes()],
                            node_size=sizes, linewidths=0.4, edgecolors="white")
     big = sorted(H.nodes(), key=lambda n: -(rank.get(n, {}).get("downstream_reach") or 0))[:14]
     nx.draw_networkx_labels(H, pos, labels={n: n for n in big}, ax=ax, font_size=6,
-                            font_color="#1b2536")
+                            font_color="#1F2329")
     ax.axis("off")
     ax.set_title("PAN data-flow — heavy hitters and downstream (arrow = provider → consumer)",
-                 fontsize=8, color="#1b2536")
+                 fontsize=8, color="#1F2329")
     buf = io.BytesIO(); fig.savefig(buf, format="png", bbox_inches="tight", facecolor="white")
     plt.close(fig); buf.seek(0); return buf
 
@@ -362,10 +362,10 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
                          str(s["cumulative_descoped"]), str(s["scope_after"]), f"{s['pct_of_descopable']}%"])
         pt = Table(rows, colWidths=[8 * mm, 34 * mm, 30 * mm, 24 * mm, 24 * mm, 28 * mm])
     pt.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F6F1E7")),
         ("TEXTCOLOR", (0, 0), (-1, 0), DIM), ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("FONTNAME", (1, 1), (1, -1), "Courier-Bold"), ("TEXTCOLOR", (1, 1), (1, -1), PAN),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f6f8fb")]),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAF8F4")]),
         ("GRID", (0, 0), (-1, -1), 0.3, LINE), ("TOPPADDING", (0, 0), (-1, -1), 3),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
     E.append(pt)
@@ -426,10 +426,10 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
                         str(h.get("out_degree", "—")), str(h["risk"])])
     ht = Table(hh_rows, colWidths=[34 * mm, 32 * mm, 30 * mm, 26 * mm, 26 * mm])
     ht.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2f7")), ("TEXTCOLOR", (0, 0), (-1, 0), DIM),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F6F1E7")), ("TEXTCOLOR", (0, 0), (-1, 0), DIM),
         ("FONTSIZE", (0, 0), (-1, -1), 8), ("FONTNAME", (0, 1), (0, -1), "Courier-Bold"),
         ("TEXTCOLOR", (0, 1), (0, -1), PAN),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f6f8fb")]),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAF8F4")]),
         ("GRID", (0, 0), (-1, -1), 0.3, LINE), ("TOPPADDING", (0, 0), (-1, -1), 3),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
     E.append(ht)

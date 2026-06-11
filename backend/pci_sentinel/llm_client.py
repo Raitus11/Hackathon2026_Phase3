@@ -109,7 +109,11 @@ class LLMClient:
         ]
         text = self._complete(messages)
         if not text:
-            return self._offline(grounded_facts) + "\n\n[note: live explanation unavailable]"
+            # Fall back to the deterministic grounded template with no inline system
+            # note: the caller's `generated` flag (and the UI badge / report heading
+            # "(deterministic narration)") already state the mode — a bracketed note
+            # inside executive prose reads as breakage, not transparency.
+            return self._offline(grounded_facts)
         return text
 
     def chat(self, question: str, facts: dict, history=None) -> str:
