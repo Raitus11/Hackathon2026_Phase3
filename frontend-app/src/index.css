@@ -45,3 +45,6 @@ table.colgrid tbody tr:hover td{background:#FBF1F1}
 .node{cursor:pointer}.lk{stroke-linecap:round}
 table.dt td,table.dt th{padding:.4rem .6rem;border-bottom:1px solid #EFECE6;text-align:left}
 tr.hh:hover{background:#FBF1F1;cursor:pointer}
+/* nav: never show a scrollbar; tabs distribute across the full bar */
+.navbar{scrollbar-width:none}
+.navbar::-webkit-scrollbar{display:none}
