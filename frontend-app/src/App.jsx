@@ -668,6 +668,22 @@ function GraphView({ d, selected, onPick }) {
       .slice(0, 12)
   }, [query, d])
   const focusNode = useMemo(() => focusId ? d.viz.nodes.find(n => n.id === focusId) : null, [focusId, d])
+  // LIVE TOKENIZATION SIMULATOR (the hackathon's core question, on the graph itself):
+  // block clear PAN at this source -> which downstream systems benefit, live.
+  const [simulate, setSimulate] = useState(false)
+  useEffect(() => { setSimulate(false) }, [focusId])
+  const seRow = useMemo(() => {
+    const ps = (d.plan?.source_exposure?.per_source) || []
+    return focusId ? ps.find(r => r.system === focusId) : null
+  }, [d, focusId])
+  const simSets = useMemo(() => {
+    if (!simulate || !focusId) return null
+    const out = new Map()
+    d.viz.edges.forEach(e => { const a = eid(e.source); (out.get(a) || out.set(a, []).get(a)).push(eid(e.target)) })
+    const down = new Set(); let fr = [focusId]
+    while (fr.length) { const nx = []; fr.forEach(u => (out.get(u) || []).forEach(v => { if (!down.has(v) && v !== focusId) { down.add(v); nx.push(v) } })); fr = nx }
+    return { down, freed: new Set((seRow?.solo_systems) || []) }
+  }, [simulate, focusId, d, seRow])
 
   const focusResult = useMemo(() => focusId ? focusGraphCapped(d.viz, focusId, hops, dir) : null, [d, focusId, hops, dir])
   const counts = useMemo(() => {
@@ -700,7 +716,15 @@ function GraphView({ d, selected, onPick }) {
     const Lv = L.filter(e => idset.has(e.source) && idset.has(e.target))
     const N = base.N.map(n => ({ ...n }))
     const deg = {}; Lv.forEach(e => { deg[e.source] = (deg[e.source] || 0) + 1; deg[e.target] = (deg[e.target] || 0) + 1 })
-    const color = n => n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6'
+    const simOn = !!simSets
+    const baseColor = n => n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6'
+    const color = n => {
+      if (!simOn) return baseColor(n)
+      if (n.id === focusId) return '#D71E28'                      // the tokenization point (stays)
+      if (simSets.freed.has(n.id)) return '#0E7C4A'               // fully freed — leaves PCI scope
+      if (simSets.down.has(n.id)) return '#7FB69B'                // loses THIS clear-PAN feed (still has other sources)
+      return baseColor(n)
+    }
     const isRoot = n => focused && n.id === focusId
     const rad = n => isRoot(n) ? 11 : (heavySet.has(n.id) ? 6 : 3) + Math.sqrt(n.reach || 0) * 1.7
     const adj = new Map()
@@ -712,10 +736,11 @@ function GraphView({ d, selected, onPick }) {
       .force('collide', d3.forceCollide().radius(n => rad(n) + 3))
     const link = g.append('g').selectAll('line').data(Lv).join('line')
       .attr('class', 'lk').attr('marker-end', 'url(#arrow)')
-      .attr('stroke', e => e.provenance === 'inferred' ? '#B45309' : '#9AA4B2')
+      .attr('stroke', e => (simOn && eid(e.source) === focusId) ? '#0E7C4A' : e.provenance === 'inferred' ? '#B45309' : '#9AA4B2')
       .attr('stroke-opacity', e => e.provenance === 'inferred' ? .85 : .5)
       .attr('stroke-width', e => Math.min(3, 1 + (e.count || 1) * .25))
-      .attr('stroke-dasharray', e => e.provenance === 'inferred' ? '4 3' : null)
+      .attr('stroke-dasharray', e => (simOn && eid(e.source) === focusId) ? '5 3' : e.provenance === 'inferred' ? '4 3' : null)
+      .attr('stroke-opacity', e => simOn ? ((eid(e.source) === focusId || simSets.down.has(eid(e.source))) ? .8 : .12) : null)
     const node = g.append('g').selectAll('circle').data(N).join('circle')
       .attr('class', 'node').attr('r', rad).attr('fill', color)
       .attr('stroke', n => isRoot(n) ? '#0E7C4A' : n.hidden_pci ? '#8F0E1E' : (heavySet.has(n.id) ? '#1F2329' : (n.scope_prov === 'inferred' ? '#B45309' : '#FFFFFF')))
@@ -749,7 +774,7 @@ function GraphView({ d, selected, onPick }) {
       node.attr('cx', n => n.x).attr('cy', n => n.y); label.attr('x', n => n.x).attr('y', n => n.y)
     })
     return () => sim.stop()
-  }, [d, mode, showInferred, heavyList, heavySet, exclBySys, onPick, focusId, hops, dir])
+  }, [d, mode, showInferred, heavyList, heavySet, exclBySys, onPick, focusId, hops, dir, simSets])
   useEffect(() => {
     if (!selected) return
     d3.select(ref.current).selectAll('circle')
@@ -823,6 +848,23 @@ function GraphView({ d, selected, onPick }) {
         {!focusId && <span className="text-[11px] text-faint">pick an app to isolate its PAN neighbourhood — or keep the full view above</span>}
       </div>
 
+      {focusId && focusNode?.true_source && (
+        <div className={'mx-2 mb-2 px-3 py-2 rounded-lg flex items-center gap-3 flex-wrap ' + (simulate ? 'tint-green' : 'bg-panel2')}>
+          <label className="flex items-center gap-2 text-xs font-semibold text-txt cursor-pointer select-none">
+            <input type="checkbox" className="accent-pan" checked={simulate} onChange={e => setSimulate(e.target.checked)} />
+            ⚡ Simulate: tokenize {focusId} — what changes downstream, live
+          </label>
+          {simulate && seRow && (
+            <span className="flex items-center gap-4 text-[11px] text-dim flex-wrap">
+              <span><b className="disp text-safe text-base">{fmt(seRow.solo_descope)}</b> fully freed — leave PCI scope</span>
+              <span><b className="disp text-safe text-base">{fmt(seRow.feeds_removed)}</b> lose this clear-PAN feed</span>
+              <span><b className="disp text-cool text-base">{fmt(seRow.parent_reduction)}</b> have exposure narrowed</span>
+              <span className="text-faint">{focusId} itself stays in the CDE as the tokenization point</span>
+            </span>
+          )}
+          {simulate && !seRow && <span className="text-[11px] text-faint">per-source impact not in this snapshot — run a live analysis</span>}
+        </div>
+      )}
       <div className="px-2 text-[11px] text-dim mb-1">{focusId ? focusHelp : modeHelp[mode]}</div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 text-[11px] text-dim items-center">
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-txt/40" style={{ background: '#D71E28' }} />true PAN source (★ heavy hitter)</span>
@@ -831,6 +873,9 @@ function GraphView({ d, selected, onPick }) {
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2563EB' }} />in scope</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '1.5px dashed #B45309' }} />inferred-only scope</span>
         {focusId && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: 'transparent', border: '2px solid #0E7C4A' }} />focused app</span>}
+        {simulate && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#0E7C4A' }} />fully freed</span>}
+        {simulate && <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#7FB69B' }} />loses this clear-PAN feed</span>}
+        {simulate && <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#0E7C4A" strokeWidth="2" strokeDasharray="5 3" /></svg>now carries CRN →</span>}
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#9AA4B2" strokeWidth="2" markerEnd="" /></svg>metadata →</span>
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#B45309" strokeWidth="2" strokeDasharray="4 3" /></svg>inferred →</span>
         <span className="ml-auto text-faint">arrow = PAN flow (provider→consumer) · hover = isolate · scroll = zoom</span>
@@ -2526,6 +2571,34 @@ function NeighbourPicker({ d, label, picked, setPicked, hint }) {
   )
 }
 
+
+/* Simplification Goal 4 — propose mechanisms to detect EMERGING PCI scope early.
+   Each trigger maps to an engine capability that already exists, so the proposal is
+   credible: re-run the pipeline on metadata deltas and diff the audited outputs. */
+function EmergingScopeWatch() {
+  const rows = [
+    ['BAM PCI flag flips Yes→No (or No→Yes)', 'Re-run scope; diff against the last run — a flip that removes a PAN carrier while Splunk still sees PAN becomes a new hidden-PCI finding automatically.'],
+    ['New dependency edge lands on a CDE system', 'The onboarding assessment above runs the same check pre-build; post-build, a nightly re-run flags the new edge and the transitive scope it drags in.'],
+    ['New clear-PAN hit in Splunk for a PCI=No app', 'Exactly the DS6 signal — ingested as an inferred PAN source, it surfaces in Hidden Scope with its evidence on the next run.'],
+    ['CDE survey response contradicts BAM', 'Inferred edges are kept provenance-tagged and never merged, so contradictions are visible side-by-side in the lineage, not silently resolved.'],
+    ['Risk score of any system moves more than a set threshold', 'Every run emits the full per-system score sheet (XLSX); a simple diff between runs is an early-warning list, no new infrastructure needed.'],
+  ]
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Emerging-scope watch <span className="text-faint text-xs font-normal">— proposed mechanism: catch tomorrow\'s PCI scope before it spreads</span></div>
+      <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">The whole pipeline is deterministic and runs end-to-end in seconds, so scope detection becomes a <b>scheduled diff</b>: re-run on each BAM/Splunk refresh and alert on what changed. Every trigger below is caught by a capability that already exists in this engine — nothing here is speculative.</p>
+      <div className="mt-3 space-y-2">
+        {rows.map(([t, h], i) => (
+          <div key={i} className="flex gap-3 text-xs">
+            <span className="mono shrink-0 w-5 h-5 rounded-md tint-gold text-[#6B4E00] font-bold flex items-center justify-center">{i + 1}</span>
+            <div><span className="font-semibold text-txt">{t}.</span> <span className="text-dim">{h}</span></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Onboarding({ d, live, onPick }) {
   const [appId, setAppId] = useState('NEW-APP')
   const [providers, setProviders] = useState([])
@@ -2670,6 +2743,7 @@ function Onboarding({ d, live, onPick }) {
           </div>
         )}
       </div>
+      <EmergingScopeWatch />
     </div>
   )
 }
