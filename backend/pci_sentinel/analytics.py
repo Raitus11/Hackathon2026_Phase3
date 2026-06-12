@@ -1061,3 +1061,184 @@ def sankey_payload(G, pan_sources: set, scope: set, scores: dict, max_sources: i
         links.append({"source": "relays", "target": "consumers", "value": relay_to_consumer})
     return {"nodes": nodes, "links": links,
             "source_count": len(origins), "scope": len(scope)}
+
+
+# ============================================================================
+# OWNERSHIP & ONBOARDING (added): accountability rollup over BAM org fields,
+# and the new-system onboarding assessment. All deterministic, zero new deps.
+# ============================================================================
+
+def ownership_rollup(G, pan_sources: set, scope: set, scores: dict, top_k: int = 12) -> dict:
+    """Exposure by LINE_OF_BUSINESS (authoritative DS4 field) — who owns the work.
+
+    Graph math names systems; remediation programs name owners. For every line of
+    business recorded in BAM we report: systems known, systems in PCI scope (CDE),
+    hidden-PCI systems (PCI=No in BAM but clear PAN observed in Splunk), and clear-PAN
+    carriers — with a sample of the hidden systems so the row is actionable, not just a
+    count. Systems whose BAM row carries no line of business (or that are not in BAM at
+    all) are reported honestly under '(not recorded in BAM)' rather than guessed.
+    """
+    scope = set(scope)
+    by = {}
+    for n, d in G.nodes(data=True):
+        lob = (d.get("line_of_business") or "").strip() or "(not recorded in BAM)"
+        row = by.setdefault(lob, {"line_of_business": lob, "systems": 0, "in_scope": 0,
+                                  "hidden_pci": 0, "carries_pan": 0, "hidden_sample": [],
+                                  "business_groups": set()})
+        row["systems"] += 1
+        if n in scope:
+            row["in_scope"] += 1
+        if d.get("carries_pan"):
+            row["carries_pan"] += 1
+        if d.get("pan_in_logs_observed") and not d.get("pci_flag"):
+            row["hidden_pci"] += 1
+            if len(row["hidden_sample"]) < 8:
+                row["hidden_sample"].append(n)
+        bg = (d.get("business_group") or "").strip()
+        if bg:
+            row["business_groups"].add(bg)
+    rows = []
+    for r in by.values():
+        r["business_groups"] = sorted(r["business_groups"])[:3]
+        r["hidden_sample"] = sorted(r["hidden_sample"])
+        rows.append(r)
+    # the unattributed bucket goes last regardless of size; real LOBs sort by exposure
+    rows.sort(key=lambda r: (r["line_of_business"] == "(not recorded in BAM)",
+                             -r["in_scope"], -r["hidden_pci"], r["line_of_business"]))
+    attributed = [r for r in rows if r["line_of_business"] != "(not recorded in BAM)"]
+    return {
+        "by_lob": rows[:top_k],
+        "lob_count": len(attributed),
+        "coverage": {
+            "systems_with_lob": sum(r["systems"] for r in attributed),
+            "systems_without_lob": sum(r["systems"] for r in rows) - sum(r["systems"] for r in attributed),
+        },
+    }
+
+
+def onboarding_assessment(G, pan_sources: set, scores: dict, app_id: str,
+                          providers: list, consumers: list | None = None,
+                          flags: dict | None = None) -> dict:
+    """Assess a NOT-YET-BUILT system before it is onboarded (rubric: extensibility).
+
+    Given the planned upstream providers (systems it will consume data from), the
+    planned downstream consumers (systems it will feed), and its own data handling
+    flags, this answers — deterministically, with the SAME clean-stream semantics as
+    the rest of the engine — the questions an architecture review asks:
+
+      * Will it land in the CDE, connected-to, or out of scope — and WHY (which
+        in-scope provider, or which of its own data elements, puts it there)?
+      * Which TRUE PAN ORIGINS reach it through its providers — i.e. exactly which
+        tokenizations upstream would let it receive CRN instead of clear PAN?
+      * Would it ever fully descope under source tokenization, or is it permanent
+        CDE (it detokenizes / holds full-track or PIN / originates PAN itself)?
+      * SCOPE EXPANSION: if it carries clear PAN and feeds the planned consumers,
+        how many currently-out-of-scope systems get dragged INTO scope by this one
+        onboarding decision — counted transitively, before a line of code is written.
+
+    Nothing is invented: planned neighbours that do not resolve to systems in the
+    authoritative universe are reported under `unknown_providers`/`unknown_consumers`
+    and excluded from the math (constraint: never invent systems or edges).
+    """
+    consumers = consumers or []
+    flags = flags or {}
+    app_id = (app_id or "").strip().upper() or "NEW-APP"
+    H = _flatten(G)
+    scope = pci_scope(H, set(pan_sources))
+    origins = _true_pan_sources(H, set(pan_sources))
+    always = {n for n, d in H.nodes(data=True) if _always_cde(d)}
+    tokenizable = origins - always
+
+    norm = lambda xs: [str(x).strip().upper() for x in xs if str(x).strip()]
+    prov_in = norm(providers)
+    cons_in = norm(consumers)
+    prov = [p for p in prov_in if p in H]
+    cons = [c for c in cons_in if c in H]
+    unknown_p = [p for p in prov_in if p not in H]
+    unknown_c = [c for c in cons_in if c not in H]
+
+    self_detok = bool(flags.get("detokenizes"))
+    self_track = bool(flags.get("full_track"))
+    self_pin = bool(flags.get("pin"))
+    self_pan = bool(flags.get("pan")) or self_detok or self_track or self_pin
+    self_always_cde = self_detok or self_track or self_pin
+
+    pan_providers = sorted(p for p in prov if p in scope)   # providers that can feed it clear PAN
+    receives_clear_pan = bool(pan_providers)
+
+    if receives_clear_pan or self_pan:
+        category = "cde"
+    elif any((p in scope) for p in prov) or any((c in scope) for c in cons):
+        category = "connected"
+    else:
+        category = "out"
+
+    if self_pan or receives_clear_pan:
+        tier = SETTINGS.tier_critical
+    elif flags.get("crn_only"):
+        tier = SETTINGS.tier_high
+    else:
+        tier = SETTINGS.tier_none
+
+    # which true origins reach it (through its providers): ancestors-of-providers ∩ origins
+    anc = set()
+    for p in prov:
+        anc.add(p)
+        anc |= nx.ancestors(H, p)
+    origins_reaching = sorted(origins & anc)
+    blocking_always = sorted(set(origins_reaching) & always)  # origins that can never be tokenized away
+
+    can_fully_descope = (category == "cde" and not self_pan
+                         and len(origins_reaching) > 0
+                         and not blocking_always)
+
+    # transitive scope expansion if this app carries clear PAN and feeds consumers
+    dragged = set()
+    if (receives_clear_pan or self_pan):
+        for c in cons:
+            if c not in scope:
+                dragged |= ({c} | nx.descendants(H, c)) - scope
+    expansion = sorted(dragged)
+
+    profile = dict(carries_pan=(receives_clear_pan or self_pan), detokenizes=self_detok,
+                   full_track=self_track, pin=self_pin, pan_in_logs=False,
+                   pan_store=bool(flags.get("pan")), crn_only=bool(flags.get("crn_only")))
+    from . import pci_requirements as req
+    families = req.families_for(profile, category)
+
+    if self_always_cde:
+        verdict = (f"{app_id} is PERMANENT CDE: it holds always-CDE data elements "
+                   f"(detokenize/full-track/PIN) — tokenization upstream cannot remove its risk. "
+                   f"Onboard it behind centralized RISE/APG controls.")
+    elif self_pan:
+        verdict = (f"{app_id} ORIGINATES clear PAN, so it enters the CDE as a new true source "
+                   f"and a future tokenization point. Prefer designing it CRN-native instead.")
+    elif receives_clear_pan:
+        toks = ", ".join(sorted(set(origins_reaching) - always)[:6]) or "its upstream true sources"
+        verdict = (f"{app_id} lands in the CDE because provider(s) {', '.join(pan_providers[:6])} "
+                   f"feed it clear PAN. To keep it OUT of the CDE, consume the tokenized stream "
+                   f"instead — tokenizing {toks} upstream delivers exactly that (clean-stream effect).")
+    elif category == "connected":
+        verdict = (f"{app_id} holds no cardholder data but touches in-scope systems, so it is "
+                   f"connected-to: still in PCI scope for access-control and testing (Req 7/8, 11), "
+                   f"a candidate for segmentation rather than tokenization.")
+    else:
+        verdict = f"{app_id} is out of PCI scope as designed: no cardholder-data flow reaches or leaves it."
+
+    return {
+        "app_id": app_id,
+        "category": category, "sensitivity_tier": tier,
+        "receives_clear_pan": receives_clear_pan,
+        "pan_providers": pan_providers,
+        "providers_resolved": sorted(prov), "consumers_resolved": sorted(cons),
+        "unknown_providers": unknown_p, "unknown_consumers": unknown_c,
+        "origins_reaching": origins_reaching,
+        "origins_reaching_count": len(origins_reaching),
+        "blocking_always_cde_origins": blocking_always,
+        "can_fully_descope_under_tokenization": can_fully_descope,
+        "permanent_cde": bool(self_always_cde),
+        "scope_expansion_count": len(expansion),
+        "scope_expansion_sample": expansion[:20],
+        "triggered_requirements": families,
+        "verdict": verdict,
+    }

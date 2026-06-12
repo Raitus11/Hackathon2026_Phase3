@@ -64,6 +64,11 @@ def _node_pci_profile(bam_row: dict) -> dict:
         data_classification=bam_row.get("data_classification", ""),
         feeds_splunk=_is_yes(bam_row.get("feeds_splunk")),
         app_name=bam_row.get("application_name", ""), sensitivity_tier=tier,
+        # ownership/accountability fields (authoritative DS4) — power the
+        # who-owns-the-exposure rollup; never guessed for non-BAM nodes.
+        line_of_business=bam_row.get("line_of_business", ""),
+        business_group=bam_row.get("business_group", ""),
+        tech_area=bam_row.get("tech_area", ""),
     )
 
 
@@ -71,7 +76,8 @@ def _default_profile() -> dict:
     return dict(in_bam=False, pci_flag=False, carries_pan=False, detokenizes=False,
                pan_store=False, pan_process=False, crn_only=False, full_track=False,
                pin=False, pan_in_logs=False, data_classification="", feeds_splunk=False,
-               app_name="", sensitivity_tier=SETTINGS.tier_none)
+               app_name="", sensitivity_tier=SETTINGS.tier_none,
+               line_of_business="", business_group="", tech_area="")
 
 
 def build_graph(ingest) -> GraphArtifacts:

@@ -35,7 +35,7 @@ _Solo descope = systems freed if only that one source is tokenized. It is small 
 
 ## Tokenization leverage (minimum-intervention optimizer)
 - Greedy max-marginal full-descope over the true PAN sources (transparent heuristic; the freed-systems objective is supermodular under conjunctive true-source coverage, so the (1−1/e) submodular guarantee does not apply and is not claimed).
-- Tokenizing **6** source system(s) descopes **30** of 92 descopable systems (95 → 65 in PCI scope).
+- Tokenizing **3** source system(s) descopes **27** of 32 descopable systems (95 → 68 in PCI scope).
 - Clean-stream impact of the recommended top-3 sources: descopes 27 systems (28.4% of the in-scope surface), aggregate exposure risk −17.9%.
 - 3 system(s) genuinely need PAN and remain in the CDE, de-tokenizing via centralized RISE/APG services.
 

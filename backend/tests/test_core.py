@@ -387,3 +387,83 @@ def test_descopable_excludes_tokenization_points_toy():
     assert plan["descopable"] == 2      # RLY and LEAF; never the tokenization point SRC
     # tokenizing the single origin fully descopes everything descopable
     assert plan["total_descoped"] == plan["descopable"]
+
+
+# ---- V-023 onboarding assessment uses the same clean-stream semantics as the engine ----
+def _onboard_toy():
+    """SRC -> RLY -> LEAF (clear PAN), plus CRN (tokenized-only, out of flow) and
+    ISLAND (no edges, no CHD)."""
+    ds1 = ("Parent App ID,Child App ID\n"
+           "RLY,SRC\n"
+           "LEAF,RLY\n")
+    ds4 = ("APPLICATION_MNEMONIC_DISTRIBUTED_ID,APPLICATION_NAME,PCI,"
+           "PCI_PRIMARYACCOUNTNUMBER_PROCESSTRANSMIT,"
+           "PCI_TOKENIZEDPRIMARYACCOUNTNUMBER_PROCESSTRANSMIT\n"
+           "SRC,Origin,YES,YES,NO\n"
+           "RLY,Relay,YES,YES,NO\n"
+           "LEAF,Leaf,YES,YES,NO\n"
+           "CRN1,TokenOnly,YES,NO,YES\n"
+           "ISLE,Island,NO,NO,NO\n")
+    art = build_graph(ingest_files([
+        ("DS1_PCI_Apps_PCI_to_PCI_Dependencies.csv", ds1),
+        ("DS4_BAM_Report_All_Apps_with_Cardholder_Data.csv", ds4),
+    ]))
+    return art, compute_scores(art.G)
+
+
+def test_onboarding_lands_in_cde_when_provider_is_in_scope():
+    art, scores = _onboard_toy()
+    a = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                        "NEWAPP", providers=["RLY"])
+    assert a["category"] == "cde" and a["receives_clear_pan"]
+    assert a["pan_providers"] == ["RLY"]
+    # the exact upstream tokenization that frees it is named
+    assert a["origins_reaching"] == ["SRC"]
+    assert a["can_fully_descope_under_tokenization"] is True
+    assert "req7_8" in a["triggered_requirements"]
+
+
+def test_onboarding_out_or_connected_when_no_chd_flow():
+    art, scores = _onboard_toy()
+    out = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                          "NEWAPP", providers=["ISLE"])
+    assert out["category"] == "out" and not out["receives_clear_pan"]
+    conn = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                           "NEWAPP", providers=[], consumers=["RLY"])
+    assert conn["category"] == "connected"   # touches the CDE without holding CHD
+
+
+def test_onboarding_detokenizer_is_permanent_cde():
+    art, scores = _onboard_toy()
+    a = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                        "NEWVLT", providers=[], flags={"detokenizes": True})
+    assert a["category"] == "cde" and a["permanent_cde"]
+    assert a["can_fully_descope_under_tokenization"] is False
+
+
+def test_onboarding_counts_transitive_scope_expansion():
+    """A PAN-carrying onboarding that feeds ISLE drags ISLE (and anything downstream
+    of it) into scope — counted before the system exists."""
+    art, scores = _onboard_toy()
+    a = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                        "NEWAPP", providers=["RLY"], consumers=["ISLE"])
+    assert a["scope_expansion_count"] == 1
+    assert a["scope_expansion_sample"] == ["ISLE"]
+    # unknown planned neighbours are reported, never invented
+    b = analytics.onboarding_assessment(art.G, art.pan_sources, scores,
+                                        "NEWAPP", providers=["GHOST9"])
+    assert b["unknown_providers"] == ["GHOST9"] and b["category"] == "out"
+
+
+# ---- V-024 ownership rollup partitions the estate exactly ----
+def test_ownership_rollup_sums_match_scope():
+    art, scores = _sample_art()
+    H = analytics._flatten(art.G)
+    scope = analytics.pci_scope(H, art.pan_sources)
+    own = analytics.ownership_rollup(art.G, art.pan_sources, scope, scores, top_k=10_000)
+    rows = own["by_lob"]
+    assert sum(r["systems"] for r in rows) == art.G.number_of_nodes()
+    assert sum(r["in_scope"] for r in rows) == len(scope)
+    hidden_total = sum(1 for _, d in art.G.nodes(data=True)
+                       if d.get("pan_in_logs_observed") and not d.get("pci_flag"))
+    assert sum(r["hidden_pci"] for r in rows) == hidden_total

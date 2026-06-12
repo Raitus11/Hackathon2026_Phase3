@@ -34,6 +34,7 @@ snap = {
     "suggested_questions": chat_mod.suggested_questions(r),
     "plan": r.plan, "whatif_top3": whatif_top3, "structure": r.structure,
     "categories": r.categories, "economics": r.economics, "sankey": r.sankey,
+    "ownership": getattr(r, "ownership", {}),
 }
 
 for out in sys.argv[1:]:

@@ -381,6 +381,7 @@ function Overview({ d, onPick }) {
       <ScopeEconomics d={d} />
       <SankeyFlow d={d} onPick={onPick} />
       <CategoryBar d={d} />
+      <OwnershipCard d={d} onPick={onPick} />
       <div className="flex flex-wrap gap-3">
         <KPI label="Systems exposed to clear PAN" value={fmt(h.systems_exposed_to_clear_pan)}
           sub={`${h.scope_metadata_confirmed} metadata-confirmed · ${h.scope_inferred_only} inferred-only`} tone="pan" delay={0}
@@ -448,6 +449,7 @@ function Overview({ d, onPick }) {
         <p className="text-sm text-dim leading-relaxed">{d.explanation}</p>
         <div className="flex flex-wrap gap-2 mt-4">{d.audit.map((a, i) => <span key={i} className="mono text-[11px] px-2 py-1 rounded bg-panel2 text-faint">{a.stage} · {a.ms}ms</span>)}</div>
       </div>
+      <InputFidelity d={d} />
     </div>
   )
 }
@@ -740,6 +742,7 @@ function Drill({ d, selected, onPick }) {
               <Row k="Scope basis" v={node.scope_prov ? (node.scope_prov === 'metadata' ? 'metadata-confirmed' : 'inferred-only') : '—'} t={node.scope_prov === 'inferred' ? 'text-pan' : (node.scope_prov === 'metadata' ? 'text-safe' : '')} />
               <Row k="Hidden PCI (Splunk)" v={node.hidden_pci ? 'YES — BAM miss' : (node.pan_in_logs_observed ? 'PAN in logs (BAM=Yes)' : 'no')} t={node.hidden_pci ? 'text-panhot' : ''} />
               <Row k="Cycle cluster" v={node.super_node || '—'} />
+              {node.lob ? <Row k="Line of business" v={node.lob} /> : null}
             </div>
             <div className="card p-5">
               <div className="disp font-bold text-sm mb-1">Why is this in scope?</div>
@@ -1256,6 +1259,7 @@ function Methods({ d }) {
           </tbody>
         </table>
       </div>
+      <RunComplexity d={d} />
       <WeightSensitivity ws={s.weight_sensitivity} />
       {s.choke_points && s.choke_points.length > 0 && (
         <div className="card p-5">
@@ -1726,7 +1730,7 @@ export default function App() {
   const [sel, setSel] = useState(null)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
+  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
   const showBanner = !['pipeline'].includes(tab)
   return (
     <div className="min-h-full">
@@ -1761,6 +1765,7 @@ export default function App() {
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
       {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}
+      {tab === 'onboard' && <Onboarding d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
@@ -2002,6 +2007,298 @@ function SankeyFlow({ d, onPick }) {
         {sk.source_count ? ` ${fmt(sk.source_count)} true sources feed ${fmt(sk.scope)} in-scope systems.` : ''}
       </div>
       <div ref={ref} />
+    </div>
+  )
+}
+
+/* ============================ OWNERSHIP (who owns the exposure) ============================ */
+function OwnershipCard({ d, onPick }) {
+  const own = d.ownership
+  const rows = (own && own.by_lob) || []
+  if (!rows.length) return null
+  const max = Math.max(1, ...rows.map(r => r.in_scope))
+  const cov = own.coverage || {}
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Who owns the exposure</div>
+      <div className="text-[11px] text-faint mb-3">
+        PCI scope and hidden-PCI counts grouped by the authoritative BAM <b>line of business</b> — the
+        remediation program gets owners, not just system IDs. Systems whose BAM row records no line of
+        business are reported under "(not recorded in BAM)", never guessed.
+      </div>
+      <div className="space-y-1.5">
+        {rows.map((r, i) => {
+          const unattr = r.line_of_business === '(not recorded in BAM)'
+          return (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <span className={'w-56 truncate text-xs ' + (unattr ? 'text-faint italic' : 'text-txt')} title={r.line_of_business}>{r.line_of_business}</span>
+              <div className="flex-1 h-4 rounded bg-panel2 overflow-hidden">
+                <div className={'h-full flex items-center justify-end pr-1.5 ' + (unattr ? 'bg-line' : 'bg-pan/80')}
+                  style={{ width: Math.max(6, 100 * r.in_scope / max) + '%', transition: 'width .5s' }}>
+                  <span className={'mono text-[10px] font-bold ' + (unattr ? 'text-dim' : 'text-ink')}>{r.in_scope}</span>
+                </div>
+              </div>
+              <span className={'mono text-[10px] w-20 text-right ' + (r.hidden_pci > 0 ? 'text-panhot' : 'text-faint')}>
+                {r.hidden_pci > 0 ? `⚠ ${r.hidden_pci} hidden` : '—'}
+              </span>
+              <span className="mono text-[10px] w-16 text-right text-faint">{r.systems} sys</span>
+            </div>
+          )
+        })}
+      </div>
+      {rows.some(r => r.hidden_sample && r.hidden_sample.length > 0) && (
+        <div className="mt-3 pt-3 border-t border-line">
+          <div className="text-[10px] uppercase tracking-wider text-faint mb-1">hidden-PCI systems by owner (click to trace)</div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {rows.filter(r => r.hidden_sample?.length).map((r, i) => (
+              <span key={i} className="text-[11px] text-dim">
+                <span className={r.line_of_business === '(not recorded in BAM)' ? 'text-faint italic' : 'text-txt'}>{r.line_of_business}:</span>{' '}
+                {r.hidden_sample.map(s => <button key={s} onClick={() => onPick && onPick(s)} className="mono text-panhot hover:underline mr-1">{s}</button>)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="text-[11px] text-faint mt-3">
+        Bar = systems in PCI scope (CDE). Coverage: {fmt(cov.systems_with_lob || 0)} systems carry a BAM line of business,
+        {' '}{fmt(cov.systems_without_lob || 0)} do not (mostly systems known only from dependency edges or signals).
+      </div>
+    </div>
+  )
+}
+
+/* ============================ INPUT FIDELITY (trust card) ============================ */
+function InputFidelity({ d }) {
+  const q = d.quality || {}
+  const g = d.graph_stats || {}
+  if (!q.files_ingested) return null
+  const Stat = ({ v, l }) => (
+    <div className="bg-panel2 rounded-lg px-3 py-2 text-center">
+      <div className="disp text-xl font-black text-txt">{fmt(v ?? '—')}</div>
+      <div className="text-[10px] text-faint leading-tight">{l}</div>
+    </div>
+  )
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Input fidelity <span className="text-faint text-xs font-normal">— what was ingested, masked, deduplicated, and refused</span></div>
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
+        <Stat v={q.files_ingested} l="files ingested" />
+        <Stat v={q.edge_rows} l="dependency rows (DS1–3)" />
+        <Stat v={q.bam_rows} l="BAM rows (DS4)" />
+        <Stat v={(q.survey_rows || 0) + (q.splunk_rows || 0)} l="signal rows (DS5+DS6)" />
+        <Stat v={q.pan_cells_masked_on_ingest} l="PAN cells masked on ingest" />
+        <Stat v={g.unresolved_signals} l="signal tokens NOT invented" />
+      </div>
+      <div className="text-[11px] text-dim mt-3 leading-relaxed">
+        {fmt(g.metadata_edges || 0)} authoritative edges deduplicated to {fmt(g.metadata_edges_deduped || 0)} distinct flows;
+        {' '}{fmt(g.inferred_edges || 0)} inferred edges kept separate and source-tagged.
+        {' '}<b className="text-txt">{fmt(g.unresolved_signals || 0)} survey/Splunk tokens named systems outside the authoritative
+        BAM universe — they are reported and excluded, never invented as nodes or edges</b> (constraint: the map contains
+        nothing the inputs cannot prove). Every PAN encountered was masked first-6/last-4 before any processing; an unmasked
+        PAN anywhere fails the run.
+      </div>
+    </div>
+  )
+}
+
+/* ============================ METHODS: measured run + complexity ============================ */
+function RunComplexity({ d }) {
+  const audit = d.audit || []
+  if (!audit.length) return null
+  const BIG_O = {
+    supervisor: 'O(1) routing', ingest: 'O(rows) stream + mask', validate_masking_leak: 'O(cells) regex+Luhn',
+    build_graph: 'O(V+E) construction', condense_to_dag: 'O(V+E) Tarjan SCC', score: 'O(V·E) Brandes → pivot-sampled at scale',
+    analytics: 'O(S·(V+E)) memoized reachability', human_gate: 'O(1) interrupt', report: 'O(V) serialization',
+  }
+  const total = audit.reduce((s, a) => s + (a.ms || 0), 0)
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Measured run <span className="text-faint text-xs font-normal">— this dataset, this hardware, named complexity</span></div>
+      <div className="text-[11px] text-faint mb-3">Wall-clock per pipeline stage for the run on screen, beside each stage's algorithmic complexity (V systems, E flows, S PAN sources). Reachability is memoized per source and betweenness switches to the Brandes–Pich sampled estimator above ~600 nodes, which is what keeps the engine sub-minute at enterprise scale.</div>
+      <table className="w-full text-sm">
+        <thead><tr className="text-left text-[11px] uppercase tracking-wider text-faint bg-panel2">
+          <th className="px-3 py-2">Stage</th><th className="px-3 py-2">Measured</th><th className="px-3 py-2">Complexity</th></tr></thead>
+        <tbody>
+          {audit.map((a, i) => (
+            <tr key={i} className="border-t border-line">
+              <td className="px-3 py-1.5 mono text-txt">{a.stage}</td>
+              <td className="px-3 py-1.5 mono text-dim">{fmt(a.ms)} ms</td>
+              <td className="px-3 py-1.5 text-dim text-[12px]">{BIG_O[a.stage] || '—'}</td>
+            </tr>
+          ))}
+          <tr className="border-t border-line bg-panel2">
+            <td className="px-3 py-1.5 font-semibold text-txt">end-to-end</td>
+            <td className="px-3 py-1.5 mono font-semibold text-pan">{fmt(total)} ms</td>
+            <td className="px-3 py-1.5 text-faint text-[12px]">ingest → DAG → score → analyze → report</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/* ============================ ONBOARDING (extensibility — assess before building) ============================ */
+function NeighbourPicker({ d, label, picked, setPicked, hint }) {
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState(false)
+  const matches = useMemo(() => {
+    const t = q.trim().toLowerCase()
+    if (!t) return []
+    return d.viz.nodes.filter(n => !picked.includes(n.id) &&
+      (n.id.toLowerCase().includes(t) || (n.name || '').toLowerCase().includes(t))).slice(0, 10)
+  }, [q, d, picked])
+  const add = id => { setPicked([...picked, id]); setQ(''); setOpen(false) }
+  return (
+    <div>
+      <div className="text-[11px] uppercase tracking-wider text-faint mb-1">{label}</div>
+      <div className="flex flex-wrap gap-1.5 mb-1.5">
+        {picked.map(p => (
+          <span key={p} className="mono text-[11px] px-2 py-0.5 rounded bg-pan/10 text-pan border border-pan/30 flex items-center gap-1">
+            {p}<button onClick={() => setPicked(picked.filter(x => x !== p))} className="text-dim hover:text-txt">✕</button>
+          </span>
+        ))}
+        {!picked.length && <span className="text-[11px] text-faint italic">none yet</span>}
+      </div>
+      <div className="relative" style={{ maxWidth: 280 }}>
+        <input value={q} placeholder="search id or name…"
+          onChange={e => { setQ(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={e => { if (e.key === 'Enter' && matches[0]) add(matches[0].id); if (e.key === 'Escape') setOpen(false) }}
+          className="mono text-[11px] px-2 py-1.5 rounded border border-line bg-panel2 text-txt w-full outline-none focus:border-cool" />
+        {open && matches.length > 0 && (
+          <div className="absolute z-20 mt-1 w-full max-h-48 overflow-auto rounded border border-line bg-panel shadow-xl">
+            {matches.map(m => (
+              <button key={m.id} onClick={() => add(m.id)} className="block w-full text-left px-2 py-1 hover:bg-pan/5 border-b border-line/40 last:border-0">
+                <span className="mono text-[11px] text-txt">{m.id}</span>
+                {m.in_scope && <span className="mono text-[9px] text-pan ml-1.5">in scope</span>}
+                {m.true_source && <span className="mono text-[9px] text-panhot ml-1.5">true source</span>}
+                <span className="block text-[10px] text-dim truncate">{m.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="text-[10px] text-faint mt-1">{hint}</div>
+    </div>
+  )
+}
+
+function Onboarding({ d, live, onPick }) {
+  const [appId, setAppId] = useState('NEW-APP')
+  const [providers, setProviders] = useState([])
+  const [consumers, setConsumers] = useState([])
+  const [flags, setFlags] = useState({ pan: false, crn_only: false, detokenizes: false, full_track: false, pin: false })
+  const [res, setRes] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(null)
+  const assess = async () => {
+    if (!live) return
+    setBusy(true); setErr(null)
+    try {
+      const r = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app_id: appId, providers, consumers, ...flags }) })
+      if (!r.ok) throw new Error('HTTP ' + r.status)
+      setRes(await r.json())
+    } catch (e) { setErr(String(e.message || e)) } finally { setBusy(false) }
+  }
+  const catTone = c => c === 'cde' ? 'text-pan border-pan/40 bg-pan/5' : c === 'connected' ? 'text-cool border-cool/40 bg-cool/5' : 'text-safe border-safe/40 bg-safe/5'
+  const catLabel = c => c === 'cde' ? 'In scope (CDE)' : c === 'connected' ? 'Connected-to (in scope)' : 'Out of scope'
+  const FlagBox = ({ k, label, warn }) => (
+    <label className="flex items-center gap-2 text-xs text-dim cursor-pointer select-none">
+      <input type="checkbox" checked={flags[k]} onChange={e => setFlags({ ...flags, [k]: e.target.checked })} />
+      {label}{warn && flags[k] && <span className="text-[10px] text-panhot">{warn}</span>}
+    </label>
+  )
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-lg">Onboard a system <span className="text-faint text-xs font-normal">— assess scope before a line of code is written</span></div>
+        <p className="text-sm text-dim mt-1 max-w-3xl leading-relaxed">
+          Describe a <b>planned</b> system — who it will consume data from, who it will feed, what it will hold — and the
+          engine answers the architecture-review questions deterministically, with the same clean-stream semantics as the
+          rest of the analysis: <b>where it lands</b> (CDE / connected-to / out), <b>why</b>, which upstream tokenizations would
+          let it receive CRN instead of clear PAN, and how many currently-out-of-scope systems the new feed would <b>drag into
+          scope</b>. Planned neighbours that don't exist in the authoritative universe are reported, never invented.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-[380px_1fr] gap-5">
+        <div className="card p-5 space-y-4 self-start">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-faint mb-1">Planned app id</div>
+            <input value={appId} onChange={e => setAppId(e.target.value)}
+              className="mono text-sm px-2 py-1.5 rounded border border-line bg-panel2 text-txt w-44 outline-none focus:border-cool" />
+          </div>
+          <NeighbourPicker d={d} label="Will consume data FROM (providers)" picked={providers} setPicked={setProviders}
+            hint="upstream systems sending it data — these decide whether clear PAN reaches it" />
+          <NeighbourPicker d={d} label="Will feed data TO (consumers)" picked={consumers} setPicked={setConsumers}
+            hint="downstream systems — these decide how far new exposure would spread" />
+          <div className="space-y-1.5">
+            <div className="text-[11px] uppercase tracking-wider text-faint">Its own data handling</div>
+            <FlagBox k="pan" label="stores / processes clear PAN itself" warn="→ new true source" />
+            <FlagBox k="crn_only" label="tokenized PAN (CRN) only" />
+            <FlagBox k="detokenizes" label="detokenizes (CRN → PAN)" warn="→ permanent CDE" />
+            <FlagBox k="full_track" label="full track data" warn="→ permanent CDE" />
+            <FlagBox k="pin" label="PIN data" warn="→ permanent CDE" />
+          </div>
+          <button onClick={assess} disabled={!live || busy}
+            className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (!live || busy ? 'bg-line text-faint' : 'bg-pan text-ink hover:brightness-110')}>
+            {busy ? 'assessing…' : 'Assess scope impact →'}</button>
+          {!live && <div className="text-[11px] text-faint">Needs the live API — upload and run an analysis first; the assessment is computed against the live graph.</div>}
+          {err && <div className="text-[11px] text-panhot">⚠ {err}</div>}
+        </div>
+
+        {res ? (
+          <div className="space-y-4">
+            <div className="card p-5">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="disp font-black text-2xl text-txt">{res.app_id}</span>
+                <span className={'mono text-[12px] px-2.5 py-1 rounded border font-semibold ' + catTone(res.category)}>{catLabel(res.category)}</span>
+                <span className="mono text-[11px] px-2 py-0.5 rounded bg-panel2 text-dim">tier {res.sensitivity_tier} / 4</span>
+                {res.permanent_cde && <span className="mono text-[11px] px-2 py-0.5 rounded bg-panhot/10 text-panhot border border-panhot/30">permanent CDE</span>}
+              </div>
+              <p className="text-sm text-dim mt-3 leading-relaxed">{res.verdict}</p>
+              <div className="mt-2"><ReqChips reqs={res.triggered_requirements} /></div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-3">
+              <div className="card p-4">
+                <div className={'disp text-3xl font-black ' + (res.receives_clear_pan ? 'text-pan' : 'text-safe')}>{res.pan_providers.length}</div>
+                <div className="text-[11px] text-dim mt-1">provider(s) feeding it clear PAN</div>
+                <div className="flex flex-wrap gap-1 mt-2">{res.pan_providers.map(p => <button key={p} onClick={() => onPick(p)} className="mono text-[11px] px-1.5 py-0.5 rounded bg-pan/10 text-pan hover:bg-pan/20">{p}</button>)}</div>
+              </div>
+              <div className="card p-4">
+                <div className="disp text-3xl font-black text-cool">{res.origins_reaching_count}</div>
+                <div className="text-[11px] text-dim mt-1">true PAN origins reach it — tokenize these and it receives CRN</div>
+                <div className="flex flex-wrap gap-1 mt-2">{res.origins_reaching.slice(0, 12).map(o => <button key={o} onClick={() => onPick(o)} className="mono text-[11px] px-1.5 py-0.5 rounded bg-cool/10 text-cool hover:bg-cool/20">{o}</button>)}
+                  {res.origins_reaching_count > 12 && <span className="text-[10px] text-faint">+{res.origins_reaching_count - 12}</span>}</div>
+                {res.blocking_always_cde_origins?.length > 0 && <div className="text-[10px] text-panhot mt-1.5">⚠ {res.blocking_always_cde_origins.join(', ')} cannot be tokenized away (always-CDE)</div>}
+              </div>
+              <div className="card p-4">
+                <div className={'disp text-3xl font-black ' + (res.scope_expansion_count > 0 ? 'text-panhot' : 'text-safe')}>{res.scope_expansion_count > 0 ? '+' + res.scope_expansion_count : '0'}</div>
+                <div className="text-[11px] text-dim mt-1">currently-out-of-scope systems this onboarding would drag INTO scope (transitive)</div>
+                <div className="flex flex-wrap gap-1 mt-2">{(res.scope_expansion_sample || []).map(x => <button key={x} onClick={() => onPick(x)} className="mono text-[11px] px-1.5 py-0.5 rounded bg-panhot/10 text-panhot hover:bg-panhot/20">{x}</button>)}</div>
+              </div>
+            </div>
+
+            <div className="card p-4 text-[11px] text-dim">
+              <span className={'mr-3 ' + (res.can_fully_descope_under_tokenization ? 'text-safe' : 'text-faint')}>
+                {res.can_fully_descope_under_tokenization
+                  ? '✓ would fully descope once its true-source front is tokenized'
+                  : res.permanent_cde ? '✗ never descopes — always-CDE data elements' : res.category === 'cde' ? '✗ cannot fully descope (originates PAN or blocked by an always-CDE origin)' : '— not in the CDE'}
+              </span>
+              {(res.unknown_providers?.length > 0 || res.unknown_consumers?.length > 0) && (
+                <span className="text-panhot">⚠ not in the authoritative universe (reported, not invented): {[...(res.unknown_providers || []), ...(res.unknown_consumers || [])].join(', ')}</span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="card p-8 text-center text-dim self-start text-sm">
+            Pick the planned providers/consumers on the left and assess.<br />
+            <span className="text-[11px] text-faint">Try: consume from a heavy hitter → lands in the CDE with the exact upstream tokenizations named; feed an out-of-scope system → see the transitive scope expansion it would cause.</span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -1310,7 +1310,7 @@
   "audit": [
     {
       "stage": "ingest",
-      "ms": 8.5,
+      "ms": 10.4,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -1326,12 +1326,12 @@
     },
     {
       "stage": "validate_masking_leak",
-      "ms": 4.5,
+      "ms": 5.8,
       "clean": true
     },
     {
       "stage": "build_graph",
-      "ms": 4.4,
+      "ms": 5.5,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -1346,7 +1346,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 3.4,
+      "ms": 3.7,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -1357,12 +1357,12 @@
     },
     {
       "stage": "score",
-      "ms": 12.8,
+      "ms": 15.4,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 35.9,
+      "ms": 44.7,
       "scope": 95,
       "heavy_hitters": 10,
       "hidden_pci": 48
@@ -1384,6 +1384,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GENERAL MANAGEMENT",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1407,6 +1408,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GENERAL MANAGEMENT",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1430,6 +1432,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GPL AND WHOLESALE DIGITAL",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1454,6 +1457,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GENERAL MANAGEMENT",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1478,6 +1482,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "DATA ANALYTICS AND REPORTING",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1502,6 +1507,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "CYBERSECURITY",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -1523,6 +1529,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "TRADITIONAL PRODUCT MANAGEMENT",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC22"
@@ -1541,6 +1548,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "FCRM",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1565,6 +1573,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "DIGITAL DATA AND AI",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1588,6 +1597,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1611,6 +1621,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "CIO DIG INNOV",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1635,6 +1646,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "BRANCH OVERSIGHT & SUPPORT",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -1656,6 +1668,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1679,6 +1692,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1703,6 +1717,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "GLOBAL OPERATIONS",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC31"
@@ -1721,6 +1736,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "GLOBAL OPERATIONS",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC32"
@@ -1739,6 +1755,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "COMMUNITY IMPACT",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC33"
@@ -1757,6 +1774,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1780,6 +1798,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1804,6 +1823,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1828,6 +1848,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1852,6 +1873,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "HR PRODUCTS & TRANSFORMATION",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1876,6 +1898,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -1900,6 +1923,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "GLOBAL OPERATIONS",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC41"
@@ -1918,6 +1942,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "CONTROLLERS",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -1940,6 +1965,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GPL AND WHOLESALE DIGITAL",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -1963,6 +1989,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "CIO WIM TECHNOLOGY",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC44"
@@ -1981,6 +2008,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "CIO WIM TECHNOLOGY",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -2005,6 +2033,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req4",
@@ -2028,6 +2057,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -2052,6 +2082,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "COMMUNICATIONS",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC48"
@@ -2070,6 +2101,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -2094,6 +2126,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -2118,6 +2151,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "GLOBAL OPERATIONS",
         "category": "cde",
         "triggered_requirements": [
           "req3",
@@ -2142,6 +2176,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2163,6 +2198,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2184,6 +2220,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2205,6 +2242,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2226,6 +2264,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2247,6 +2286,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2268,6 +2308,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2289,6 +2330,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2310,6 +2352,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2331,6 +2374,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2352,6 +2396,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2373,6 +2418,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2394,6 +2440,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2415,6 +2462,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2436,6 +2484,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2457,6 +2506,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2478,6 +2528,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2499,6 +2550,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2520,6 +2572,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2541,6 +2594,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2562,6 +2616,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2583,6 +2638,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2604,6 +2660,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2625,6 +2682,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2646,6 +2704,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2667,6 +2726,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -2689,6 +2749,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2710,6 +2771,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2731,6 +2793,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2752,6 +2815,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2773,6 +2837,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2794,6 +2859,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2815,6 +2881,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2836,6 +2903,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2857,6 +2925,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2878,6 +2947,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2899,6 +2969,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2920,6 +2991,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2941,6 +3013,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2962,6 +3035,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -2983,6 +3057,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3004,6 +3079,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3025,6 +3101,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3046,6 +3123,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3067,6 +3145,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3088,6 +3167,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3109,6 +3189,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3130,6 +3211,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3151,6 +3233,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3172,6 +3255,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -3194,6 +3278,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3215,6 +3300,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3236,6 +3322,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3257,6 +3344,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3278,6 +3366,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3299,6 +3388,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3320,6 +3410,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3341,6 +3432,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3362,6 +3454,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3383,6 +3476,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3404,6 +3498,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3425,6 +3520,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3446,6 +3542,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3467,6 +3564,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3488,6 +3586,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3509,6 +3608,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3530,6 +3630,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3551,6 +3652,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3572,6 +3674,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3593,6 +3696,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3614,6 +3718,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3635,6 +3740,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3656,6 +3762,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3677,6 +3784,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3698,6 +3806,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3719,6 +3828,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3740,6 +3850,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3761,6 +3872,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3782,6 +3894,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3803,6 +3916,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3824,6 +3938,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3845,6 +3960,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3866,6 +3982,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3887,6 +4004,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3908,6 +4026,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3929,6 +4048,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3950,6 +4070,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3971,6 +4092,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -3992,6 +4114,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4013,6 +4136,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4034,6 +4158,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4055,6 +4180,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4076,6 +4202,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4097,6 +4224,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4118,6 +4246,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4140,6 +4269,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4161,6 +4291,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4182,6 +4313,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4203,6 +4335,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4224,6 +4357,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4245,6 +4379,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4266,6 +4401,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4287,6 +4423,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4308,6 +4445,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4329,6 +4467,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4351,6 +4490,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4372,6 +4512,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4393,6 +4534,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4414,6 +4556,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC167"
@@ -4432,6 +4575,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC168"
@@ -4450,6 +4594,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4471,6 +4616,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4492,6 +4638,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4513,6 +4660,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4534,6 +4682,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4555,6 +4704,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC170"
@@ -4573,6 +4723,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4594,6 +4745,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4615,6 +4767,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4636,6 +4789,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4657,6 +4811,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4678,6 +4833,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4699,6 +4855,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4720,6 +4877,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4741,6 +4899,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4762,6 +4921,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC173"
@@ -4780,6 +4940,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC174"
@@ -4798,6 +4959,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4819,6 +4981,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4840,6 +5003,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4861,6 +5025,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4883,6 +5048,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4904,6 +5070,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "connected",
         "triggered_requirements": [
           "req7_8",
@@ -4925,6 +5092,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4946,6 +5114,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC52"
@@ -4964,6 +5133,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -4985,6 +5155,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "metadata",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5006,6 +5177,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5027,6 +5199,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC177"
@@ -5045,6 +5218,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC178"
@@ -5063,6 +5237,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC179"
@@ -5081,6 +5256,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC180"
@@ -5099,6 +5275,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC181"
@@ -5117,6 +5294,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5139,6 +5317,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC182"
@@ -5157,6 +5336,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC183"
@@ -5175,6 +5355,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC184"
@@ -5193,6 +5374,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC123"
@@ -5211,6 +5393,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC55"
@@ -5229,6 +5412,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5250,6 +5434,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5271,6 +5456,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC112"
@@ -5289,6 +5475,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC185"
@@ -5307,6 +5494,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC186"
@@ -5325,6 +5513,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC187"
@@ -5343,6 +5532,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC109"
@@ -5361,6 +5551,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC188"
@@ -5379,6 +5570,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC189"
@@ -5397,6 +5589,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC190"
@@ -5415,6 +5608,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC191"
@@ -5433,6 +5627,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC192"
@@ -5451,6 +5646,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5472,6 +5668,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC193"
@@ -5490,6 +5687,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5512,6 +5710,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5534,6 +5733,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5556,6 +5756,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5578,6 +5779,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5600,6 +5802,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5622,6 +5825,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5644,6 +5848,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5666,6 +5871,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5688,6 +5894,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5710,6 +5917,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5732,6 +5940,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5754,6 +5963,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5776,6 +5986,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5798,6 +6009,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5820,6 +6032,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5842,6 +6055,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5864,6 +6078,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5886,6 +6101,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5908,6 +6124,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5930,6 +6147,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5952,6 +6170,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5974,6 +6193,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -5996,6 +6216,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6018,6 +6239,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6040,6 +6262,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6062,6 +6285,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6084,6 +6308,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6106,6 +6331,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6128,6 +6354,7 @@
         "pan_in_logs_observed": false,
         "hidden_pci": false,
         "scope_prov": null,
+        "lob": "",
         "category": "out",
         "triggered_requirements": [],
         "super_node": "SCC221"
@@ -6146,6 +6373,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6168,6 +6396,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6190,6 +6419,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6212,6 +6442,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6234,6 +6465,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6256,6 +6488,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6278,6 +6511,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6300,6 +6534,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6322,6 +6557,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6344,6 +6580,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6366,6 +6603,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -6388,6 +6626,7 @@
         "pan_in_logs_observed": true,
         "hidden_pci": true,
         "scope_prov": "inferred",
+        "lob": "",
         "category": "cde",
         "triggered_requirements": [
           "req7_8",
@@ -13316,9 +13555,9 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH"
+          "8FVE"
         ],
-        "last_source": "JSVCH",
+        "last_source": "8FVE",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13336,10 +13575,10 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
-          "8FVE"
+          "8FVE",
+          "JSVCH"
         ],
-        "last_source": "8FVE",
+        "last_source": "JSVCH",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13357,11 +13596,11 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO"
+          "JSVCH",
+          "KTEYN"
         ],
-        "last_source": "KPO",
+        "last_source": "KTEYN",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13379,12 +13618,12 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM"
         ],
-        "last_source": "6PNXUI",
+        "last_source": "HTOKM",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13402,13 +13641,13 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN"
         ],
-        "last_source": "KDUZ",
+        "last_source": "JBFN",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13426,14 +13665,14 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD"
         ],
-        "last_source": "8DEKT",
+        "last_source": "8KHD",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13451,15 +13690,15 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT"
         ],
-        "last_source": "8BUJ",
+        "last_source": "JEQZT",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13477,16 +13716,16 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY"
         ],
-        "last_source": "8DUDR",
+        "last_source": "LZRKY",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13504,17 +13743,17 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
+          "JAED"
         ],
-        "last_source": "LDUCG",
+        "last_source": "JAED",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13532,18 +13771,18 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
+          "JAED",
+          "8TCLL"
         ],
-        "last_source": "8NC1",
+        "last_source": "8TCLL",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13561,19 +13800,19 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1",
-          "8TCU"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
+          "JAED",
+          "8TCLL",
+          "KCO"
         ],
-        "last_source": "8TCU",
+        "last_source": "KCO",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13591,20 +13830,20 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1",
-          "8TCU",
-          "8BCKS"
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
+          "JAED",
+          "8TCLL",
+          "KCO",
+          "6PNXUI"
         ],
-        "last_source": "8BCKS",
+        "last_source": "6PNXUI",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13622,21 +13861,21 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
+          "JAED",
+          "8TCLL",
+          "KCO",
           "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1",
-          "8TCU",
-          "8BCKS",
-          "JAED"
+          "LCUZ"
         ],
-        "last_source": "JAED",
+        "last_source": "LCUZ",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13654,22 +13893,22 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1",
-          "8TCU",
-          "8BCKS",
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
+          "LZRKY",
           "JAED",
-          "LZRKY"
+          "8TCLL",
+          "KCO",
+          "6PNXUI",
+          "LCUZ",
+          "JLFXM"
         ],
-        "last_source": "LZRKY",
+        "last_source": "JLFXM",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13687,23 +13926,23 @@
           "8CEMS",
           "9CPC",
           "6IVC",
-          "JSVCH",
           "8FVE",
-          "KPO",
-          "6PNXUI",
-          "KDUZ",
-          "8DEKT",
-          "8BUJ",
-          "8DUDR",
-          "LDUCG",
-          "8NC1",
-          "8TCU",
-          "8BCKS",
-          "JAED",
+          "JSVCH",
+          "KTEYN",
+          "HTOKM",
+          "JBFN",
+          "8KHD",
+          "JEQZT",
           "LZRKY",
-          "JCOC"
+          "JAED",
+          "8TCLL",
+          "KCO",
+          "6PNXUI",
+          "LCUZ",
+          "JLFXM",
+          "8CKND"
         ],
-        "last_source": "JCOC",
+        "last_source": "8CKND",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13814,12 +14053,12 @@
           "solo_systems": []
         },
         {
-          "system": "JSVCH",
+          "system": "8FVE",
           "downstream_reach": 1,
           "solo_descope": 0,
           "feeds_removed": 1,
           "parent_reduction": 1,
-          "risk": 30.91,
+          "risk": 50.91,
           "is_true_source": true,
           "solo_systems": []
         },
@@ -13834,17 +14073,17 @@
           "solo_systems": []
         },
         {
-          "system": "8FVE",
+          "system": "JSVCH",
           "downstream_reach": 1,
           "solo_descope": 0,
           "feeds_removed": 1,
           "parent_reduction": 1,
-          "risk": 50.91,
+          "risk": 30.91,
           "is_true_source": true,
           "solo_systems": []
         },
         {
-          "system": "KPO",
+          "system": "KTEYN",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
@@ -13854,7 +14093,7 @@
           "solo_systems": []
         },
         {
-          "system": "6PNXUI",
+          "system": "HTOKM",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
@@ -13864,12 +14103,12 @@
           "solo_systems": []
         },
         {
-          "system": "KDUZ",
+          "system": "JBFN",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
           "parent_reduction": 0,
-          "risk": 20.0,
+          "risk": 30.0,
           "is_true_source": true,
           "solo_systems": []
         }
@@ -13888,7 +14127,7 @@
         {
           "k": 5,
           "pct_sources": 7.9,
-          "fully_descoped": 27
+          "fully_descoped": 28
         },
         {
           "k": 10,
@@ -14024,7 +14263,7 @@
           "gap": 0,
           "optimal_sources": [
             "6CWC",
-            "8CCF"
+            "8EFW"
           ],
           "certified": true,
           "pct_of_descopable": 9.4
@@ -14172,7 +14411,7 @@
       "all_certified": true
     },
     "decision_memo": {
-      "text": "Recommended action: tokenize PAN at the true source. Tokenizing the single highest-leverage source (6CWC) alone fully descopes 2 system(s) today \u2014 small, but that is a threshold effect, not a failure. Full descope begins with the very first sources tokenized, reaching 27 at ~7.9% of the 63 sources (k=5). The recommended greedy set (6CWC, 8CCF, 8MEC) descopes 27. Scope reduction is a program that pays off as the source front is cleared, not a single switch. Exposure falls immediately, even before that threshold. Tokenizing 6CWC strips a clear-PAN feed from 29 downstream systems and reduces the true-source-parent count on 27 systems. Exposure narrows across the estate even where a system's scope status has not yet changed \u2014 this is the marginal benefit of each tokenization, and the right way to rank them. Targeting matters. Blocking the three widest conduits by betweenness (8AQB, 8BCC, 8AFN) fully descopes 0 systems, whereas tokenizing the true-source set (6CWC, 8CCF, 8MEC) descopes 27 and removes 30 clear-PAN feeds. Blocking high-traffic relays does not reduce scope; converting the systems that originate PAN does. Sequence: begin with 6CWC and proceed down the ranked true-source list; each step lowers aggregate exposure now and advances toward the descope threshold. Plan for the full true-source front to realise the larger descope. (Descopable surface: 32 of 95 in-scope systems.)",
+      "text": "Recommended action: tokenize PAN at the true source. Tokenizing the single highest-leverage source (6CWC) alone fully descopes 2 system(s) today \u2014 small, but that is a threshold effect, not a failure. Full descope begins with the very first sources tokenized, reaching 28 at ~7.9% of the 63 sources (k=5). The recommended greedy set (6CWC, 8CCF, 8MEC) descopes 27. Scope reduction is a program that pays off as the source front is cleared, not a single switch. Exposure falls immediately, even before that threshold. Tokenizing 6CWC strips a clear-PAN feed from 29 downstream systems and reduces the true-source-parent count on 27 systems. Exposure narrows across the estate even where a system's scope status has not yet changed \u2014 this is the marginal benefit of each tokenization, and the right way to rank them. Targeting matters. Blocking the three widest conduits by betweenness (8AQB, 8BCC, 8AFN) fully descopes 0 systems, whereas tokenizing the true-source set (6CWC, 8CCF, 8MEC) descopes 27 and removes 30 clear-PAN feeds. Blocking high-traffic relays does not reduce scope; converting the systems that originate PAN does. Sequence: begin with 6CWC and proceed down the ranked true-source list; each step lowers aggregate exposure now and advances toward the descope threshold. Plan for the full true-source front to realise the larger descope. (Descopable surface: 32 of 95 in-scope systems.)",
       "grounded_on": [
         "saturation_curve",
         "source_exposure",
@@ -14309,10 +14548,10 @@
     "choke_points": [
       "6CWC",
       "8CCF",
-      "8BCC",
       "8AFN",
-      "8AQB",
+      "8BCC",
       "8BKV",
+      "8AQB",
       "8CEMS",
       "8BFL",
       "8A",
@@ -14509,10 +14748,10 @@
         "is_true_source": true
       },
       {
-        "system": "8BCC",
+        "system": "8BKV",
         "branch_size": 26,
         "downstream_reach": 26,
-        "risk": 70.72,
+        "risk": 60.58,
         "is_true_source": false
       },
       {
@@ -14530,10 +14769,10 @@
         "is_true_source": false
       },
       {
-        "system": "8BKV",
+        "system": "8BCC",
         "branch_size": 26,
         "downstream_reach": 26,
-        "risk": 60.58,
+        "risk": 70.72,
         "is_true_source": false
       },
       {
@@ -14579,17 +14818,6 @@
           "downstream_reach": 27
         },
         {
-          "target": "8BCC",
-          "min_cut_edges": 1,
-          "edges_to_sever": [
-            [
-              "8AQB",
-              "8BCC"
-            ]
-          ],
-          "downstream_reach": 26
-        },
-        {
           "target": "8BY",
           "min_cut_edges": 1,
           "edges_to_sever": [
@@ -14605,12 +14833,27 @@
           "min_cut_edges": 2,
           "edges_to_sever": [
             [
-              "8BKV",
+              "8DEM",
               "8AQB"
             ],
             [
-              "8DEM",
+              "8BKV",
               "8AQB"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "6PNX",
+          "min_cut_edges": 2,
+          "edges_to_sever": [
+            [
+              "8BCC",
+              "6PNX"
+            ],
+            [
+              "8AQB",
+              "6PNX"
             ]
           ],
           "downstream_reach": 26
@@ -14620,11 +14863,11 @@
           "min_cut_edges": 2,
           "edges_to_sever": [
             [
-              "8BKV",
+              "8DEM",
               "8AQB"
             ],
             [
-              "8DEM",
+              "8BKV",
               "8AQB"
             ]
           ],
@@ -14635,10 +14878,6 @@
           "min_cut_edges": 4,
           "edges_to_sever": [
             [
-              "8CCF",
-              "8BKV"
-            ],
-            [
               "6CWC",
               "8BKV"
             ],
@@ -14648,6 +14887,10 @@
             ],
             [
               "8MEC",
+              "8BKV"
+            ],
+            [
+              "8CCF",
               "8BKV"
             ]
           ],
@@ -16410,6 +16653,12 @@
         "reach": 3
       },
       {
+        "id": "src:8DFB",
+        "label": "8DFB",
+        "band": 0,
+        "reach": 2
+      },
+      {
         "id": "src:8CEMS",
         "label": "8CEMS",
         "band": 0,
@@ -16418,12 +16667,6 @@
       {
         "id": "src:9CPC",
         "label": "9CPC",
-        "band": 0,
-        "reach": 2
-      },
-      {
-        "id": "src:8DFB",
-        "label": "8DFB",
         "band": 0,
         "reach": 2
       },
@@ -16491,6 +16734,16 @@
         "value": 1
       },
       {
+        "source": "src:8DFB",
+        "target": "relays",
+        "value": 1
+      },
+      {
+        "source": "src:8DFB",
+        "target": "consumers",
+        "value": 1
+      },
+      {
         "source": "src:8CEMS",
         "target": "relays",
         "value": 1
@@ -16507,16 +16760,6 @@
       },
       {
         "source": "src:9CPC",
-        "target": "consumers",
-        "value": 1
-      },
-      {
-        "source": "src:8DFB",
-        "target": "relays",
-        "value": 1
-      },
-      {
-        "source": "src:8DFB",
         "target": "consumers",
         "value": 1
       },
@@ -16543,5 +16786,149 @@
     ],
     "source_count": 63,
     "scope": 95
+  },
+  "ownership": {
+    "by_lob": [
+      {
+        "line_of_business": "GLOBAL OPERATIONS",
+        "systems": 16,
+        "in_scope": 13,
+        "hidden_pci": 0,
+        "carries_pan": 13,
+        "hidden_sample": [],
+        "business_groups": [
+          "CHIEF OPERATING OFFICE"
+        ]
+      },
+      {
+        "line_of_business": "GENERAL MANAGEMENT",
+        "systems": 3,
+        "in_scope": 3,
+        "hidden_pci": 0,
+        "carries_pan": 3,
+        "hidden_sample": [],
+        "business_groups": [
+          "WEALTH & INVESTMENT MANAGEMENT"
+        ]
+      },
+      {
+        "line_of_business": "GPL AND WHOLESALE DIGITAL",
+        "systems": 2,
+        "in_scope": 2,
+        "hidden_pci": 0,
+        "carries_pan": 2,
+        "hidden_sample": [],
+        "business_groups": [
+          "GPL AND WHOLESALE DIGITAL"
+        ]
+      },
+      {
+        "line_of_business": "CONTROLLERS",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 1,
+        "carries_pan": 0,
+        "hidden_sample": [
+          "8EIV"
+        ],
+        "business_groups": [
+          "FINANCE"
+        ]
+      },
+      {
+        "line_of_business": "CIO DIG INNOV",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "TECHNOLOGY"
+        ]
+      },
+      {
+        "line_of_business": "CIO WIM TECHNOLOGY",
+        "systems": 2,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "FINANCE",
+          "TECHNOLOGY"
+        ]
+      },
+      {
+        "line_of_business": "CYBERSECURITY",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 0,
+        "hidden_sample": [],
+        "business_groups": [
+          "TECHNOLOGY"
+        ]
+      },
+      {
+        "line_of_business": "DATA ANALYTICS AND REPORTING",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "CHIEF OPERATING OFFICE"
+        ]
+      },
+      {
+        "line_of_business": "DIGITAL DATA AND AI",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "CBL - CHANNELS"
+        ]
+      },
+      {
+        "line_of_business": "FCRM",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "CORPORATE RISK"
+        ]
+      },
+      {
+        "line_of_business": "HR PRODUCTS & TRANSFORMATION",
+        "systems": 1,
+        "in_scope": 1,
+        "hidden_pci": 0,
+        "carries_pan": 1,
+        "hidden_sample": [],
+        "business_groups": [
+          "HUMAN RESOURCES"
+        ]
+      },
+      {
+        "line_of_business": "BRANCH OVERSIGHT & SUPPORT",
+        "systems": 1,
+        "in_scope": 0,
+        "hidden_pci": 0,
+        "carries_pan": 0,
+        "hidden_sample": [],
+        "business_groups": [
+          "CBL - CHANNELS"
+        ]
+      }
+    ],
+    "lob_count": 15,
+    "coverage": {
+      "systems_with_lob": 34,
+      "systems_without_lob": 205
+    }
   }
 }

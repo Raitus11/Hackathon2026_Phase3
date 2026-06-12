@@ -43,6 +43,7 @@ def _full(r):
         "explanation": r.explanation, "audit": r.audit, "structure": r.structure,
         "plan": r.plan,
         "categories": r.categories, "economics": r.economics, "sankey": r.sankey,
+        "ownership": getattr(r, "ownership", {}),
     }
 
 
@@ -216,6 +217,30 @@ def decision_memo(live: int = 0):
     p = plan(0.8, 8)  # reuse the enriched-plan builder above
     llm = LLMClient()
     return narrate_mod.decision_memo(llm, narrate_mod.build_memo_facts(p, r.headline))
+
+
+class OnboardBody(BaseModel):
+    """A planned, not-yet-built system: who it consumes from, who it feeds, what it
+    holds. Assessed deterministically against the live graph — see
+    analytics.onboarding_assessment."""
+    app_id: str = "NEW-APP"
+    providers: list = []          # upstream systems it will consume data from
+    consumers: list = []          # downstream systems it will feed
+    pan: bool = False             # stores/processes clear PAN itself
+    crn_only: bool = False        # handles tokenized PAN (CRN) only
+    detokenizes: bool = False
+    full_track: bool = False
+    pin: bool = False
+
+
+@app.post("/api/onboard")
+def onboard(body: OnboardBody):
+    """Pre-onboarding scope assessment for a planned system (extensibility)."""
+    G, ps, sc = _need_art()
+    return analytics_mod.onboarding_assessment(
+        G, ps, sc, body.app_id, body.providers, body.consumers,
+        flags={"pan": body.pan, "crn_only": body.crn_only, "detokenizes": body.detokenizes,
+               "full_track": body.full_track, "pin": body.pin})
 
 
 class WhatIf(BaseModel):

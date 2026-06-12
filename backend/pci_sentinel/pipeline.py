@@ -39,6 +39,7 @@ class RunResult:
     economics: dict = field(default_factory=dict)
     sankey: dict = field(default_factory=dict)
     decision_memo: dict = field(default_factory=dict)
+    ownership: dict = field(default_factory=dict)
 
 
 def _audit(log, stage, t0, **extra):
@@ -64,6 +65,7 @@ def _viz_payload(art, dagr, scores, scope, hh, inferred_scope=frozenset(), categ
             "pan_in_logs_observed": bool(d.get("pan_in_logs_observed")),
             "hidden_pci": bool(d.get("pan_in_logs_observed") and not d.get("pci_flag")),
             "scope_prov": (("inferred" if n in inferred_scope else "metadata") if in_scope else None),
+            "lob": d.get("line_of_business", ""),
             "category": cat_node.get(n, {}).get("category"),
             "triggered_requirements": cat_node.get(n, {}).get("families", []),
             "super_node": dagr.node_to_super.get(n),
@@ -236,6 +238,12 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
     except Exception:
         pass
 
+    # who-owns-the-exposure rollup (authoritative DS4 org fields; guarded)
+    try:
+        ownership = analytics.ownership_rollup(art.G, art.pan_sources, scope, scores)
+    except Exception:
+        ownership = {}
+
     return RunResult(
         quality=ing.quality, graph_stats=art.stats, dag_stats=dagr.stats,
         scope_size=len(scope), scope_breakdown=breakdown,
@@ -246,7 +254,7 @@ def finalize(ing, art, dagr, scores, scope, hh, impact, hidden, audit, plan=None
         structure=structure,
         plan=plan or {},
         categories=categories, economics=economics, sankey=sankey,
-        decision_memo=decision_memo)
+        decision_memo=decision_memo, ownership=ownership)
 
 
 def run(files: list, recommend_top: int = 3) -> RunResult:

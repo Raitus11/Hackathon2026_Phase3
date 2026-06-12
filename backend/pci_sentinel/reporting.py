@@ -561,6 +561,19 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
         sheet(wb.create_sheet("HiddenPCI"), ["System (PCI=No in BAM, PAN seen in Splunk)"],
               [[s] for s in hidden.get("hidden_pci_systems", [])], [44])
 
+    # Ownership — exposure by line of business (authoritative DS4 org fields), so the
+    # remediation program has owners, not just system IDs. Guarded: older results
+    # without the rollup simply omit the sheet.
+    own = (getattr(result, "ownership", {}) or {}).get("by_lob") or []
+    if own:
+        sheet(wb.create_sheet("Ownership"),
+              ["Line of business", "Systems known", "In PCI scope (CDE)", "Hidden PCI",
+               "Clear-PAN carriers", "Hidden systems (sample)", "Business groups (sample)"],
+              [[o["line_of_business"], o["systems"], o["in_scope"], o["hidden_pci"],
+                o["carries_pan"], ", ".join(o.get("hidden_sample", [])),
+                ", ".join(o.get("business_groups", []))] for o in own],
+              [34, 13, 17, 11, 16, 34, 34])
+
     # Tokenization plan — cumulative descope curve (always populated, even when the
     # greedy full-descope plan halts at 0; an empty sheet reads as 'didn't finish').
     curve = plan.get("cumulative_curve") or []

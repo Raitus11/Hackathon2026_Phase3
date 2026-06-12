@@ -22,7 +22,7 @@ That's the headline. Everything else explains and acts on it.
   **51 inferred-only** from survey/Splunk signals (kept separate, never claimed as fact).
 - **48 hidden-PCI** — `PCI=No` in BAM, clear PAN in their Splunk logs.
 - **2 cyclic clusters** resolved into a clean 233-node DAG.
-- **Top intervention: 8CCF** — the highest-leverage single tokenization point.
+- **Top intervention: 6CWC** — the highest-leverage single tokenization point.
 The heavy-hitters table ranks distributors by **downstream reach**; "**solo
 descope**" sits beside it and is near-zero for everyone — a deliberate, honest
 signal that no single source frees much alone. Hold that thought.
@@ -39,13 +39,18 @@ of it.
 **1:45 — Planner, fewest moves for the most descope (35s).** *[Planner tab]*
 Because the same downstream systems are fed by *several* PAN sources, the right
 question isn't "which one source" — it's "which minimal *set*." A greedy
-max-coverage optimizer (Nemhauser–Wolsey–Fisher 1978 — applied here as a
-transparent heuristic, since the freed-systems objective is supermodular under
-conjunctive true-source coverage, so the (1−1/e) bound does *not* hold) picks **8CCF, 8DFB, 8EFW**: tokenizing those **descopes 3 downstream
-systems** and **converts 3 sources from live PAN (tier 4) to non-reversible tokens
-(tier 3)**. The what-if simulator recomputes scope live as you toggle sources;
-systems that genuinely need PAN stay in the CDE and de-tokenize via RISE/APG — we
-model that, we don't pretend it disappears.
+max-coverage optimizer (applied as a transparent heuristic, since the
+freed-systems objective is supermodular under conjunctive true-source coverage,
+so the Nemhauser–Wolsey–Fisher (1−1/e) bound does *not* hold — and a certified-optimal
+branch-and-bound frontier checks it) picks **6CWC, 8CCF, 8MEC**: tokenizing those
+**descopes 27 of the 32 descopable systems (95 → 68 in scope, −28.4% surface)** —
+and the first pick, 6CWC, is itself a BAM miss. *Descopable* = in-scope minus the
+systems that can never leave the CDE (the tokenization points themselves and
+always-CDE elements); the Planner, the Optimizer frontier, the saturation curve and
+the Economics card all report this **same denominator** — one number, every surface.
+The what-if simulator recomputes scope live as you toggle sources; systems that
+genuinely need PAN stay in the CDE and de-tokenize via RISE/APG — we model that, we
+don't pretend it disappears.
 
 **2:20 — Graph + Drill-down, trace it to the row (30s).** *[Data-Flow Graph →
 click 6CWC → Drill-down]*
@@ -54,6 +59,13 @@ not cosmetic. Drill into 6CWC: zero upstream providers (a true source), scope ba
 *inferred-only*, **Hidden PCI: YES — BAM miss**, and a PAN-lineage view that walks
 every path back to its true source. Every claim traces to a row, a rule, or a
 cited algorithm.
+
+**(optional, if a beat is cut) Onboarding — tomorrow's architecture review (15s).** *[Onboarding tab]*
+Describe a system that doesn't exist yet — who it consumes from, what it holds — and
+the engine answers the review questions before a line of code is written: where it
+lands (CDE / connected-to / out), the exact upstream tokenizations that would hand it
+CRN instead of clear PAN, and how many out-of-scope systems the new feed would drag
+into scope, counted transitively. The map isn't a snapshot; it's the onboarding control.
 
 **2:50 — Why it wins (10s).**
 **Hybrid Intelligence:** deterministic graph math does every verifiable step
