@@ -2279,9 +2279,9 @@ export default function App() {
         </div>
       </div>
       <div className="max-w-[1280px] mx-auto px-5 py-5">
-      <nav className="flex gap-1 items-center mb-5 bg-panel rounded-xl p-1 w-fit border border-line shadow-sm">
+      <nav className="flex gap-0.5 items-center mb-5 bg-panel rounded-xl p-1 w-full border border-line shadow-sm overflow-x-auto">
         {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
-          <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>
+          <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-[13px] px-3.5 py-2 rounded-lg text-dim whitespace-nowrap">{l}</button>
           {['hidden', 'onboard', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
         </React.Fragment>))}
       </nav>
