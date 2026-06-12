@@ -1310,7 +1310,7 @@
   "audit": [
     {
       "stage": "ingest",
-      "ms": 10.4,
+      "ms": 10.5,
       "files_ingested": 6,
       "edge_rows": 338,
       "bam_rows": 34,
@@ -1331,7 +1331,7 @@
     },
     {
       "stage": "build_graph",
-      "ms": 5.5,
+      "ms": 6.0,
       "nodes": 239,
       "metadata_edges": 338,
       "metadata_edges_deduped": 234,
@@ -1346,7 +1346,7 @@
     },
     {
       "stage": "condense_to_dag",
-      "ms": 3.7,
+      "ms": 3.5,
       "source_nodes": 239,
       "source_edges": 283,
       "dag_nodes": 233,
@@ -1357,12 +1357,12 @@
     },
     {
       "stage": "score",
-      "ms": 15.4,
+      "ms": 15.6,
       "scored_nodes": 239
     },
     {
       "stage": "analytics",
-      "ms": 44.7,
+      "ms": 45.5,
       "scope": 95,
       "heavy_hitters": 10,
       "hidden_pci": 48
@@ -13396,6 +13396,10 @@
     ],
     "target_fraction": 0.8,
     "true_source_count": 63,
+    "floor_breakdown": {
+      "origins_in_scope": 63,
+      "always_cde_in_scope": 0
+    },
     "cumulative_curve": [
       {
         "k": 1,
@@ -13450,12 +13454,12 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ"
+          "8EFW"
         ],
-        "last_source": "8LNQ",
+        "last_source": "8EFW",
         "cumulative_descoped": 29,
         "marginal_descoped": 1,
-        "cumulative_feeds_removed": 32
+        "cumulative_feeds_removed": 33
       },
       {
         "k": 6,
@@ -13464,10 +13468,10 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
-          "8EFW"
+          "8EFW",
+          "8LNQ"
         ],
-        "last_source": "8EFW",
+        "last_source": "8LNQ",
         "cumulative_descoped": 30,
         "marginal_descoped": 1,
         "cumulative_feeds_removed": 33
@@ -13479,8 +13483,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM"
         ],
         "last_source": "8CCCM",
@@ -13495,8 +13499,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS"
         ],
@@ -13512,8 +13516,8 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC"
@@ -13530,14 +13534,14 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC"
+          "JSVCH"
         ],
-        "last_source": "6IVC",
+        "last_source": "JSVCH",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13549,12 +13553,12 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
+          "JSVCH",
           "8FVE"
         ],
         "last_source": "8FVE",
@@ -13569,16 +13573,16 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
+          "JSVCH",
           "8FVE",
-          "JSVCH"
+          "6IVC"
         ],
-        "last_source": "JSVCH",
+        "last_source": "6IVC",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13590,17 +13594,17 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN"
+          "8FVE",
+          "6IVC",
+          "JEQZY"
         ],
-        "last_source": "KTEYN",
+        "last_source": "JEQZY",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13612,18 +13616,18 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK"
         ],
-        "last_source": "HTOKM",
+        "last_source": "JSEK",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13635,19 +13639,19 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369"
         ],
-        "last_source": "JBFN",
+        "last_source": "HCV369",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13659,20 +13663,20 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
+          "JAED"
         ],
-        "last_source": "8KHD",
+        "last_source": "JAED",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13684,21 +13688,21 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
+          "JAED",
+          "LMQX"
         ],
-        "last_source": "JEQZT",
+        "last_source": "LMQX",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13710,22 +13714,22 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
+          "JAED",
+          "LMQX",
+          "8EIV"
         ],
-        "last_source": "LZRKY",
+        "last_source": "8EIV",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13737,23 +13741,23 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
-          "JAED"
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
+          "JAED",
+          "LMQX",
+          "8EIV",
+          "HOGCN"
         ],
-        "last_source": "JAED",
+        "last_source": "HOGCN",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13765,24 +13769,24 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ"
         ],
-        "last_source": "8TCLL",
+        "last_source": "8DZZ",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13794,25 +13798,25 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL",
-          "KCO"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ",
+          "JLF"
         ],
-        "last_source": "KCO",
+        "last_source": "JLF",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13824,26 +13828,26 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL",
-          "KCO",
-          "6PNXUI"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ",
+          "JLF",
+          "8DEKT"
         ],
-        "last_source": "6PNXUI",
+        "last_source": "8DEKT",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13855,27 +13859,27 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL",
-          "KCO",
-          "6PNXUI",
-          "LCUZ"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ",
+          "JLF",
+          "8DEKT",
+          "HNULL"
         ],
-        "last_source": "LCUZ",
+        "last_source": "HNULL",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13887,28 +13891,28 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL",
-          "KCO",
-          "6PNXUI",
-          "LCUZ",
-          "JLFXM"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ",
+          "JLF",
+          "8DEKT",
+          "HNULL",
+          "JEQPM"
         ],
-        "last_source": "JLFXM",
+        "last_source": "JEQPM",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -13920,29 +13924,29 @@
           "8CCF",
           "8MEC",
           "8DFB",
-          "8LNQ",
           "8EFW",
+          "8LNQ",
           "8CCCM",
           "8CEMS",
           "9CPC",
-          "6IVC",
-          "8FVE",
           "JSVCH",
-          "KTEYN",
-          "HTOKM",
-          "JBFN",
-          "8KHD",
-          "JEQZT",
-          "LZRKY",
+          "8FVE",
+          "6IVC",
+          "JEQZY",
+          "JSEK",
+          "HCV369",
           "JAED",
-          "8TCLL",
-          "KCO",
-          "6PNXUI",
-          "LCUZ",
-          "JLFXM",
-          "8CKND"
+          "LMQX",
+          "8EIV",
+          "HOGCN",
+          "8DZZ",
+          "JLF",
+          "8DEKT",
+          "HNULL",
+          "JEQPM",
+          "LCUZ"
         ],
-        "last_source": "8CKND",
+        "last_source": "LCUZ",
         "cumulative_descoped": 32,
         "marginal_descoped": 0,
         "cumulative_feeds_removed": 34
@@ -14043,7 +14047,7 @@
           "solo_systems": []
         },
         {
-          "system": "6IVC",
+          "system": "JSVCH",
           "downstream_reach": 1,
           "solo_descope": 0,
           "feeds_removed": 1,
@@ -14073,7 +14077,7 @@
           "solo_systems": []
         },
         {
-          "system": "JSVCH",
+          "system": "6IVC",
           "downstream_reach": 1,
           "solo_descope": 0,
           "feeds_removed": 1,
@@ -14083,7 +14087,7 @@
           "solo_systems": []
         },
         {
-          "system": "KTEYN",
+          "system": "JEQZY",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
@@ -14093,7 +14097,7 @@
           "solo_systems": []
         },
         {
-          "system": "HTOKM",
+          "system": "JSEK",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
@@ -14103,7 +14107,7 @@
           "solo_systems": []
         },
         {
-          "system": "JBFN",
+          "system": "HCV369",
           "downstream_reach": 0,
           "solo_descope": 0,
           "feeds_removed": 0,
@@ -14263,7 +14267,7 @@
           "gap": 0,
           "optimal_sources": [
             "6CWC",
-            "8EFW"
+            "8CCF"
           ],
           "certified": true,
           "pct_of_descopable": 9.4
@@ -14748,6 +14752,20 @@
         "is_true_source": true
       },
       {
+        "system": "8BCC",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 70.72,
+        "is_true_source": false
+      },
+      {
+        "system": "8AFN",
+        "branch_size": 26,
+        "downstream_reach": 26,
+        "risk": 67.42,
+        "is_true_source": false
+      },
+      {
         "system": "8BKV",
         "branch_size": 26,
         "downstream_reach": 26,
@@ -14759,20 +14777,6 @@
         "branch_size": 26,
         "downstream_reach": 26,
         "risk": 83.64,
-        "is_true_source": false
-      },
-      {
-        "system": "8AFN",
-        "branch_size": 26,
-        "downstream_reach": 26,
-        "risk": 67.42,
-        "is_true_source": false
-      },
-      {
-        "system": "8BCC",
-        "branch_size": 26,
-        "downstream_reach": 26,
-        "risk": 70.72,
         "is_true_source": false
       },
       {
@@ -14829,31 +14833,12 @@
           "downstream_reach": 26
         },
         {
-          "target": "8AFN",
-          "min_cut_edges": 2,
+          "target": "8BCC",
+          "min_cut_edges": 1,
           "edges_to_sever": [
-            [
-              "8DEM",
-              "8AQB"
-            ],
-            [
-              "8BKV",
-              "8AQB"
-            ]
-          ],
-          "downstream_reach": 26
-        },
-        {
-          "target": "6PNX",
-          "min_cut_edges": 2,
-          "edges_to_sever": [
-            [
-              "8BCC",
-              "6PNX"
-            ],
             [
               "8AQB",
-              "6PNX"
+              "8BCC"
             ]
           ],
           "downstream_reach": 26
@@ -14863,11 +14848,26 @@
           "min_cut_edges": 2,
           "edges_to_sever": [
             [
-              "8DEM",
+              "8BKV",
               "8AQB"
             ],
             [
+              "8DEM",
+              "8AQB"
+            ]
+          ],
+          "downstream_reach": 26
+        },
+        {
+          "target": "8AFN",
+          "min_cut_edges": 2,
+          "edges_to_sever": [
+            [
               "8BKV",
+              "8AQB"
+            ],
+            [
+              "8DEM",
               "8AQB"
             ]
           ],
@@ -14878,6 +14878,10 @@
           "min_cut_edges": 4,
           "edges_to_sever": [
             [
+              "8CCF",
+              "8BKV"
+            ],
+            [
               "6CWC",
               "8BKV"
             ],
@@ -14887,10 +14891,6 @@
             ],
             [
               "8MEC",
-              "8BKV"
-            ],
-            [
-              "8CCF",
               "8BKV"
             ]
           ],
@@ -16671,8 +16671,8 @@
         "reach": 2
       },
       {
-        "id": "src:6IVC",
-        "label": "6IVC",
+        "id": "src:JSVCH",
+        "label": "JSVCH",
         "band": 0,
         "reach": 1
       },
@@ -16764,7 +16764,7 @@
         "value": 1
       },
       {
-        "source": "src:6IVC",
+        "source": "src:JSVCH",
         "target": "consumers",
         "value": 1
       },

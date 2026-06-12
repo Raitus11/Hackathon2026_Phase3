@@ -440,7 +440,7 @@ function Overview({ d, onPick }) {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <ScatterReachRisk d={d} onPick={onPick} />
+        <ScopeWaterfall d={d} />
         <BarExclusiveReach d={d} onPick={onPick} />
       </div>
 
@@ -459,7 +459,12 @@ function GraphView({ d, selected, onPick }) {
   const ref = useRef()
   const [mode, setMode] = useState('heavy')
   const [showInferred, setShowInferred] = useState(true)
-  const [focusId, setFocusId] = useState(null)        // pinned app, or null = whole-estate view
+  // SCALE GUARD: at 4K-estate size the whole-graph force layout is an unreadable
+  // hairball, so open focused on the top intervention's ego-graph instead — the
+  // most legible view first; "clear focus" still reaches the estate views.
+  const autoFocus = d.viz.nodes.length > 800
+    ? ((d.headline || {}).top_intervention || (d.heavy_hitters[0] || {}).system || null) : null
+  const [focusId, setFocusId] = useState(autoFocus)        // pinned app, or null = whole-estate view
   const [hops, setHops] = useState(1)                  // 1 | 2 | Infinity
   const [dir, setDir] = useState('both')               // 'down' | 'up' | 'both'
   const [query, setQuery] = useState('')
@@ -1073,6 +1078,73 @@ function BlockComparison({ plan, onPick }) {
   )
 }
 
+function ScopeWaterfall({ d }) {
+  const plan = d.plan || {}
+  const before = plan.before ?? (d.impact?.scope_before ?? 0)
+  const descopable = plan.descopable ?? 0
+  const floor = Math.max(0, before - descopable)
+  const fb = plan.floor_breakdown || null
+  const tokPoints = fb ? fb.origins_in_scope : null
+  const alwaysCde = fb ? fb.always_cde_in_scope : null
+  // bars: [label, height, color, kind] — kind 'full' | 'drop' | 'floor'
+  const W = 560, H = 300, P = { l: 48, r: 16, t: 22, b: 52 }
+  const maxv = Math.max(1, before)
+  const y = v => P.t + (1 - v / maxv) * (H - P.t - P.b)
+  const innerW = W - P.l - P.r
+  const cols = 3, gap = 26
+  const bw = (innerW - gap * (cols - 1)) / cols
+  const x = i => P.l + i * (bw + gap)
+  const pct = descopable && before ? Math.round(100 * descopable / before) : 0
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold">Where the scope goes <span className="text-faint text-xs font-normal">— the descope waterfall</span></div>
+      <div className="text-xs text-dim mb-2">Of the <b>{fmt(before)}</b> systems in PCI scope today, <b className="text-safe">{fmt(descopable)}</b> ({pct}%) can fully leave the CDE once the true-source front emits CRN. The <b>{fmt(floor)}</b>-system floor is irreducible by design{fb ? <>: <b className="text-pan">{fmt(tokPoints)}</b> stay as the tokenization points themselves and <b className="text-cool">{fmt(alwaysCde)}</b> hold always-CDE data (detokenize / full-track / PIN — RISE/APG territory)</> : ' (tokenization points + always-CDE elements)'}. Every segment uses the same audited denominator as the Planner, the certified frontier and Economics.</div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
+        {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
+          <g key={i}>
+            <line x1={P.l} x2={W - P.r} y1={y(f * maxv)} y2={y(f * maxv)} stroke="#E6E2DA" strokeWidth="0.5" />
+            <text x={P.l - 6} y={y(f * maxv) + 3} textAnchor="end" fontSize="9" fill="#8B95A3">{fmt(Math.round(f * maxv))}</text>
+          </g>
+        ))}
+        {/* col 1 — in scope today (full bar) */}
+        <rect x={x(0)} y={y(before)} width={bw} height={y(0) - y(before)} fill="#D71E28" fillOpacity="0.85" rx="3">
+          <title>{fmt(before)} systems in PCI scope today</title></rect>
+        <text x={x(0) + bw / 2} y={y(before) - 7} textAnchor="middle" fontSize="13" fontWeight="800" fill="#D71E28" className="disp">{fmt(before)}</text>
+        <text x={x(0) + bw / 2} y={H - P.b + 16} textAnchor="middle" fontSize="10" fill="#5A6472">in scope today</text>
+
+        {/* connector */}
+        <line x1={x(0) + bw} y1={y(before)} x2={x(1)} y2={y(before)} stroke="#9AA4B2" strokeWidth="0.75" strokeDasharray="3 3" />
+
+        {/* col 2 — floating drop: fully descopable */}
+        <rect x={x(1)} y={y(before)} width={bw} height={Math.max(2, y(floor) - y(before))} fill="#0E7C4A" fillOpacity="0.85" rx="3">
+          <title>{fmt(descopable)} systems fully descopable under complete true-source tokenization</title></rect>
+        <text x={x(1) + bw / 2} y={y(before) - 7} textAnchor="middle" fontSize="13" fontWeight="800" fill="#0E7C4A" className="disp">−{fmt(descopable)}</text>
+        <text x={x(1) + bw / 2} y={H - P.b + 16} textAnchor="middle" fontSize="10" fill="#5A6472">fully descopable</text>
+        <text x={x(1) + bw / 2} y={H - P.b + 28} textAnchor="middle" fontSize="9" fill="#8B95A3">once all true sources emit CRN</text>
+
+        {/* connector */}
+        <line x1={x(1) + bw} y1={y(floor)} x2={x(2)} y2={y(floor)} stroke="#9AA4B2" strokeWidth="0.75" strokeDasharray="3 3" />
+
+        {/* col 3 — achievable floor, stacked breakdown when available */}
+        {fb ? (
+          <g>
+            <rect x={x(2)} y={y(tokPoints)} width={bw} height={y(0) - y(tokPoints)} fill="#D71E28" fillOpacity="0.65" rx="3">
+              <title>{fmt(tokPoints)} true PAN sources remain in the CDE as tokenization points</title></rect>
+            <rect x={x(2)} y={y(floor)} width={bw} height={Math.max(0, y(tokPoints) - y(floor))} fill="#2563EB" fillOpacity="0.7" rx="3">
+              <title>{fmt(alwaysCde)} systems hold always-CDE data elements — stay via RISE/APG</title></rect>
+          </g>
+        ) : (
+          <rect x={x(2)} y={y(floor)} width={bw} height={y(0) - y(floor)} fill="#2563EB" fillOpacity="0.7" rx="3">
+            <title>{fmt(floor)} systems — the achievable floor</title></rect>
+        )}
+        <text x={x(2) + bw / 2} y={y(floor) - 7} textAnchor="middle" fontSize="13" fontWeight="800" fill="#1F2329" className="disp">{fmt(floor)}</text>
+        <text x={x(2) + bw / 2} y={H - P.b + 16} textAnchor="middle" fontSize="10" fill="#5A6472">achievable floor</text>
+        {fb && <text x={x(2) + bw / 2} y={H - P.b + 28} textAnchor="middle" fontSize="9" fill="#8B95A3">{fmt(tokPoints)} token points · {fmt(alwaysCde)} RISE/APG</text>}
+      </svg>
+    </div>
+  )
+}
+
 function ScatterReachRisk({ d, onPick }) {
   const nodes = (d.viz?.nodes || []).filter(n => n.carries_pan || n.hidden_pci || (n.reach || 0) > 0)
   const W = 560, H = 300, P = { l: 44, r: 16, t: 14, b: 36 }
@@ -1208,7 +1280,7 @@ function WeightSensitivity({ ws }) {
 }
 
 /* ============================ METHODS (cont.) ============================ */
-function Methods({ d }) {
+function Methods({ d, onPick }) {
   const s = d.structure || {}
   const algos = [
     ['Cycle resolution', 'Tarjan strongly-connected-components → condensation', 'Tarjan 1972', 'Source relationships from BAM/ServiceNow contain cycles; SCC detection + supervertex contraction provably yields a DAG. The rule is explicit and explainable.'],
@@ -1261,6 +1333,7 @@ function Methods({ d }) {
       </div>
       <RunComplexity d={d} />
       <WeightSensitivity ws={s.weight_sensitivity} />
+      <ScatterReachRisk d={d} onPick={onPick || (() => {})} />
       {s.choke_points && s.choke_points.length > 0 && (
         <div className="card p-5">
           <div className="disp font-bold text-sm">Choke points <span className="text-faint font-normal">— tokenizing one severs PAN to a whole branch</span></div>
@@ -1723,11 +1796,80 @@ function HiddenScope({ d, onPick }) {
   )
 }
 
+/* ============================ PRESENT MODE (guided tour — communication axis) ============================ */
+function buildTourSteps(d) {
+  const h = d.headline || {}, imp = d.impact || {}, plan = d.plan || {}, econ = d.economics || {}
+  const hid = d.hidden || {}
+  const topMiss = (hid.hidden_detail || [])[0]
+  const topDist = (d.heavy_hitters || [])[0]
+  const fb = plan.floor_breakdown || {}
+  const sat = plan.saturation_curve || {}
+  const lastSat = (sat.curve || [])[ (sat.curve || []).length - 1 ]
+  const floor = Math.max(0, (plan.before ?? 0) - (plan.descopable ?? 0))
+  return [
+    { tab: 'overview', title: 'The estate, in one screen',
+      text: `${fmt(h.systems_exposed_to_clear_pan)} systems sit in PCI scope today — ${fmt(h.scope_metadata_confirmed)} confirmed by authoritative BAM metadata, ${fmt(h.scope_inferred_only)} surfaced only by survey/Splunk signals and kept clearly separate. ${fmt(h.cycle_clusters_resolved)} circular-dependency clusters were resolved via Tarjan SCC condensation into a provable DAG, so every lineage claim that follows is well-defined.` },
+    { tab: 'hidden', title: 'The finding BAM cannot see',
+      text: `${fmt(h.hidden_pci_systems_bam_misses)} systems are recorded as PCI = No in the catalogue, yet clear card numbers appear in their Splunk logs — unmanaged scope no compliance program is tracking.${topMiss ? ` The widest of them, ${topMiss.system}, propagates onward to ${fmt(topMiss.downstream_reach)} downstream systems.` : ''} Every row carries its evidence: the masked finding, the owner's stated source, and how far the leak travels.` },
+    { tab: 'planner', title: 'Why no single tokenization fixes this',
+      text: `${topDist ? `The widest distributor, ${topDist.system}, feeds clear PAN to ${fmt(topDist.downstream_reach)} systems — yet tokenizing it alone frees almost nothing.` : ''} A system only leaves the CDE when ALL of its true PAN sources emit CRN, and on a saturated estate every system has many. The saturation curve shows full descope stays flat until nearly the whole ${fmt(plan.true_source_count)}-source front is tokenized${lastSat ? `, then releases ${fmt(lastSat.fully_descoped)} of ${fmt(plan.before)} systems` : ''}. That shape is the insight, not a failure — and the certified-optimal frontier below it is exact, not heuristic.` },
+    { tab: 'blast', title: 'Block this vs block that',
+      text: `Even before full descope, every tokenization removes real exposure. Blocking a source strips its clear-PAN feeds, shrinks downstream parent counts, and lowers aggregate risk — the per-source benefit table and the side-by-side block-set comparison quantify exactly what the organizers' FAQ asks: "if we don't send PCI from this upstream, how many downstream benefit?"` },
+    { tab: 'onboard', title: 'Dry-run tomorrow\'s system today',
+      text: `Extensibility, live: describe a system that does not exist yet — who it consumes from, who it feeds, what it holds — and the engine answers the architecture review deterministically with the same clean-stream semantics: where it lands (CDE / connected / out), which upstream tokenizations would keep it clean, and how many out-of-scope systems it would drag in. Unknown names are reported, never invented.` },
+    { tab: 'overview', title: 'The decision, costed',
+      text: `The waterfall: ${fmt(plan.before)} in scope → ${fmt(plan.descopable)} fully descopable → a ${fmt(floor)}-system irreducible floor${fb.origins_in_scope != null ? ` (${fmt(fb.origins_in_scope)} tokenization points + ${fmt(fb.always_cde_in_scope)} always-CDE via RISE/APG)` : ''}.${econ.in_scope_now != null ? ` In audit terms: ${econ.posture_now} today → ${econ.posture_floor} at the floor, with the effort delta priced from labeled, overridable assumptions.` : ''} One denominator across every surface, enforced by a regression test.` },
+    { tab: 'methods', title: 'Why you can trust the numbers',
+      text: `Hybrid intelligence: deterministic graph algorithms and classical statistics do every measured step — Tarjan, reachability, Brandes betweenness, branch-and-bound exact optimization — each named, cited, and bounded. The LLM only narrates numbers it never computes. Card data is masked first-6/last-4 on ingest and an unmasked PAN fails the entire run. What it claims, and what it deliberately does not, is stated on every page.` },
+  ]
+}
+
+function PresentMode({ d, onTab, onClose }) {
+  const steps = useMemo(() => buildTourSteps(d), [d])
+  const [i, setI] = useState(0)
+  const go = n => { const j = Math.min(steps.length - 1, Math.max(0, n)); setI(j); onTab(steps[j].tab) }
+  useEffect(() => { onTab(steps[0].tab) }, [])  // eslint-disable-line
+  useEffect(() => {
+    const k = e => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight') go(i + 1)
+      if (e.key === 'ArrowLeft') go(i - 1)
+    }
+    window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k)
+  })
+  const s = steps[i]
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none">
+      <div className="max-w-[860px] mx-auto px-5 pb-5 pointer-events-auto">
+        <div className="card p-5 shadow-2xl border-2" style={{ borderColor: '#D71E28' }}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="mono text-[11px] px-2 py-0.5 rounded bg-pan text-white font-bold">PRESENTING · {i + 1}/{steps.length}</span>
+            <span className="disp font-bold text-lg text-txt">{s.title}</span>
+            <button onClick={onClose} className="ml-auto mono text-[11px] px-2 py-1 rounded border border-line text-dim hover:text-txt" title="Esc">✕ exit</button>
+          </div>
+          <p className="text-sm text-dim leading-relaxed mt-2">{s.text}</p>
+          <div className="flex items-center gap-2 mt-3">
+            <button onClick={() => go(i - 1)} disabled={i === 0}
+              className={'mono text-xs px-4 py-1.5 rounded-lg ' + (i === 0 ? 'bg-line text-faint' : 'bg-panel2 text-txt hover:bg-line')}>← prev</button>
+            <div className="flex gap-1.5 mx-2">{steps.map((_, j) => (
+              <button key={j} onClick={() => go(j)} className="rounded-full" style={{ width: 8, height: 8, background: j === i ? '#D71E28' : '#C7CDD6' }} />))}</div>
+            {i < steps.length - 1
+              ? <button onClick={() => go(i + 1)} className="mono text-xs px-4 py-1.5 rounded-lg bg-pan text-white font-semibold hover:brightness-110">next →</button>
+              : <button onClick={onClose} className="mono text-xs px-4 py-1.5 rounded-lg bg-safe text-white font-semibold hover:brightness-110">finish ✓</button>}
+            <span className="ml-auto text-[10px] text-faint">← → keys · Esc to exit · the script doubles as the 3-minute demo narration</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ============================ APP ============================ */
 export default function App() {
   const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, reset, clearError } = useData()
   const [tab, setTab] = useState('overview')
   const [sel, setSel] = useState(null)
+  const [present, setPresent] = useState(false)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
   const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
@@ -1747,6 +1889,8 @@ export default function App() {
                 <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded bg-white/15 text-white hover:bg-white/25" title="XLSX data pack">↓ XLSX</a>
               </div>
             )}
+            <button onClick={() => setPresent(true)} title="Guided walkthrough of the findings — judge mode"
+              className="mono text-[11px] px-3 py-1.5 rounded bg-gold text-txt font-semibold hover:brightness-110 transition">▶ Present</button>
             <button onClick={() => { reset(); setTab('pipeline') }}
               className="mono text-[11px] px-3 py-1.5 rounded bg-white text-pan font-semibold hover:bg-gold hover:text-txt transition">↑ New analysis</button>
             <span className={'mono text-[11px] px-2 py-1 rounded ' + (src === 'live' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70')}>{src === 'live' ? '● live API' : '● embedded snapshot'}</span>
@@ -1769,8 +1913,9 @@ export default function App() {
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
-      {tab === 'methods' && <Methods d={d} />}
+      {tab === 'methods' && <Methods d={d} onPick={pick} />}
       {tab === 'ask' && <Ask suggested={suggested} live={src === 'live'} />}
+      {present && <PresentMode d={d} onTab={setTab} onClose={() => setPresent(false)} />}
       <footer className="text-[11px] text-faint mt-8 leading-relaxed">
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.
         <b className="text-dim"> What it does not:</b> remediate controls, assert business need, or treat inferred signals as ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.
@@ -2191,15 +2336,34 @@ function Onboarding({ d, live, onPick }) {
   const [res, setRes] = useState(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
-  const assess = async () => {
+  const assessWith = async (payload) => {
     if (!live) return
     setBusy(true); setErr(null)
     try {
       const r = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app_id: appId, providers, consumers, ...flags }) })
+        body: JSON.stringify(payload) })
       if (!r.ok) throw new Error('HTTP ' + r.status)
       setRes(await r.json())
     } catch (e) { setErr(String(e.message || e)) } finally { setBusy(false) }
+  }
+  const assess = () => assessWith({ app_id: appId, providers, consumers, ...flags })
+  // one-click demo scenarios derived from the live analysis — prefill AND assess
+  const topSrc = (d.heavy_hitters || [])[0]?.system
+  const outNode = useMemo(() => (d.viz?.nodes || []).find(n => !n.in_scope && !n.carries_pan && !n.hidden_pci)?.id, [d])
+  const scenarios = [
+    topSrc && { label: `consumer of ${topSrc}`, hint: 'lands in CDE; names the exact upstream fix',
+      s: { app_id: 'NEW-CONS', providers: [topSrc], consumers: [], pan: false, crn_only: false, detokenizes: false, full_track: false, pin: false } },
+    outNode && { label: `PAN originator feeding ${outNode}`, hint: 'new true source; drags systems into scope',
+      s: { app_id: 'NEW-ORIG', providers: [], consumers: [outNode], pan: true, crn_only: false, detokenizes: false, full_track: false, pin: false } },
+    { label: 'CRN-native reporting reader', hint: 'token-only by design → connected, not CDE',
+      s: { app_id: 'NEW-CRN', providers: [], consumers: topSrc ? [topSrc] : [], pan: false, crn_only: true, detokenizes: false, full_track: false, pin: false } },
+    { label: 'detokenizing service', hint: 'permanent CDE — RISE/APG territory',
+      s: { app_id: 'NEW-DETOK', providers: topSrc ? [topSrc] : [], consumers: [], pan: false, crn_only: false, detokenizes: true, full_track: false, pin: false } },
+  ].filter(Boolean)
+  const runScenario = sc => {
+    setAppId(sc.s.app_id); setProviders(sc.s.providers); setConsumers(sc.s.consumers)
+    setFlags({ pan: sc.s.pan, crn_only: sc.s.crn_only, detokenizes: sc.s.detokenizes, full_track: sc.s.full_track, pin: sc.s.pin })
+    assessWith(sc.s)
   }
   const catTone = c => c === 'cde' ? 'text-pan border-pan/40 bg-pan/5' : c === 'connected' ? 'text-cool border-cool/40 bg-cool/5' : 'text-safe border-safe/40 bg-safe/5'
   const catLabel = c => c === 'cde' ? 'In scope (CDE)' : c === 'connected' ? 'Connected-to (in scope)' : 'Out of scope'
@@ -2220,6 +2384,15 @@ function Onboarding({ d, live, onPick }) {
           let it receive CRN instead of clear PAN, and how many currently-out-of-scope systems the new feed would <b>drag into
           scope</b>. Planned neighbours that don't exist in the authoritative universe are reported, never invented.
         </p>
+        {live && scenarios.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span className="text-[11px] text-faint self-center">one-click dry-runs:</span>
+            {scenarios.map((sc, i) => (
+              <button key={i} onClick={() => runScenario(sc)} title={sc.hint}
+                className="mono text-[11px] px-2.5 py-1 rounded-lg border border-pan/30 text-pan bg-pan/5 hover:bg-pan/10">▸ {sc.label}</button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-[380px_1fr] gap-5">

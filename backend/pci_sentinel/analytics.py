@@ -675,11 +675,23 @@ def minimal_tokenization_plan(G, pan_sources: set, scores: dict,
     # even when greedy full-descope halts early)
     curve = cumulative_descope_curve(G, pan_sources, scores, max_k=candidate_k)
     log.info(f"       [plan] complete: {len(chosen)} steps, {total} systems fully descoped")
+    # Exact decomposition of the achievable floor (before − descopable). Two groups
+    # can never leave the CDE: the true PAN origins (they remain as tokenization
+    # points) and the always-CDE elements (detokenizers / full-track / PIN — RISE/APG
+    # territory). origins_in_scope + always_cde_in_scope == before − descopable by
+    # construction; asserted in V-022 so the waterfall can never drift from the
+    # denominator every other surface reports.
+    origins_in_scope = len(origins & before)
+    always_cde_in_scope = len((independent & before) - origins)
     return {
         "before": before_n, "descopable": len(descopable), "after": len(cur),
         "total_descoped": total, "k": len(chosen),
         "plan": chosen, "steps": steps, "target_fraction": target_fraction,
         "true_source_count": len(origins),
+        "floor_breakdown": {
+            "origins_in_scope": origins_in_scope,          # stay as tokenization points
+            "always_cde_in_scope": always_cde_in_scope,    # stay via RISE/APG (detok/track/PIN)
+        },
         "cumulative_curve": curve,
         # Honest method statement: greedy is a heuristic here (objective is supermodular,
         # so no (1-1/e) guarantee). The exposure metrics carry the story.

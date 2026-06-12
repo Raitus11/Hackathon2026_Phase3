@@ -356,6 +356,13 @@ def test_descopable_denominator_consistent_across_surfaces():
     # and the denominator excludes the origins themselves (tokenization points stay)
     origins = analytics._true_pan_sources(H, set(pan))
     assert plan["descopable"] <= len(scope) - len(origins & scope)
+    # waterfall identity: floor (before − descopable) decomposes EXACTLY into
+    # tokenization points + always-CDE elements — the Overview waterfall renders
+    # these segments and must never disagree with the shared denominator.
+    fb = plan["floor_breakdown"]
+    assert fb["origins_in_scope"] + fb["always_cde_in_scope"] == plan["before"] - plan["descopable"], (
+        f"floor breakdown {fb} does not sum to before − descopable "
+        f"({plan['before']} − {plan['descopable']})")
 
 
 def test_descopable_excludes_tokenization_points_toy():
