@@ -1,12 +1,44 @@
 @tailwind base; @tailwind components; @tailwind utilities;
 html,body,#root{height:100%}
-body{background:#FBFAF8;color:#1F2329;font-family:"IBM Plex Sans",sans-serif}
+body{background:#F3F1EB;color:#1F2329;font-family:"IBM Plex Sans",sans-serif}
 .mono{font-family:"IBM Plex Mono",monospace}.disp{font-family:"Archivo",sans-serif}
-.card{background:#ffffff;border:1px solid #E6E2DA;border-radius:14px;box-shadow:0 1px 2px rgba(31,35,41,.05)}
+.card{background:#ffffff;border:1px solid #E3DED4;border-radius:14px;
+  box-shadow:0 1px 3px rgba(31,35,41,.07),0 4px 14px rgba(31,35,41,.04)}
+/* every beige data tile gets quiet definition — one rule lifts ~40 surfaces
+   (scoped so elevated dropdowns with shadow utilities keep their elevation) */
+.bg-panel2:not([class*="shadow"]){box-shadow:inset 0 0 0 1px #E8E3D8}
+
+/* ---- semantic tint vocabulary: red=PAN/severity · gold=AI/money/highlight ·
+       green=benefit/safe · blue=informational/RISE-APG ---- */
+.tint-red{background:#FBEFEF!important;box-shadow:inset 0 0 0 1px #EFD3D3!important}
+.tint-gold{background:#FCF6E2!important;box-shadow:inset 0 0 0 1px #ECDCA8!important}
+.tint-green{background:#ECF4EF!important;box-shadow:inset 0 0 0 1px #CFE3D7!important}
+.tint-blue{background:#EEF3FB!important;box-shadow:inset 0 0 0 1px #D5E1F3!important}
+
+/* pipeline surfaces */
+.pipe-strip{border-top:3px solid #FFCD41;background:linear-gradient(180deg,#FFFDF4,#fff 60%)}
+.pipe-feed{background:#F9F7F1}
+/* AI decision memo — the gold (generative) surface */
+.memo-card{background:linear-gradient(180deg,#FFFCF1,#fff 70%)}
+/* warm ivory search/filter fields */
+.field-ivory{background:#FFFDF6!important;border-color:#E2D8BC!important}
+
+/* zebra table with gold-tinted header (evidence ledger, choke points) */
+table.zt thead tr{background:#FBF6E6}
+table.zt thead th{padding:.45rem .6rem}
+table.zt tbody tr:nth-child(even){background:#FAF8F2}
+/* methods capability grid — columns carry their own quiet tone */
+table.colgrid tbody td:nth-child(2){background:#FAF8F2}
+table.colgrid tbody td:nth-child(3){background:#FCF7E8}
+table.colgrid tbody tr:hover td{background:#FBF1F1}
 /* corporate masthead: brand red band with the gold keyline */
 .masthead{background:linear-gradient(90deg,#D71E28,#A21621);border-bottom:4px solid #FFCD41;
   box-shadow:0 2px 10px rgba(143,14,30,.18)}
-.tab{transition:.15s}.tab[data-on="1"]{color:#fff;background:#D71E28}
+.tab{transition:.15s}
+.tab:hover{color:#1F2329;background:#F6F4EF}
+.tab[data-on="1"]{color:#fff;background:#D71E28;box-shadow:inset 0 -3px 0 #FFCD41}
+.tab[data-on="1"]:hover{background:#D71E28}
+:focus-visible{outline:2px solid #FFCD41;outline-offset:2px}
 .kpi{animation:rise .5s cubic-bezier(.2,.8,.2,1) backwards}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .scroll::-webkit-scrollbar{width:8px;height:8px}.scroll::-webkit-scrollbar-thumb{background:#DDD8CE;border-radius:8px}

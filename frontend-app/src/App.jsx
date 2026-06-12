@@ -171,8 +171,10 @@ function useData() {
 /* ============================ small bits ============================ */
 function KPI({ label, value, sub, tone, delay, def: defn }) {
   const tones = { pan: 'text-pan', hot: 'text-panhot', safe: 'text-safe', cool: 'text-cool' }
+  const edges = { pan: '#D71E28', hot: '#8F0E1E', safe: '#0E7C4A', cool: '#2563EB' }
   return (
-    <div className="card kpi p-4 flex-1 min-w-[190px] relative group" style={{ animationDelay: delay + 'ms' }}>
+    <div className="card kpi p-4 flex-1 min-w-[190px] relative group"
+      style={{ animationDelay: delay + 'ms', borderTop: '3px solid ' + (edges[tone] || '#E3DED4') }}>
       <div className="text-[11px] uppercase tracking-[.14em] text-faint flex items-center gap-1">{label}
         {defn && <span className="text-faint/70 cursor-help" title={defn}>ⓘ</span>}</div>
       <div className={'disp font-black text-4xl mt-1 ' + (tones[tone] || 'text-txt')}>{value}</div>
@@ -236,12 +238,12 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
         </p>
         <div className="flex flex-wrap gap-2 mt-3">
           {['Deterministic core', 'Human-gated', 'LLM narrates — never decides', 'Masking enforced on ingest'].map(t =>
-            <span key={t} className="text-[11px] mono px-2.5 py-1 rounded-full border border-line text-dim">{t}</span>)}
+            <span key={t} className="text-[11px] mono px-2.5 py-1 rounded-full border border-[#E2D8BC] bg-[#FFFDF6] text-dim">{t}</span>)}
         </div>
       </div>
 
       {/* compact flow strip */}
-      <div className="card px-5 py-4">
+      <div className="card pipe-strip px-5 py-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[11px] uppercase tracking-[.16em] text-faint">Agent pipeline · LangGraph</span>
           <span className="text-[11px] mono text-faint">{phase === 'running' ? 'running…' : phase === 'gate' ? 'paused at gate' : phase === 'done' ? 'complete' : 'idle'}</span>
@@ -274,7 +276,7 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
 
       {/* live agent activity feed */}
       {running && (
-        <div className="card px-5 py-4">
+        <div className="card pipe-feed px-5 py-4">
           <div className="text-[11px] uppercase tracking-[.16em] text-faint mb-2">Run activity</div>
           <div className="space-y-1.5">
             {agents.map((a, i) => {
@@ -297,7 +299,7 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
       )}
 
       {/* upload / run */}
-      <div className="card p-5">
+      <div className={'card p-5' + (phase === 'done' ? ' tint-green' : '')}>
         {phase === 'gate' && gate ? (
           <div>
             <div className="text-sm font-semibold text-pan flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-pan animate-pulse" />Awaiting your approval</div>
@@ -354,11 +356,11 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
                 </div>
                 <div className="flex items-center gap-4 mt-4 flex-wrap">
                   <button disabled={uploading} onClick={() => onUpload(files, requireApproval)}
-                    className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (uploading ? 'bg-line text-faint' : 'bg-pan text-ink hover:brightness-110')}>
+                    className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (uploading ? 'bg-panel2 text-faint border border-line' : 'bg-pan text-ink hover:brightness-110 shadow-sm')}>
                     {uploading ? 'running…' : 'Run analysis →'}
                   </button>
                   <label className="flex items-center gap-2 text-xs text-dim cursor-pointer select-none">
-                    <input type="checkbox" checked={requireApproval} onChange={e => setRequireApproval(e.target.checked)} />
+                    <input type="checkbox" className="accent-pan" checked={requireApproval} onChange={e => setRequireApproval(e.target.checked)} />
                     pause for human approval before reporting
                   </label>
                 </div>
@@ -409,10 +411,10 @@ function Overview({ d, onPick }) {
             </div>
           ))}
           <div className="grid grid-cols-4 gap-2 mt-4 text-center">
-            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.nodes_descoped}</div><div className="text-[11px] text-dim">systems descoped</div></div>
-            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-pan">{imp.sources_downgraded_count ?? (imp.sources_downgraded || []).length}</div><div className="text-[11px] text-dim">sources → token</div></div>
-            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.node_surface_reduction_pct}%</div><div className="text-[11px] text-dim">surface ↓</div></div>
-            <div className="bg-panel2 rounded-lg p-3"><div className="disp text-2xl font-black text-cool">{imp.retained_via_detokenization_count}</div><div className="text-[11px] text-dim">stay (RISE/APG)</div></div>
+            <div className="tint-green rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.nodes_descoped}</div><div className="text-[11px] text-dim">systems descoped</div></div>
+            <div className="tint-red rounded-lg p-3"><div className="disp text-2xl font-black text-pan">{imp.sources_downgraded_count ?? (imp.sources_downgraded || []).length}</div><div className="text-[11px] text-dim">sources → token</div></div>
+            <div className="tint-green rounded-lg p-3"><div className="disp text-2xl font-black text-safe">{imp.node_surface_reduction_pct}%</div><div className="text-[11px] text-dim">surface ↓</div></div>
+            <div className="tint-blue rounded-lg p-3"><div className="disp text-2xl font-black text-cool">{imp.retained_via_detokenization_count}</div><div className="text-[11px] text-dim">stay (RISE/APG)</div></div>
           </div>
           <div className="text-[11px] text-faint mt-3">A system descopes only when it receives CRN from <b>all</b> upstreams. Systems that must de-tokenize via centralized RISE/APG services remain in the CDE by design.</div>
         </div>
@@ -590,8 +592,8 @@ function GraphView({ d, selected, onPick }) {
       <div className="flex items-center gap-2 px-2 pt-1 pb-2 flex-wrap">
         <span className="text-[11px] text-faint mr-1">view:</span>
         {modes.map(([k, l]) => <button key={k} onClick={() => { setMode(k); clearFocus() }}
-          className={'mono text-[11px] px-2.5 py-1 rounded border ' + (!focusId && mode === k ? 'border-pan text-pan bg-pan/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
-        <label className="flex items-center gap-1 text-[11px] text-dim ml-2 cursor-pointer"><input type="checkbox" checked={showInferred} onChange={e => setShowInferred(e.target.checked)} />show inferred edges</label>
+          className={'mono text-[11px] px-2.5 py-1 rounded border ' + (!focusId && mode === k ? 'border-pan text-pan bg-pan/10' : 'border-[#D9D3C7] bg-white text-dim shadow-sm hover:text-txt hover:border-pan/60 hover:bg-gold/10')}>{l}</button>)}
+        <label className="flex items-center gap-1 text-[11px] text-dim ml-2 cursor-pointer"><input type="checkbox" className="accent-pan" checked={showInferred} onChange={e => setShowInferred(e.target.checked)} />show inferred edges</label>
         <span className="ml-auto mono text-[11px] text-faint">{counts.n} nodes · {counts.l} edges</span>
       </div>
 
@@ -603,7 +605,7 @@ function GraphView({ d, selected, onPick }) {
             onChange={e => { setQuery(e.target.value); setOpenList(true) }}
             onFocus={() => setOpenList(true)}
             onKeyDown={e => { if (e.key === 'Enter' && matches[0]) pickFocus(matches[0].id); if (e.key === 'Escape') setOpenList(false) }}
-            className="mono text-[11px] px-2 py-1 rounded border border-line bg-panel2 text-txt w-full outline-none focus:border-cool" />
+            className="mono text-[11px] px-2 py-1 rounded-lg border border-[#D9D3C7] bg-white text-txt w-full outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
           {openList && matches.length > 0 && (
             <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded border border-line bg-panel2 shadow-xl">
               {matches.map(m => (
@@ -627,11 +629,11 @@ function GraphView({ d, selected, onPick }) {
             <span className="text-[11px] text-faint ml-1">direction:</span>
             {[['both', 'both'], ['down', 'downstream'], ['up', 'upstream']].map(([k, l]) =>
               <button key={k} onClick={() => setDir(k)}
-                className={'mono text-[11px] px-2 py-1 rounded border ' + (dir === k ? 'border-cool text-cool bg-cool/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (dir === k ? 'border-cool text-cool bg-cool/10' : 'border-[#D9D3C7] bg-white text-dim shadow-sm hover:text-txt hover:border-pan/60 hover:bg-gold/10')}>{l}</button>)}
             <span className="text-[11px] text-faint ml-1">hops:</span>
             {[[1, '1'], [2, '2'], [Infinity, 'all']].map(([k, l]) =>
               <button key={l} onClick={() => setHops(k)}
-                className={'mono text-[11px] px-2 py-1 rounded border ' + (hops === k ? 'border-cool text-cool bg-cool/10' : 'border-line text-dim hover:text-txt')}>{l}</button>)}
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (hops === k ? 'border-cool text-cool bg-cool/10' : 'border-[#D9D3C7] bg-white text-dim shadow-sm hover:text-txt hover:border-pan/60 hover:bg-gold/10')}>{l}</button>)}
           </>
         )}
         {!focusId && <span className="text-[11px] text-faint">pick an app to isolate its PAN neighbourhood — or keep the full view above</span>}
@@ -715,7 +717,7 @@ function Drill({ d, selected, onPick }) {
       <div className="card p-4">
         <div className="text-[11px] uppercase tracking-widest text-faint mb-2">System explorer</div>
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="search id or name…"
-          className="w-full bg-panel2 border border-line rounded-lg px-3 py-2 text-sm mono text-txt mb-2" />
+          className="w-full bg-white border border-[#D9D3C7] rounded-lg px-3 py-2 text-sm mono text-txt mb-2 outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
         <div className="scroll overflow-auto max-h-[520px] space-y-0.5">
           {list.map(n => (
             <button key={n.id} onClick={() => onPick(n.id)}
@@ -749,7 +751,7 @@ function Drill({ d, selected, onPick }) {
               <Row k="Cycle cluster" v={node.super_node || '—'} />
               {node.lob ? <Row k="Line of business" v={node.lob} /> : null}
             </div>
-            <div className="card p-5">
+            <div className="card p-5" style={{ borderTop: '3px solid #2563EB', background: 'linear-gradient(180deg,#F8FAFE,#fff 55%)' }}>
               <div className="disp font-bold text-sm mb-1">Why is this in scope?</div>
               <p className="text-xs text-dim leading-relaxed">
                 {!node.in_scope ? 'Not in scope — no clear-PAN flow reaches this system.' :
@@ -763,7 +765,7 @@ function Drill({ d, selected, onPick }) {
           </div>
 
           {lineage.length > 0 && (
-            <div className="card p-5">
+            <div className="card p-5" style={{ borderTop: '3px solid #FFCD41', background: 'linear-gradient(180deg,#FFFCF1,#fff 60%)' }}>
               <div className="disp font-bold text-sm mb-2">PAN lineage <span className="text-faint text-xs font-normal">— upstream paths toward a true PAN source</span></div>
               <div className="space-y-1.5">
                 {lineage.map((p, i) => (
@@ -783,7 +785,7 @@ function Drill({ d, selected, onPick }) {
 
           <div className="grid md:grid-cols-2 gap-5">
             <div className="card p-5">
-              <div className="disp font-bold mb-2">Upstream providers <span className="text-faint text-xs">({ins.length}) — send PAN to {node.id}</span></div>
+              <div className="disp font-bold mb-2"><span className="inline-block w-2 h-2 rounded-full bg-pan mr-1.5" />Upstream providers <span className="text-faint text-xs">({ins.length}) — send PAN to {node.id}</span></div>
               <div className="scroll max-h-[240px] overflow-auto space-y-1">
                 {ins.length ? ins.map((e, i) => (
                   <button key={i} onClick={() => onPick(e.source)} className="w-full flex justify-between text-left text-sm px-2 py-1 rounded hover:bg-panel2">
@@ -793,7 +795,7 @@ function Drill({ d, selected, onPick }) {
               </div>
             </div>
             <div className="card p-5">
-              <div className="disp font-bold mb-2">Downstream consumers <span className="text-faint text-xs">({outs.length}) — receive PAN from {node.id}</span></div>
+              <div className="disp font-bold mb-2"><span className="inline-block w-2 h-2 rounded-full bg-cool mr-1.5" />Downstream consumers <span className="text-faint text-xs">({outs.length}) — receive PAN from {node.id}</span></div>
               <div className="scroll max-h-[240px] overflow-auto space-y-1">
                 {outs.length ? outs.map((e, i) => (
                   <button key={i} onClick={() => onPick(e.target)} className="w-full flex justify-between text-left text-sm px-2 py-1 rounded hover:bg-panel2">
@@ -839,11 +841,11 @@ function DecisionMemo({ plan }) {
   const curve = plan && plan.saturation_curve && plan.saturation_curve.curve
   const chips = memo.grounded_on || []
   return (
-    <div className="card p-5 border border-pan/30">
+    <div className="card memo-card p-5 border border-gold">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="disp font-bold text-lg flex items-center gap-2">
           AI Decision Memo
-          <span className={'mono text-[10px] px-2 py-0.5 rounded ' + (memo.generated ? 'bg-pan/20 text-pan' : 'bg-line text-dim')}>{memo.generated ? '✦ AI-generated' : '○ deterministic narration'}</span>
+          <span className={'mono text-[10px] px-2 py-0.5 rounded ' + (memo.generated ? 'bg-pan text-white' : 'bg-gold/40 text-[#6B4E00] border border-gold')}>{memo.generated ? '✦ AI-generated' : '○ deterministic narration'}</span>
         </div>
         {typeof memo.tokens === 'number' && memo.tokens > 0 && <span className="mono text-[10px] text-faint">~{memo.tokens.toLocaleString()} tokens</span>}
       </div>
@@ -860,7 +862,7 @@ function DecisionMemo({ plan }) {
       </div>
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-3">
-          {chips.map(c => <span key={c} className="mono text-[10px] px-2 py-0.5 rounded bg-panel2 text-faint border border-line">grounded on: {c}</span>)}
+          {chips.map(c => <span key={c} className="mono text-[10px] px-2 py-0.5 rounded tint-blue text-cool">grounded on: {c}</span>)}
         </div>
       )}
     </div>
@@ -969,7 +971,7 @@ function Planner({ d, live, onPick }) {
           <div className="flex flex-wrap gap-1.5 mb-3">
             {candidates.map(s => (
               <button key={s} onClick={() => toggle(s)} disabled={!live}
-                className={'mono text-[11px] px-2 py-1 rounded border ' + (selected.includes(s) ? 'border-pan text-pan bg-pan/10' : 'border-line text-dim hover:text-txt') + (!live ? ' opacity-60' : '')}>
+                className={'mono text-[11px] px-2 py-1 rounded border ' + (selected.includes(s) ? 'border-pan text-pan bg-pan/10' : 'border-[#D9D3C7] bg-white text-dim shadow-sm hover:text-txt hover:border-pan/60 hover:bg-gold/10') + (!live ? ' opacity-60' : '')}>
                 {s}{exclBy[s] != null ? ` ·${exclBy[s]}` : ''}
               </button>
             ))}
@@ -1060,7 +1062,7 @@ function BlockComparison({ plan, onPick }) {
       <div className="text-xs text-dim mb-3 max-w-3xl">The FAQ's “block A vs block B” at the set level. Each column tokenizes a different candidate set and reports the benefit. Note the <b>conduit</b> set frees far fewer systems despite high traffic — tokenizing high-betweenness relays does little, because they are pass-throughs, not true sources. Benefit comes from tokenizing true sources.</div>
       <div className="grid md:grid-cols-3 gap-3">
         {entries.map(([label, v], i) => (
-          <div key={i} className="bg-panel2 rounded-xl p-4 border border-line">
+          <div key={i} className={(['tint-green', 'tint-blue', 'tint-red'][i] || 'bg-panel2') + ' rounded-xl p-4'}>
             <div className="text-sm font-semibold text-txt mb-1">{label}</div>
             <div className="flex flex-wrap gap-1 mb-3">
               {(v.tokenize || []).map(s => <button key={s} onClick={() => onPick && onPick(s)} className="mono text-[11px] px-1.5 py-0.5 rounded bg-pan/10 text-pan hover:bg-pan/20">{s}</button>)}
@@ -1294,7 +1296,7 @@ function Methods({ d, onPick }) {
     ['Card-data safety', 'Luhn check on Luhn-valid synthetic data; first-6/last-4 masking', 'Luhn 1954; PCI-DSS', 'Masking enforced on ingest; an unmasked PAN fails the run. No real card data is ever stored, logged, or displayed.'],
   ]
   const Stat = ({ v, l, sub, c = 'text-pan' }) => (
-    <div className="bg-panel2 rounded-xl p-4">
+    <div className={({ 'text-pan': 'tint-red', 'text-panhot': 'tint-red', 'text-cool': 'tint-blue', 'text-safe': 'tint-green' }[c] || 'bg-panel2') + ' rounded-xl p-4'}>
       <div className={'disp text-3xl font-black ' + c}>{v}</div>
       <div className="text-xs text-txt mt-1">{l}</div>
       {sub && <div className="text-[11px] text-faint mt-0.5">{sub}</div>}
@@ -1315,7 +1317,7 @@ function Methods({ d, onPick }) {
       </div>
 
       <div className="card p-0 overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm colgrid">
           <thead><tr className="text-left text-[11px] uppercase tracking-wider text-faint bg-panel2">
             <th className="px-4 py-2.5">Capability</th><th className="px-4 py-2.5">Algorithm / solver</th>
             <th className="px-4 py-2.5">Citation</th><th className="px-4 py-2.5">Why</th></tr></thead>
@@ -1373,20 +1375,20 @@ function ChatPanel({ suggested, live, threadId, height = 400 }) {
         {msgs.length === 0 && <div className="text-xs text-faint mb-1">Pick a suggested question below, or type your own.</div>}
         {msgs.map((m, i) => (
           <div key={i} className={'max-w-[88%] ' + (m.role === 'user' ? 'ml-auto' : '')}>
-            <div className={'rounded-xl px-3 py-2 text-sm ' + (m.role === 'user' ? 'bg-pan/15 text-txt' : 'bg-panel2 text-dim')}>{m.content}</div>
-            {m.grounded && m.grounded.length > 0 && <div className="flex flex-wrap gap-1 mt-1">{m.grounded.slice(0, 8).map((gx, j) => <span key={j} className="mono text-[10px] px-1.5 py-0.5 rounded bg-line text-faint">{gx}</span>)}</div>}
+            <div className={'rounded-xl px-3 py-2 text-sm ' + (m.role === 'user' ? 'bg-pan/15 text-txt' : 'text-dim border border-[#ECDCA8] bg-[#FFFDF4]')}>{m.content}</div>
+            {m.grounded && m.grounded.length > 0 && <div className="flex flex-wrap gap-1 mt-1">{m.grounded.slice(0, 8).map((gx, j) => <span key={j} className="mono text-[10px] px-1.5 py-0.5 rounded tint-blue text-cool">{gx}</span>)}</div>}
           </div>
         ))}
         {busy && <div className="text-xs text-faint mono">analyst is thinking…</div>}
         <div ref={endRef} />
       </div>
       <div className="flex flex-wrap gap-1.5 mt-2">
-        {(suggested || []).slice(0, 5).map((s, i) => <button key={i} onClick={() => send(s)} className="text-left text-[11px] px-2.5 py-1 rounded-full border border-line text-dim hover:border-pan hover:text-pan">{s}</button>)}
+        {(suggested || []).slice(0, 5).map((s, i) => <button key={i} onClick={() => send(s)} className="text-left text-[11px] px-2.5 py-1 rounded-full border border-[#D9D3C7] bg-white text-dim hover:border-pan hover:text-pan hover:bg-gold/10 transition">{s}</button>)}
       </div>
       <div className="flex gap-2 mt-2">
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
           placeholder="ask about scope, heavy hitters, a system ID, tokenization impact…"
-          className="flex-1 bg-panel2 border border-line rounded-lg px-3 py-2 text-sm text-txt" />
+          className="flex-1 bg-white border border-[#D9D3C7] rounded-lg px-3 py-2 text-sm text-txt outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
         <button onClick={() => send()} disabled={busy} className="mono text-xs px-4 rounded-lg bg-pan text-ink font-semibold disabled:opacity-50">send</button>
       </div>
     </div>
@@ -1538,7 +1540,7 @@ function BlastRadius({ d, onPick }) {
   const copy = async () => { try { await navigator.clipboard.writeText(report); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch (e) {} }
 
   const Card = ({ r, color, tag }) => r ? (
-    <div className="bg-panel2 rounded-xl p-4 border border-line flex-1 min-w-[240px]">
+    <div className={(tag && tag.startsWith('A') ? 'tint-red' : 'tint-blue') + ' rounded-xl p-4 flex-1 min-w-[240px]'}>
       <div className="flex items-center gap-2 mb-2">
         <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
         <button onClick={() => onPick(r.system)} className="mono text-sm font-bold hover:underline" style={{ color }}>{r.system}</button>
@@ -1612,8 +1614,8 @@ function BlastRadius({ d, onPick }) {
             </p>
           </div>
           <div className="flex flex-col gap-1.5 shrink-0">
-            <button onClick={downloadCSV} className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2 whitespace-nowrap">↓ report (CSV)</button>
-            <button onClick={downloadMD} className="mono text-[11px] px-3 py-1.5 rounded border border-line text-safe hover:bg-panel2 whitespace-nowrap">↓ report (.md)</button>
+            <button onClick={downloadCSV} className="mono text-[11px] px-3 py-1.5 rounded-lg border border-safe/40 bg-white text-safe shadow-sm hover:bg-safe/10 whitespace-nowrap transition">↓ report (CSV)</button>
+            <button onClick={downloadMD} className="mono text-[11px] px-3 py-1.5 rounded-lg border border-safe/40 bg-white text-safe shadow-sm hover:bg-safe/10 whitespace-nowrap transition">↓ report (.md)</button>
           </div>
         </div>
       </div>
@@ -1691,7 +1693,7 @@ function VerdictBanner({ d, onTab, onPick }) {
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="disp font-black text-3xl text-panhot">{fmt(h.hidden_pci_systems_bam_misses)}</span>
         <span className="text-txt text-base">systems are handling clear card numbers that BAM never flagged as PCI.</span>
-        <button onClick={() => onTab('hidden')} className="mono text-[11px] px-2 py-0.5 rounded border border-panhot/40 text-panhot hover:bg-panhot/10 ml-1">see the evidence →</button>
+        <button onClick={() => onTab('hidden')} className="mono text-[11px] px-2.5 py-1 rounded-lg bg-panhot text-white font-semibold shadow-sm hover:brightness-110 ml-1 transition">see the evidence →</button>
       </div>
       <div className="text-sm text-dim mt-1.5 leading-relaxed">
         {fmt(h.systems_exposed_to_clear_pan)} systems sit in PCI scope ({h.scope_metadata_confirmed} confirmed · {h.scope_inferred_only} inferred).
@@ -1771,11 +1773,11 @@ function HiddenScope({ d, onPick }) {
       <div className="card p-5">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
           <div className="disp font-bold">Evidence ledger <span className="text-faint text-xs font-normal">— every miss, with its Splunk proof</span></div>
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="filter id or name…" className="bg-panel2 border border-line rounded-lg px-3 py-1.5 text-sm mono text-txt w-56" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="filter id or name…" className="field-ivory border rounded-lg px-3 py-1.5 text-sm mono text-txt w-56 outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
         </div>
         <div className="scroll overflow-auto max-h-[460px]">
-          <table className="dt w-full text-sm">
-            <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+          <table className="dt zt w-full text-sm">
+            <thead><tr className="text-dim text-[11px] uppercase tracking-wider sticky top-0" style={{ background: '#FBF6E6' }}>
               <th>System</th><th title="Downstream systems it feeds PAN to">Propagates to</th>
               <th title="App's own stated origin of the PAN (DS6)">Stated source</th>
               <th>BAM flag</th><th title="What Splunk found in Sept–Dec logs">Splunk finding</th><th title="PCI DSS v4.0.1 requirement families this system should satisfy but does not">v4.0.1 gap</th></tr></thead>
@@ -1784,7 +1786,7 @@ function HiddenScope({ d, onPick }) {
                 <td className="text-panhot font-semibold">{x.system}<span className="text-faint text-[10px] ml-1.5">{(x.name || '').slice(0, 18)}</span></td>
                 <td className={x.downstream_reach > 0 ? 'text-pan' : 'text-faint'}>{x.downstream_reach || '—'}</td>
                 <td className="text-dim">{x.stated_source || '—'}</td>
-                <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-line text-dim">PCI = No</span></td>
+                <td><span className="text-[10px] px-1.5 py-0.5 rounded tint-blue text-cool font-semibold">PCI = No</span></td>
                 <td><span className="text-[10px] px-1.5 py-0.5 rounded bg-panhot/15 text-panhot">{x.finding || 'True PAN'}</span></td>
                 <td><ReqChips reqs={x.triggered_requirements} /></td>
               </tr>))}</tbody>
@@ -1872,7 +1874,6 @@ export default function App() {
   const [present, setPresent] = useState(false)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
-  const tabs = [['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']]
   const showBanner = !['pipeline'].includes(tab)
   return (
     <div className="min-h-full">
@@ -1885,8 +1886,8 @@ export default function App() {
             {error && <span onClick={clearError} title="dismiss" className="mono text-[11px] px-2 py-1 rounded bg-white text-pan font-semibold cursor-pointer max-w-[340px] truncate shadow-sm">⚠ {error}</span>}
             {src === 'live' && phase === 'done' && (
               <div className="flex items-center gap-1.5">
-                <a href="/api/report/pdf" className="mono text-[11px] px-3 py-1.5 rounded bg-white/15 text-white hover:bg-white/25" title="Executive PDF report">↓ PDF</a>
-                <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded bg-white/15 text-white hover:bg-white/25" title="XLSX data pack">↓ XLSX</a>
+                <a href="/api/report/pdf" className="mono text-[11px] px-3 py-1.5 rounded bg-white text-brandDeep font-semibold shadow-sm hover:bg-gold hover:text-txt transition" title="Executive PDF report">↓ PDF</a>
+                <a href="/api/report/xlsx" className="mono text-[11px] px-3 py-1.5 rounded bg-white text-brandDeep font-semibold shadow-sm hover:bg-gold hover:text-txt transition" title="XLSX data pack">↓ XLSX</a>
               </div>
             )}
             <button onClick={() => setPresent(true)} title="Guided walkthrough of the findings — judge mode"
@@ -1900,8 +1901,11 @@ export default function App() {
         </div>
       </div>
       <div className="max-w-[1280px] mx-auto px-5 py-5">
-      <nav className="flex gap-1 mb-5 bg-panel rounded-xl p-1 w-fit border border-line">
-        {tabs.map(([k, l]) => <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>)}
+      <nav className="flex gap-1 items-center mb-5 bg-panel rounded-xl p-1 w-fit border border-line shadow-sm">
+        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
+          <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-sm px-4 py-2 rounded-lg text-dim">{l}</button>
+          {['hidden', 'onboard', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
+        </React.Fragment>))}
       </nav>
       {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
@@ -1958,20 +1962,20 @@ function ScopeEconomics({ d }) {
         <div className="text-[11px] text-faint">all figures are labeled estimates · see assumptions</div>
       </div>
       <div className="flex items-end gap-3 mt-3 flex-wrap">
-        <div className="bg-panel2 rounded-lg px-4 py-3">
+        <div className="tint-red rounded-lg px-4 py-3">
           <div className="disp text-3xl font-black text-pan">{fmt(e.in_scope_now)}</div>
           <div className="text-[11px] text-dim">in PCI scope now (CDE)</div>
         </div>
         <div className="disp text-2xl text-faint pb-3">→</div>
-        <div className="bg-panel2 rounded-lg px-4 py-3">
+        <div className="tint-green rounded-lg px-4 py-3">
           <div className="disp text-3xl font-black text-safe">{fmt(e.achievable_floor)}</div>
           <div className="text-[11px] text-dim">achievable floor (full tokenization)</div>
         </div>
-        <div className="bg-panel2 rounded-lg px-4 py-3">
+        <div className="tint-blue rounded-lg px-4 py-3">
           <div className="disp text-3xl font-black text-cool">{fmt(e.removable)}</div>
           <div className="text-[11px] text-dim">systems removable from scope</div>
         </div>
-        <div className="bg-panel2 rounded-lg px-4 py-3">
+        <div className="tint-gold rounded-lg px-4 py-3">
           <div className="disp text-2xl font-black text-safe">~{money(e.cost_saving)}</div>
           <div className="text-[11px] text-dim">est. assessment saving ({e.effort_now?.qsa_days}→{e.effort_floor?.qsa_days} QSA-days)</div>
         </div>
@@ -2064,7 +2068,7 @@ function SegmentationCard({ d, onPick }) {
         removes its whole downstream branch from CDE scope. Segmentation is the other canonical
         scope-reduction lever besides tokenization.
       </div>
-      <table className="w-full text-sm">
+      <table className="w-full text-sm zt">
         <thead>
           <tr className="text-dim text-xs text-left border-b border-line">
             <th className="py-1">System</th><th>Branch isolated</th><th>Reach</th><th>Role</th>
@@ -2217,8 +2221,8 @@ function InputFidelity({ d }) {
   const q = d.quality || {}
   const g = d.graph_stats || {}
   if (!q.files_ingested) return null
-  const Stat = ({ v, l }) => (
-    <div className="bg-panel2 rounded-lg px-3 py-2 text-center">
+  const Stat = ({ v, l, tint }) => (
+    <div className={(tint || 'bg-panel2') + ' rounded-lg px-3 py-2 text-center'}>
       <div className="disp text-xl font-black text-txt">{fmt(v ?? '—')}</div>
       <div className="text-[10px] text-faint leading-tight">{l}</div>
     </div>
@@ -2231,8 +2235,8 @@ function InputFidelity({ d }) {
         <Stat v={q.edge_rows} l="dependency rows (DS1–3)" />
         <Stat v={q.bam_rows} l="BAM rows (DS4)" />
         <Stat v={(q.survey_rows || 0) + (q.splunk_rows || 0)} l="signal rows (DS5+DS6)" />
-        <Stat v={q.pan_cells_masked_on_ingest} l="PAN cells masked on ingest" />
-        <Stat v={g.unresolved_signals} l="signal tokens NOT invented" />
+        <Stat v={q.pan_cells_masked_on_ingest} l="PAN cells masked on ingest" tint="tint-gold" />
+        <Stat v={g.unresolved_signals} l="signal tokens NOT invented" tint="tint-blue" />
       </div>
       <div className="text-[11px] text-dim mt-3 leading-relaxed">
         {fmt(g.metadata_edges || 0)} authoritative edges deduplicated to {fmt(g.metadata_edges_deduped || 0)} distinct flows;
@@ -2309,7 +2313,7 @@ function NeighbourPicker({ d, label, picked, setPicked, hint }) {
           onChange={e => { setQ(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
           onKeyDown={e => { if (e.key === 'Enter' && matches[0]) add(matches[0].id); if (e.key === 'Escape') setOpen(false) }}
-          className="mono text-[11px] px-2 py-1.5 rounded border border-line bg-panel2 text-txt w-full outline-none focus:border-cool" />
+          className="mono text-[11px] px-2 py-1.5 rounded-lg border border-[#D9D3C7] bg-white text-txt w-full outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
         {open && matches.length > 0 && (
           <div className="absolute z-20 mt-1 w-full max-h-48 overflow-auto rounded border border-line bg-panel shadow-xl">
             {matches.map(m => (
@@ -2369,7 +2373,7 @@ function Onboarding({ d, live, onPick }) {
   const catLabel = c => c === 'cde' ? 'In scope (CDE)' : c === 'connected' ? 'Connected-to (in scope)' : 'Out of scope'
   const FlagBox = ({ k, label, warn }) => (
     <label className="flex items-center gap-2 text-xs text-dim cursor-pointer select-none">
-      <input type="checkbox" checked={flags[k]} onChange={e => setFlags({ ...flags, [k]: e.target.checked })} />
+      <input type="checkbox" className="accent-pan" checked={flags[k]} onChange={e => setFlags({ ...flags, [k]: e.target.checked })} />
       {label}{warn && flags[k] && <span className="text-[10px] text-panhot">{warn}</span>}
     </label>
   )
@@ -2396,11 +2400,11 @@ function Onboarding({ d, live, onPick }) {
       </div>
 
       <div className="grid lg:grid-cols-[380px_1fr] gap-5">
-        <div className="card p-5 space-y-4 self-start">
+        <div className="card p-5 space-y-4 self-start" style={{ background: '#FAF8F2' }}>
           <div>
             <div className="text-[11px] uppercase tracking-wider text-faint mb-1">Planned app id</div>
             <input value={appId} onChange={e => setAppId(e.target.value)}
-              className="mono text-sm px-2 py-1.5 rounded border border-line bg-panel2 text-txt w-44 outline-none focus:border-cool" />
+              className="mono text-sm px-2 py-1.5 rounded-lg border border-[#D9D3C7] bg-white text-txt w-44 outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
           </div>
           <NeighbourPicker d={d} label="Will consume data FROM (providers)" picked={providers} setPicked={setProviders}
             hint="upstream systems sending it data — these decide whether clear PAN reaches it" />
@@ -2415,7 +2419,7 @@ function Onboarding({ d, live, onPick }) {
             <FlagBox k="pin" label="PIN data" warn="→ permanent CDE" />
           </div>
           <button onClick={assess} disabled={!live || busy}
-            className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (!live || busy ? 'bg-line text-faint' : 'bg-pan text-ink hover:brightness-110')}>
+            className={'text-xs px-5 py-2 rounded-lg font-semibold ' + (!live || busy ? 'bg-panel2 text-faint border border-line' : 'bg-pan text-ink hover:brightness-110 shadow-sm')}>
             {busy ? 'assessing…' : 'Assess scope impact →'}</button>
           {!live && <div className="text-[11px] text-faint">Needs the live API — upload and run an analysis first; the assessment is computed against the live graph.</div>}
           {err && <div className="text-[11px] text-panhot">⚠ {err}</div>}
