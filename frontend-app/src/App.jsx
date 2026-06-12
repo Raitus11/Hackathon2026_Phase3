@@ -1984,7 +1984,7 @@ function HiddenScope({ d, onPick }) {
           program currently knows about. We use BAM's <i>current</i> flag, so anything BAM has since caught is excluded.
         </p>
       </div>
-      <ReconBars d={d} />
+      <ReconBars d={d} onPick={onPick} />
 
       <div className="flex flex-wrap gap-3">
         <KPI label="Hidden PCI — BAM misses" value={fmt(hid.hidden_pci_count)} sub="PCI=No in BAM · clear PAN in Splunk" tone="hot" delay={0}
@@ -2275,13 +2275,26 @@ function MigrationAdvisory({ d, onPick, onTab }) {
 /* ============================ BAM vs SPLUNK RECONCILIATION (the catalogue's blind spot, quantified) ============================ */
 /* Proportional set-comparison, scale-proof at 4,000+ apps: what the system of record
    DECLARES vs what the logs OBSERVE, and the union — the real PAN surface. */
-function ReconBars({ d }) {
+function ReconBars({ d, onPick }) {
   const hid = d.hidden || {}
   const declared = hid.declared_pan_systems_count || 0
   const hidden = hid.hidden_pci_count || 0
   const observed = useMemo(() => d.viz.nodes.filter(n => n.pan_in_logs_observed).length, [d])
   const overlap = Math.max(0, observed - hidden)      // observed in logs AND BAM already flags PCI
   const union = declared + hidden                      // the real PAN surface
+  const [seg, setSeg] = useState(null)                 // {title, tone, list:[node]} | null
+  const [q, setQ] = useState('')
+  const lists = useMemo(() => {
+    const ns = d.viz.nodes
+    const decl = ns.filter(n => n.carries_pan).sort((a, b) => (b.reach || 0) - (a.reach || 0))
+    const hidSet = new Set(hid.hidden_pci_systems || [])
+    const hidL = ns.filter(n => hidSet.has(n.id)).sort((a, b) => (b.reach || 0) - (a.reach || 0))
+    const obs = ns.filter(n => n.pan_in_logs_observed).sort((a, b) => (b.reach || 0) - (a.reach || 0))
+    const ovl = obs.filter(n => !hidSet.has(n.id))
+    return { decl, hidL, obs, ovl, union: [...decl, ...hidL] }
+  }, [d, hid])
+  const open = (title, tone, list) => { setQ(''); setSeg({ title, tone, list }) }
+  const shown = seg ? seg.list.filter(n => !q || n.id.toLowerCase().includes(q.toLowerCase()) || (n.name || '').toLowerCase().includes(q.toLowerCase())) : []
   if (!union) return null
   const covPct = Math.round(100 * declared / union)
   const W = 1080, BH = 34, GAP = 46, P = { l: 8, t: 26 }
@@ -2293,18 +2306,23 @@ function ReconBars({ d }) {
       <svg viewBox={`0 0 ${W} ${P.t + 3 * (BH + GAP)}`} className="w-full" style={{ maxHeight: 290 }}>
         {/* row 1 — BAM declared */}
         <text x={P.l} y={P.t - 8} fontSize="11" fontWeight="700" fill="#1F2329">BAM declares — PAN carriers in the catalogue</text>
-        <rect x={x(0)} y={P.t} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".85" />
+        <rect x={x(0)} y={P.t} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".85"
+          style={{ cursor: 'pointer' }} onClick={() => open('Declared in BAM — known PAN carriers', '#2563EB', lists.decl)}><title>click to list the {fmt(declared)} declared carriers</title></rect>
         <text x={x(declared) - 8} y={P.t + BH / 2 + 4} textAnchor="end" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(declared)}</text>
         {/* row 2 — Splunk observed */}
         <text x={P.l} y={P.t + BH + GAP - 8} fontSize="11" fontWeight="700" fill="#1F2329">Splunk observes — clear PAN actually in the logs</text>
-        <rect x={x(Math.max(0, declared - overlap))} y={P.t + BH + GAP} width={Math.max(2, x(observed) - x(0))} height={BH} rx="4" fill="#E8A33D" fillOpacity=".9" />
-        {hidden > 0 && <rect x={x(declared)} y={P.t + BH + GAP} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".95" />}
+        <rect x={x(Math.max(0, declared - overlap))} y={P.t + BH + GAP} width={Math.max(2, x(observed) - x(0))} height={BH} rx="4" fill="#E8A33D" fillOpacity=".9"
+          style={{ cursor: 'pointer' }} onClick={() => open('Observed in Splunk — clear PAN in the logs', '#E8A33D', lists.obs)}><title>click to list the {fmt(observed)} Splunk-observed systems</title></rect>
+        {hidden > 0 && <rect x={x(declared)} y={P.t + BH + GAP} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".95"
+          style={{ cursor: 'pointer' }} onClick={() => open('Hidden PCI — BAM never flagged, Splunk has the proof', '#8F0E1E', lists.hidL)}><title>click to list the {fmt(hidden)} hidden systems</title></rect>}
         {overlap > 0 && <text x={x(Math.max(0, declared - overlap)) + 8} y={P.t + BH + GAP + BH / 2 + 4} fontSize="11" fontWeight="700" fill="#1F2329">{fmt(overlap)} also in BAM ✓</text>}
         {hidden > 0 && <text x={x(declared) + (x(hidden) - x(0)) / 2} y={P.t + BH + GAP + BH / 2 + 4} textAnchor="middle" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(hidden)} BAM never flagged</text>}
         {/* row 3 — the real surface (union) */}
         <text x={P.l} y={P.t + 2 * (BH + GAP) - 8} fontSize="11" fontWeight="700" fill="#1F2329">The real clear-PAN surface — declared ∪ observed</text>
-        <rect x={x(0)} y={P.t + 2 * (BH + GAP)} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".55" />
-        <rect x={x(declared)} y={P.t + 2 * (BH + GAP)} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".9" />
+        <rect x={x(0)} y={P.t + 2 * (BH + GAP)} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".55"
+          style={{ cursor: 'pointer' }} onClick={() => open('The real clear-PAN surface — declared ∪ observed', '#5A6472', lists.union)}><title>click to list all {fmt(union)} systems on the real surface</title></rect>
+        <rect x={x(declared)} y={P.t + 2 * (BH + GAP)} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".9"
+          style={{ cursor: 'pointer' }} onClick={() => open('Hidden PCI — BAM never flagged, Splunk has the proof', '#8F0E1E', lists.hidL)}><title>click to list the {fmt(hidden)} hidden systems</title></rect>
         <text x={x(union) - 8} y={P.t + 2 * (BH + GAP) + BH / 2 + 4} textAnchor="end" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(union)}</text>
         {/* coverage bracket */}
         <line x1={x(0)} y1={P.t + 2 * (BH + GAP) + BH + 12} x2={x(declared)} y2={P.t + 2 * (BH + GAP) + BH + 12} stroke="#2563EB" strokeWidth="2" />
@@ -2312,7 +2330,34 @@ function ReconBars({ d }) {
         <line x1={x(declared)} y1={P.t + 2 * (BH + GAP) + BH + 12} x2={x(union)} y2={P.t + 2 * (BH + GAP) + BH + 12} stroke="#8F0E1E" strokeWidth="2" />
         <text x={x(declared + hidden / 2)} y={P.t + 2 * (BH + GAP) + BH + 26} textAnchor="middle" fontSize="10" fontWeight="700" fill="#8F0E1E">invisible {100 - covPct}%</text>
       </svg>
-      <div className="text-[11px] text-faint mt-1">Proportional to system counts, so it stays honest at any scale. The dark-red block is exactly the evidence ledger below — every system in it has its Splunk proof attached.</div>
+      <div className="text-[11px] text-faint mt-1">Proportional to system counts, so it stays honest at any scale. <b className="text-dim">Click any bar segment to list its systems.</b> The dark-red block is exactly the evidence ledger below — every system in it has its Splunk proof attached.</div>
+
+      {seg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(31,35,41,.45)' }} onClick={() => setSeg(null)}>
+          <div className="card p-5 w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm" style={{ background: seg.tone }} />
+              <span className="disp font-bold text-base text-txt">{seg.title}</span>
+              <span className="mono text-[11px] text-faint">({fmt(seg.list.length)})</span>
+              <button onClick={() => setSeg(null)} className="ml-auto text-faint hover:text-txt text-lg leading-none">✕</button>
+            </div>
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="filter id or name…" autoFocus
+              className="field-ivory border rounded-lg px-3 py-1.5 text-sm mono text-txt w-full mt-3 outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
+            <div className="scroll overflow-auto max-h-80 mt-2 grid grid-cols-2 gap-1.5">
+              {shown.slice(0, 200).map(n => (
+                <button key={n.id} onClick={() => { onPick && onPick(n.id); setSeg(null) }}
+                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-line bg-white hover:border-pan/60 hover:bg-gold/10 text-left">
+                  <span className="mono text-xs text-txt font-semibold">{n.id}</span>
+                  <span className="mono text-[10px] text-faint">feeds {fmt(n.reach || 0)}</span>
+                </button>
+              ))}
+              {shown.length === 0 && <div className="text-xs text-faint col-span-2 py-3 text-center">no systems match the filter</div>}
+              {shown.length > 200 && <div className="text-[10px] text-faint col-span-2 text-center">showing first 200 — narrow with the filter</div>}
+            </div>
+            <div className="text-[10px] text-faint mt-2">sorted by downstream reach · click a system to open its full drill-down</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
