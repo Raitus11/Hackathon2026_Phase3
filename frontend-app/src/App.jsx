@@ -1984,6 +1984,7 @@ function HiddenScope({ d, onPick }) {
           program currently knows about. We use BAM's <i>current</i> flag, so anything BAM has since caught is excluded.
         </p>
       </div>
+      <ReconBars d={d} />
 
       <div className="flex flex-wrap gap-3">
         <KPI label="Hidden PCI — BAM misses" value={fmt(hid.hidden_pci_count)} sub="PCI=No in BAM · clear PAN in Splunk" tone="hot" delay={0}
@@ -2176,6 +2177,146 @@ function ExposureMap({ d, onPick }) {
   )
 }
 
+/* ============================ MIGRATION ADVISORY (decision support — execution out of scope) ============================ */
+/* The organizer FAQ (Tokenization Q8) defers actual migration to "separate activities";
+   this tab is therefore an ADVISORY sequence, not an execution plan — it tells the
+   program owner the order of work and who is in each wave, derived entirely from the
+   computed graph. Scale-aware: counts + ranked samples, never 4,000 rows on screen. */
+function MigrationAdvisory({ d, onPick, onTab }) {
+  const plan = d.plan || {}, imp = d.impact || {}, hid = d.hidden || {}, st = d.structure || {}
+  const steps = plan.steps || []
+  const curve = (plan.cumulative_curve || plan.saturation_curve?.curve || [])
+  const fb = plan.floor_breakdown || {}
+  const retainedList = imp.retained_via_detokenization || []
+  const inScope = useMemo(() => d.viz.nodes.filter(n => n.in_scope), [d])
+  const retainedSet = useMemo(() => new Set(retainedList), [retainedList])
+  const acceptCrn = useMemo(() => inScope.filter(n => !n.true_source && !retainedSet.has(n.id))
+    .sort((a, b) => (b.risk || 0) - (a.risk || 0)), [inScope, retainedSet])
+  const sources = useMemo(() => inScope.filter(n => n.true_source)
+    .sort((a, b) => (b.reach || 0) - (a.reach || 0)), [inScope])
+  const orderedSrc = useMemo(() => {
+    const fromPlan = steps.map(s => s.tokenize)
+    const rest = sources.map(n => n.id).filter(id => !fromPlan.includes(id))
+    return [...fromPlan, ...rest]
+  }, [steps, sources])
+  const hiddenDetail = hid.hidden_detail || []
+  const chokes = (st.segmentation_candidates || []).slice(0, 8)
+
+  const Chips = ({ ids, tone }) => (
+    <div className="flex flex-wrap gap-1 mt-2">
+      {ids.slice(0, 12).map(id => (
+        <button key={id} onClick={() => onPick(id)}
+          className={'mono text-[11px] px-1.5 py-0.5 rounded hover:brightness-95 ' + tone}>{id}</button>
+      ))}
+      {ids.length > 12 && <span className="text-[10px] text-faint self-center">+{fmt(ids.length - 12)} more</span>}
+    </div>
+  )
+  const Wave = ({ n, title, count, color, children }) => (
+    <div className="card p-4 flex-1 min-w-[260px]" style={{ borderTop: '3px solid ' + color }}>
+      <div className="flex items-baseline gap-2">
+        <span className="disp font-black text-lg" style={{ color }}>{n}</span>
+        <span className="disp font-bold text-sm text-txt">{title}</span>
+        <span className="mono text-[11px] text-faint ml-auto">{fmt(count)} systems</span>
+      </div>
+      {children}
+    </div>
+  )
+  return (
+    <div className="space-y-4">
+      <div className="card p-5 tint-gold">
+        <div className="disp font-bold text-lg">Migration advisory <span className="text-faint text-xs font-normal">— the order of work, derived from the graph</span></div>
+        <p className="text-sm text-dim mt-1 max-w-4xl leading-relaxed">
+          <b className="text-txt">Advisory only.</b> The organizers are explicit that executing tokenization — downstream CRN acceptance,
+          RISE/APG onboarding — is handled by <i>separate activities</i> outside this exercise. What the graph CAN decide, deterministically,
+          is the <b>sequence</b>: who converts first, who follows, and who is permanent scope. Every wave below is computed from the same
+          audited lineage as the rest of the analysis; nothing is invented.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-4">
+        <Wave n="W1" title="Tokenize the true sources" count={plan.true_source_count || sources.length} color="#D71E28">
+          <p className="text-xs text-dim mt-1.5 leading-relaxed">Convert PAN → CRN where card numbers <b>originate</b>, in optimizer order — earliest steps carry the most leverage. These systems remain in the CDE as the tokenization points.</p>
+          <Chips ids={orderedSrc} tone="bg-pan/10 text-pan" />
+          {steps.length > 0 && <div className="text-[10px] text-faint mt-2">first {steps.length} in certified order: {steps.map(s => s.tokenize).join(' → ')}</div>}
+        </Wave>
+        <Wave n="W2" title="Switch downstream to CRN" count={plan.descopable ?? acceptCrn.length} color="#0E7C4A">
+          <p className="text-xs text-dim mt-1.5 leading-relaxed">Once a system's <b>entire</b> source front emits CRN, it accepts tokens and <b>leaves PCI scope</b> — the clean-stream effect. Sequence inside the wave: highest-risk first (shown).</p>
+          <Chips ids={acceptCrn.map(n => n.id)} tone="bg-safe/10 text-safe" />
+        </Wave>
+        <Wave n="W3" title="Onboard RISE/APG de-tokenization" count={retainedList.length} color="#2563EB">
+          <p className="text-xs text-dim mt-1.5 leading-relaxed">These genuinely need the real card number. They stay inside the CDE <b>by design</b> and convert CRN → PAN only through the centralized RISE/APG services — permanent, controlled scope.</p>
+          <Chips ids={retainedList} tone="bg-cool/10 text-cool" />
+        </Wave>
+      </div>
+
+      <div className="flex flex-wrap gap-4">
+        <div className="card p-4 flex-1 min-w-[300px]" style={{ borderTop: '3px solid #8F0E1E' }}>
+          <div className="disp font-bold text-sm text-panhot">Parallel track — close the hidden scope first</div>
+          <p className="text-xs text-dim mt-1.5">The {fmt(hid.hidden_pci_count || 0)} systems BAM never flagged are unmanaged risk <i>today</i>, independent of any wave. Triage them before W1 budgets are set — each carries its Splunk evidence. <button onClick={() => onTab && onTab('hidden')} className="text-panhot hover:underline font-semibold">open the evidence ledger →</button></p>
+          <Chips ids={hiddenDetail.map(x => x.system)} tone="bg-panhot/10 text-panhot" />
+        </div>
+        <div className="card p-4 flex-1 min-w-[300px]" style={{ borderTop: '3px solid #0E7C4A' }}>
+          <div className="disp font-bold text-sm text-safe">Alternative lever — segmentation</div>
+          <p className="text-xs text-dim mt-1.5">Where tokenization is slow to land, network-isolating the PAN feed at a choke point removes its whole downstream branch from CDE scope — the other canonical lever, available per-branch at any time.</p>
+          <Chips ids={chokes.map(c => c.system || c)} tone="bg-safe/10 text-safe" />
+        </div>
+      </div>
+
+      <div className="card p-4 text-[11px] text-faint leading-relaxed">
+        Dependency rule the sequence encodes: a W2 system flips only when <b>all</b> of its true-source parents have completed W1
+        (conjunctive coverage — the saturation curve in the Planner shows exactly when the wave releases{curve.length ? '' : ''}).
+        W3 has no dependency on W1/W2 and can start immediately. Effort and ownership are deliberately NOT estimated here —
+        execution planning is out of this exercise's scope per the organizer FAQ.
+      </div>
+    </div>
+  )
+}
+
+/* ============================ BAM vs SPLUNK RECONCILIATION (the catalogue's blind spot, quantified) ============================ */
+/* Proportional set-comparison, scale-proof at 4,000+ apps: what the system of record
+   DECLARES vs what the logs OBSERVE, and the union — the real PAN surface. */
+function ReconBars({ d }) {
+  const hid = d.hidden || {}
+  const declared = hid.declared_pan_systems_count || 0
+  const hidden = hid.hidden_pci_count || 0
+  const observed = useMemo(() => d.viz.nodes.filter(n => n.pan_in_logs_observed).length, [d])
+  const overlap = Math.max(0, observed - hidden)      // observed in logs AND BAM already flags PCI
+  const union = declared + hidden                      // the real PAN surface
+  if (!union) return null
+  const covPct = Math.round(100 * declared / union)
+  const W = 1080, BH = 34, GAP = 46, P = { l: 8, t: 26 }
+  const x = v => P.l + (v / union) * (W - 2 * P.l)
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">What BAM declares vs what Splunk observes <span className="text-faint text-xs font-normal">— the catalogue's blind spot, measured</span></div>
+      <div className="text-xs text-dim mt-1 max-w-4xl">BAM is the system of record but it is self-reported. Splunk log evidence is the ground truth check. Lay the two over each other and the gap is the finding: <b className="text-txt">the catalogue sees {covPct}% of the real clear-PAN surface</b> — the missing {100 - covPct}% ({fmt(hidden)} systems) is scope no compliance program is tracking.</div>
+      <svg viewBox={`0 0 ${W} ${P.t + 3 * (BH + GAP)}`} className="w-full" style={{ maxHeight: 290 }}>
+        {/* row 1 — BAM declared */}
+        <text x={P.l} y={P.t - 8} fontSize="11" fontWeight="700" fill="#1F2329">BAM declares — PAN carriers in the catalogue</text>
+        <rect x={x(0)} y={P.t} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".85" />
+        <text x={x(declared) - 8} y={P.t + BH / 2 + 4} textAnchor="end" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(declared)}</text>
+        {/* row 2 — Splunk observed */}
+        <text x={P.l} y={P.t + BH + GAP - 8} fontSize="11" fontWeight="700" fill="#1F2329">Splunk observes — clear PAN actually in the logs</text>
+        <rect x={x(Math.max(0, declared - overlap))} y={P.t + BH + GAP} width={Math.max(2, x(observed) - x(0))} height={BH} rx="4" fill="#E8A33D" fillOpacity=".9" />
+        {hidden > 0 && <rect x={x(declared)} y={P.t + BH + GAP} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".95" />}
+        {overlap > 0 && <text x={x(Math.max(0, declared - overlap)) + 8} y={P.t + BH + GAP + BH / 2 + 4} fontSize="11" fontWeight="700" fill="#1F2329">{fmt(overlap)} also in BAM ✓</text>}
+        {hidden > 0 && <text x={x(declared) + (x(hidden) - x(0)) / 2} y={P.t + BH + GAP + BH / 2 + 4} textAnchor="middle" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(hidden)} BAM never flagged</text>}
+        {/* row 3 — the real surface (union) */}
+        <text x={P.l} y={P.t + 2 * (BH + GAP) - 8} fontSize="11" fontWeight="700" fill="#1F2329">The real clear-PAN surface — declared ∪ observed</text>
+        <rect x={x(0)} y={P.t + 2 * (BH + GAP)} width={x(declared) - x(0)} height={BH} rx="4" fill="#2563EB" fillOpacity=".55" />
+        <rect x={x(declared)} y={P.t + 2 * (BH + GAP)} width={x(hidden) - x(0)} height={BH} rx="4" fill="#8F0E1E" fillOpacity=".9" />
+        <text x={x(union) - 8} y={P.t + 2 * (BH + GAP) + BH / 2 + 4} textAnchor="end" fontSize="13" fontWeight="800" fill="#fff" className="disp">{fmt(union)}</text>
+        {/* coverage bracket */}
+        <line x1={x(0)} y1={P.t + 2 * (BH + GAP) + BH + 12} x2={x(declared)} y2={P.t + 2 * (BH + GAP) + BH + 12} stroke="#2563EB" strokeWidth="2" />
+        <text x={x(declared / 2)} y={P.t + 2 * (BH + GAP) + BH + 26} textAnchor="middle" fontSize="10" fontWeight="700" fill="#2563EB">catalogue coverage {covPct}%</text>
+        <line x1={x(declared)} y1={P.t + 2 * (BH + GAP) + BH + 12} x2={x(union)} y2={P.t + 2 * (BH + GAP) + BH + 12} stroke="#8F0E1E" strokeWidth="2" />
+        <text x={x(declared + hidden / 2)} y={P.t + 2 * (BH + GAP) + BH + 26} textAnchor="middle" fontSize="10" fontWeight="700" fill="#8F0E1E">invisible {100 - covPct}%</text>
+      </svg>
+      <div className="text-[11px] text-faint mt-1">Proportional to system counts, so it stays honest at any scale. The dark-red block is exactly the evidence ledger below — every system in it has its Splunk proof attached.</div>
+    </div>
+  )
+}
+
 /* ============================ PRESENT MODE (guided tour — communication axis) ============================ */
 function buildTourSteps(d) {
   const h = d.headline || {}, imp = d.impact || {}, plan = d.plan || {}, econ = d.economics || {}
@@ -2280,9 +2421,9 @@ export default function App() {
       </div>
       <div className="max-w-[1280px] mx-auto px-5 py-5">
       <nav className="flex gap-0.5 items-center mb-5 bg-panel rounded-xl p-1 w-full border border-line shadow-sm overflow-x-auto">
-        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['graph', 'Data-Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
+        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['roadmap', 'Roadmap'], ['graph', 'Data-Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
           <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-[13px] px-3.5 py-2 rounded-lg text-dim whitespace-nowrap">{l}</button>
-          {['hidden', 'onboard', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
+          {['hidden', 'roadmap', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
         </React.Fragment>))}
       </nav>
       {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
@@ -2295,6 +2436,7 @@ export default function App() {
       {tab === 'graph' && <GraphView d={d} selected={sel} onPick={setSel} />}
       {tab === 'graph' && sel && <div className="mt-4"><Drill d={d} selected={sel} onPick={setSel} /></div>}
       {tab === 'heatmap' && <ExposureMap d={d} onPick={pick} />}
+      {tab === 'roadmap' && <MigrationAdvisory d={d} onPick={pick} onTab={setTab} />}
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
       {tab === 'methods' && <Methods d={d} onPick={pick} />}
       {tab === 'ask' && <Ask suggested={suggested} live={src === 'live'} />}
