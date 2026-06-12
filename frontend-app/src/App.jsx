@@ -375,11 +375,195 @@ function Pipeline({ d, agents, phase, gate, uploading, suggested, onUpload, onAp
 
 
 /* ============================ OVERVIEW (expert) ============================ */
-function Overview({ d, onPick }) {
+/* "Every square is a system" — the unit chart a business reader parses in one glance.
+   In-scope systems colored by their fate under full true-source tokenization. At 4K
+   scale each square represents N systems (the legend says so). */
+function FateGrid({ d, onPick }) {
+  const plan = d.plan || {}
+  const before = plan.before ?? 0
+  const [sel, setSel] = useState(null)         // {color,label,systems:[node]} | null
+  const [one, setOne] = useState(null)         // a single node opened from a bucket
+  if (!before) return null
+  const fb = plan.floor_breakdown || {}
+  const green = plan.descopable ?? 0                                  // can leave scope
+  const red = fb.origins_in_scope ?? Math.max(0, before - green)      // stay as tokenization points
+  const blue = fb.always_cde_in_scope ?? 0                            // stay — RISE/APG
+
+  // Map squares to REAL systems so each one is inspectable. Counts stay the audited
+  // plan numbers (V-022); membership is derived from node flags and sliced to fit.
+  const byId = useMemo(() => Object.fromEntries(d.viz.nodes.map(n => [n.id, n])), [d])
+  const retained = new Set(((d.impact || {}).retained_via_detokenization) || [])
+  const inScope = useMemo(() => d.viz.nodes.filter(n => n.in_scope), [d])
+  const redList = inScope.filter(n => n.true_source).sort((a, b) => (b.reach || 0) - (a.reach || 0)).slice(0, red)
+  const blueList = [...retained].map(id => byId[id]).filter(Boolean).slice(0, blue)
+  const blueSet = new Set(blueList.map(n => n.id))
+  const greenList = inScope.filter(n => !n.true_source && !blueSet.has(n.id))
+    .sort((a, b) => (b.risk || 0) - (a.risk || 0)).slice(0, green)
+
+  const unit = Math.max(1, Math.ceil(before / 180))                   // ≤180 squares at any scale
+  const chunk = (arr, lbl, col) => {
+    const out = []
+    for (let i = 0; i < Math.round(arr.length / unit) || (arr.length && i === 0); i++)
+      out.push({ color: col, label: lbl, systems: arr.slice(i * unit, (i + 1) * unit) })
+    return out
+  }
+  const cells = [
+    ...chunk(greenList, 'Can leave PCI scope', '#0E7C4A'),
+    ...chunk(redList, 'Stays — tokenization point', '#D71E28'),
+    ...chunk(blueList, 'Stays — needs RISE/APG', '#2563EB'),
+  ]
+  const cols = 30, size = 13, gap = 3
+  const rowsN = Math.max(1, Math.ceil(cells.length / cols))
+  const W = cols * (size + gap), H = rowsN * (size + gap)
+  const pct = Math.round(100 * green / before)
+  const close = () => { setSel(null); setOne(null) }
+  const node = one || (sel && sel.systems.length === 1 ? sel.systems[0] : null)
+  const maxRisk = Math.max(1, ...inScope.map(n => n.risk || 0))
+  const maxReach = Math.max(1, ...inScope.map(n => n.reach || 0))
+  const fateOf = n => n.true_source ? ['Stays — tokenization point', '#D71E28',
+      'It originates clear PAN, so after tokenization it remains in the CDE as the conversion point — it still ingests real card numbers to turn them into tokens.']
+    : blueSet.has(n.id) ? ['Stays — needs RISE/APG', '#2563EB',
+      'It genuinely needs the real card number, so it stays in the CDE by design and de-tokenizes via the central RISE/APG services.']
+    : ['Can leave PCI scope', '#0E7C4A',
+      'Once every true PAN source feeding it emits tokens (CRN), this system only ever receives tokens — it drops out of the audit entirely (the clean-stream effect).']
+  const Bar = ({ v, max, color, label }) => (
+    <div className="mb-2">
+      <div className="flex justify-between text-[10px] text-faint mb-0.5"><span>{label}</span><span className="mono text-txt">{fmt(v ?? 0)}</span></div>
+      <div className="h-2 rounded-full bg-panel2 overflow-hidden"><div className="h-full rounded-full" style={{ width: Math.max(3, 100 * (v || 0) / max) + '%', background: color }} /></div>
+    </div>
+  )
+  return (
+    <div className="card p-5">
+      <div className="disp font-bold text-lg">Every square is a system in PCI scope today</div>
+      <div className="text-xs text-dim mb-3">{unit > 1 ? `Each square ≈ ${unit} systems. ` : ''}<b className="text-safe">Green leaves the audit</b> once the true PAN sources emit tokens (CRN) — {pct}% of today's scope. <b className="text-pan">Red stays</b> as the tokenization points themselves. <b className="text-cool">Blue stays</b> because it must de-tokenize via the central RISE/APG services. <b>Click any square to inspect it.</b></div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: 560 }}>
+        {cells.map((c, i) => (
+          <rect key={i} x={(i % cols) * (size + gap)} y={Math.floor(i / cols) * (size + gap)}
+            width={size} height={size} rx="2.5" fill={c.color} fillOpacity={c.color === '#0E7C4A' ? 0.85 : 0.8}
+            style={{ animation: `rise .4s ${Math.min(i * 6, 900)}ms cubic-bezier(.2,.8,.2,1) backwards`, cursor: c.systems.length ? 'pointer' : 'default' }}
+            onClick={() => c.systems.length && setSel(c)}>
+            <title>{c.systems.length ? c.systems.map(n => n.id).join(', ') + ' — ' + c.label + ' (click to inspect)' : c.label}</title>
+          </rect>
+        ))}
+      </svg>
+      <div className="flex flex-wrap gap-4 mt-3 text-[11px] text-dim">
+        {green > 0 && <span><i className="inline-block w-3 h-3 rounded-sm align-[-2px] mr-1.5" style={{ background: '#0E7C4A' }} />{fmt(green)} can leave PCI scope</span>}
+        {red > 0 && <span><i className="inline-block w-3 h-3 rounded-sm align-[-2px] mr-1.5" style={{ background: '#D71E28' }} />{fmt(red)} stay — tokenization points</span>}
+        {blue > 0 && <span><i className="inline-block w-3 h-3 rounded-sm align-[-2px] mr-1.5" style={{ background: '#2563EB' }} />{fmt(blue)} stay — need RISE/APG</span>}
+      </div>
+
+      {sel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(31,35,41,.45)' }} onClick={close}>
+          <div className="card p-5 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            {node ? (() => {
+              const [flabel, fcolor, fwhy] = fateOf(node)
+              return (
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="disp font-black text-2xl text-txt mono">{node.id}</span>
+                    <span className="mono text-[11px] px-2 py-0.5 rounded font-semibold text-white" style={{ background: fcolor }}>{flabel}</span>
+                    <button onClick={close} className="ml-auto text-faint hover:text-txt text-lg leading-none">✕</button>
+                  </div>
+                  {node.name && <div className="text-[11px] text-dim mt-0.5 truncate">{node.name}</div>}
+                  {node.lob && <div className="text-[10px] text-faint mt-0.5">Line of business: {node.lob}</div>}
+                  <p className="text-xs text-dim leading-relaxed mt-2">{fwhy}</p>
+                  <div className="mt-3">
+                    <Bar v={node.risk} max={maxRisk} color="#D71E28" label={`Risk score (estate max ${Math.round(maxRisk)})`} />
+                    <Bar v={node.reach} max={maxReach} color="#E8A33D" label="Systems it feeds card data to (downstream reach)" />
+                    <Bar v={node.tier} max={4} color="#2563EB" label="Data sensitivity tier (of 4)" />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2 text-[10px] text-dim">
+                    {node.hidden_pci && <span className="px-2 py-0.5 rounded tint-red text-panhot font-semibold">hidden PCI — BAM never flagged it</span>}
+                    {node.scope_prov === 'inferred' && <span className="px-2 py-0.5 rounded tint-gold">scope inferred from signals only</span>}
+                    {node.scope_prov === 'metadata' && <span className="px-2 py-0.5 rounded tint-green text-safe">scope confirmed by BAM metadata</span>}
+                  </div>
+                  <div className="mt-2"><ReqChips reqs={node.triggered_requirements} /></div>
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => { onPick && onPick(node.id); close() }}
+                      className="text-xs px-4 py-2 rounded-lg bg-pan text-white font-semibold hover:brightness-110">Full drill-down — lineage &amp; evidence →</button>
+                    {one && sel.systems.length > 1 && <button onClick={() => setOne(null)} className="text-xs px-3 py-2 rounded-lg border border-line text-dim hover:text-txt">← back to square</button>}
+                  </div>
+                </div>
+              )
+            })() : (
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="disp font-bold text-lg">{sel.systems.length} systems in this square</span>
+                  <span className="mono text-[11px] px-2 py-0.5 rounded font-semibold text-white" style={{ background: sel.color }}>{sel.label}</span>
+                  <button onClick={close} className="ml-auto text-faint hover:text-txt text-lg leading-none">✕</button>
+                </div>
+                <div className="text-[11px] text-faint mt-1 mb-2">Pick one to inspect — sorted by risk.</div>
+                <div className="scroll overflow-auto max-h-72 grid grid-cols-2 gap-1.5">
+                  {sel.systems.map(n => (
+                    <button key={n.id} onClick={() => setOne(n)} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-line bg-white hover:border-pan/60 hover:bg-gold/10 text-left">
+                      <span className="mono text-xs text-txt font-semibold">{n.id}</span>
+                      <span className="mono text-[10px] text-faint">risk {Math.round(n.risk || 0)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* Numbered, plain-English action list — what a steering committee writes down. */
+function NextActions({ d, onPick, onTab }) {
+  const plan = d.plan || {}, h = d.headline || {}, imp = d.impact || {}
+  const hh = Object.fromEntries((d.heavy_hitters || []).map(x => [x.system, x]))
+  const topMiss = ((d.hidden || {}).hidden_detail || [])[0]
+  const steps = (plan.steps || []).slice(0, 3)
+  const acts = []
+  if (steps.length) {
+    const names = steps.map(s => s.tokenize)
+    const reachSum = names.reduce((a, s) => a + (hh[s]?.downstream_reach || 0), 0)
+    acts.push({
+      n: 1, title: <>Tokenize {names.map((s, i) => <span key={s}><button onClick={() => onPick(s)} className="mono text-pan hover:underline font-bold">{s}</button>{i < names.length - 1 ? ', ' : ''}</span>)} first</>,
+      body: `The three highest-leverage sources. Together they feed clear card numbers to ${fmt(reachSum)} downstream connections; tokenizing them fully releases ${fmt(imp.nodes_descoped ?? steps[steps.length - 1].cumulative_descoped)} systems and removes a clear-PAN feed from ${fmt(imp.feeds_removed ?? 0)} more.`,
+    })
+  }
+  if (h.hidden_pci_systems_bam_misses) acts.push({
+    n: acts.length + 1, title: <>Investigate the <button onClick={() => onTab && onTab('hidden')} className="text-panhot hover:underline font-bold">{fmt(h.hidden_pci_systems_bam_misses)} hidden systems</button> BAM never flagged</>,
+    body: `They handle real card numbers with no PCI controls applied${topMiss ? ` — start with ${topMiss.system}, which passes the leaked data on to ${fmt(topMiss.downstream_reach)} further systems` : ''}. Each has its Splunk evidence attached.`,
+  })
+  if ((imp.retained_via_detokenization_count ?? 0) > 0) acts.push({
+    n: acts.length + 1, title: <>Plan RISE/APG onboarding for {fmt(imp.retained_via_detokenization_count)} systems</>,
+    body: 'They genuinely need the real card number, so they stay inside the CDE by design and de-tokenize through the central services — budget them as permanent scope, not failures.',
+  })
+  acts.push({
+    n: acts.length + 1, title: <>Drive scope from {fmt(plan.before)} to the {fmt(Math.max(0, (plan.before ?? 0) - (plan.descopable ?? 0)))}-system floor</>,
+    body: 'Full descope ramps as the source front is cleared — the saturation curve in the Planner shows the threshold. Every tokenization along the way removes real exposure immediately.',
+  })
+  return (
+    <div className="card p-5" style={{ borderTop: '3px solid #0E7C4A' }}>
+      <div className="disp font-bold text-lg">What to do next <span className="text-faint text-xs font-normal">— in plain language</span></div>
+      <div className="space-y-3 mt-3">
+        {acts.map(a => (
+          <div key={a.n} className="flex gap-3">
+            <span className="disp font-black text-lg text-safe shrink-0 w-7 h-7 rounded-full tint-green flex items-center justify-center">{a.n}</span>
+            <div>
+              <div className="text-sm font-semibold text-txt">{a.title}</div>
+              <div className="text-xs text-dim leading-relaxed mt-0.5">{a.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Overview({ d, onPick, onTab }) {
   const h = d.headline, imp = d.impact, dag = d.dag_stats || {}
   const before = imp.scope_before, after = imp.scope_after, maxv = Math.max(before, 1)
   return (
     <div className="space-y-5">
+      <div className="grid lg:grid-cols-2 gap-5">
+        <FateGrid d={d} onPick={onPick} />
+        <NextActions d={d} onPick={onPick} onTab={onTab} />
+      </div>
       <ScopeEconomics d={d} />
       <SankeyFlow d={d} onPick={onPick} />
       <CategoryBar d={d} />
@@ -1149,11 +1333,7 @@ function ScopeWaterfall({ d }) {
 
 function ScatterReachRisk({ d, onPick }) {
   const nodes = (d.viz?.nodes || []).filter(n => n.carries_pan || n.hidden_pci || (n.reach || 0) > 0)
-  const W = 560, H = 300, P = { l: 44, r: 16, t: 14, b: 36 }
-  // On a saturated estate, downstream reach is ~identical for every source (the dots
-  // collapse to one vertical line), so reach can't discriminate. Conduit centrality
-  // (betweenness) is the axis that separates the systems many PAN paths route THROUGH
-  // from ordinary carriers — the real prioritization signal here.
+  const W = 640, H = 330, P = { l: 44, r: 16, t: 26, b: 36 }
   const bx = n => n.betweenness || 0
   const maxX = Math.max(1e-9, ...nodes.map(bx))
   const maxY = Math.max(1, ...nodes.map(n => n.risk || 0))
@@ -1162,19 +1342,29 @@ function ScatterReachRisk({ d, onPick }) {
   const x = v => P.l + (v / maxX) * (W - P.l - P.r)
   const y = v => H - P.b - (v / maxY) * (H - P.t - P.b)
   const color = n => n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : '#2563EB'
+  // quadrant guides at half-scale; label the systems a reader should be able to name
+  const gx = x(maxX / 2), gy = y(maxY / 2)
+  const labelled = nodes.filter(n => bx(n) > maxX * 0.18 || (n.risk || 0) > maxY * 0.8 || hh.has(n.id))
+    .sort((a, b) => (bx(b) + (b.risk || 0) / maxY) - (bx(a) + (a.risk || 0) / maxY)).slice(0, 9)
+  const labelSet = new Set(labelled.map(n => n.id))
   return (
     <div className="card p-5">
-      <div className="disp font-bold">Prioritization quadrant <span className="text-faint text-xs font-normal">— conduit centrality × risk</span></div>
-      <div className="text-xs text-dim mb-2">Reach is saturated here (every source reaches ~the whole estate), so we plot <b>betweenness</b> — how many PAN paths route through a system — against risk. Upper-right = high-conduit <i>and</i> high-risk: the systems whose tokenization would sever the most PAN flow. <span className="text-pan">◯ ringed</span> = top distributor · <span className="text-safe">▢</span> = choke point (cut vertex).</div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 320 }}>
+      <div className="disp font-bold">Sources vs relays <span className="text-faint text-xs font-normal">— where tokenization pays, and where it doesn't</span></div>
+      <div className="text-xs text-dim mb-2">Horizontal = how much PAN traffic merely <b>routes through</b> a system (betweenness); vertical = composite risk. Systems to the <b>right are relays</b> — heavily trafficked, but tokenizing them frees nothing (proven in the block-set comparison: the top-conduit set descopes 0). They are <b className="text-safe">segmentation</b> candidates instead. The tokenization budget belongs to the <span className="text-pan">red true sources</span>, wherever they sit. <span className="text-safe">▢</span> = choke point (cut vertex).</div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 350 }}>
         {[0, 0.25, 0.5, 0.75, 1].map((f, i) => (
           <g key={i}>
             <line x1={P.l} x2={W - P.r} y1={y(f * maxY)} y2={y(f * maxY)} stroke="#E6E2DA" strokeWidth="0.5" />
             <text x={P.l - 6} y={y(f * maxY) + 3} textAnchor="end" fontSize="9" fill="#8B95A3">{Math.round(f * maxY)}</text>
           </g>
         ))}
+        {/* quadrant guides + corner captions */}
+        <line x1={gx} x2={gx} y1={P.t} y2={H - P.b} stroke="#C9B870" strokeWidth="0.8" strokeDasharray="4 3" />
+        <line x1={P.l} x2={W - P.r} y1={gy} y2={gy} stroke="#C9B870" strokeWidth="0.8" strokeDasharray="4 3" />
+        <text x={W - P.r - 4} y={P.t + 10} textAnchor="end" fontSize="9" fontWeight="700" fill="#0E7C4A">high-traffic relay → segment here</text>
+        <text x={P.l + 4} y={P.t + 10} fontSize="9" fontWeight="700" fill="#D71E28">high-risk holder → tokenize at its sources</text>
         <text x={P.l - 30} y={P.t + 6} fontSize="9" fill="#5A6472" transform={`rotate(-90 ${P.l - 30} ${H / 2})`}>risk score</text>
-        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#5A6472">betweenness (conduit centrality) →</text>
+        <text x={(W) / 2} y={H - 6} textAnchor="middle" fontSize="9" fill="#5A6472">PAN traffic routed THROUGH the system (betweenness) →</text>
         {nodes.map((n, i) => {
           const isChoke = chokes.has(n.id)
           const r = hh.has(n.id) ? 7 : 3.6
@@ -1189,6 +1379,10 @@ function ScatterReachRisk({ d, onPick }) {
             <title>{n.id} · betweenness {(+bx(n)).toFixed(3)} · risk {n.risk}</title>
           </circle>
         })}
+        {labelled.map((n, i) => (
+          <text key={'lb' + i} x={x(bx(n)) + 9} y={y(n.risk || 0) + 3} fontSize="9" fontWeight="600"
+            fill={color(n)} className="mono" style={{ pointerEvents: 'none' }}>{n.id}</text>
+        ))}
       </svg>
     </div>
   )
@@ -1909,7 +2103,7 @@ export default function App() {
       </nav>
       {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
-      {tab === 'overview' && <Overview d={d} onPick={pick} />}
+      {tab === 'overview' && <Overview d={d} onPick={pick} onTab={setTab} />}
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
       {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}

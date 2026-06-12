@@ -237,6 +237,48 @@ def build_pdf(result, art, scores, plan: dict) -> bytes:
                        f"<b>{br.get('inferred_only')}</b> are inferred-only candidate scope from survey/Splunk "
                        f"signals (kept separate, never treated as ground truth).", small))
 
+    # ---------------------------------------------------------------- what to do next (BA-first)
+    # Numbered, plain-language actions a steering committee writes down — every figure
+    # comes from the computed plan/hidden/impact, mirroring the dashboard card.
+    try:
+        _plan = getattr(result, "plan", {}) or {}
+        _imp = getattr(result, "impact", {}) or {}
+        _hidd = getattr(result, "hidden", {}) or {}
+        _steps = (_plan.get("steps") or [])[:3]
+        _acts = []
+        if _steps:
+            _names = ", ".join(s["tokenize"] for s in _steps)
+            _acts.append(f"<b>Tokenize {_names} first.</b> The highest-leverage sources: together they "
+                         f"fully release <b>{_imp.get('nodes_descoped', 0)}</b> systems from PCI scope and "
+                         f"remove a clear-PAN feed from <b>{_imp.get('feeds_removed', 0)}</b> more.")
+        if _hidd.get("hidden_pci_count"):
+            _top = (_hidd.get("hidden_detail") or [{}])[0]
+            _acts.append(f"<b>Investigate the {_hidd['hidden_pci_count']} hidden systems BAM never flagged.</b> "
+                         f"They handle real card numbers with no PCI controls applied"
+                         + (f" — start with {_top.get('system')}, which passes the leaked data on to "
+                            f"{_top.get('downstream_reach', 0)} further systems." if _top.get("system") else "."))
+        if _imp.get("retained_via_detokenization_count"):
+            _acts.append(f"<b>Plan RISE/APG onboarding for {_imp['retained_via_detokenization_count']} systems.</b> "
+                         f"They genuinely need the real card number, stay inside the CDE by design, and "
+                         f"de-tokenize through the central services — permanent scope, not failures.")
+        _floor = max(0, (_plan.get("before") or 0) - (_plan.get("descopable") or 0))
+        _acts.append(f"<b>Drive scope from {_plan.get('before', 0)} to the {_floor}-system floor.</b> Full descope "
+                     f"ramps as the source front is cleared; every tokenization along the way removes real "
+                     f"exposure immediately.")
+        if _acts:
+            E.append(Paragraph("What to do next — in plain language", h2))
+            for _i, _a in enumerate(_acts, 1):
+                E.append(Paragraph(f"<b>{_i}.</b>&nbsp;&nbsp;{_a}", body))
+            E.append(Spacer(1, 4))
+        _fg = report_charts.chart_fate_grid(_plan)
+        if _fg:
+            E.append(_rl(_fg, 170, 60))
+            E.append(_caption("Each square is a system in PCI scope today, colored by its fate under full "
+                              "true-source tokenization — same audited numbers as every other surface.", small))
+            E.append(Spacer(1, 4))
+    except Exception:
+        pass
+
     # ---------------------------------------------------------------- visual decision dashboard
     # Business-analyst figures: every chart answers one question and labels the number AND %.
     E.append(Paragraph("Decision dashboard", h2))

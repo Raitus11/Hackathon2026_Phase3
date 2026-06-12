@@ -238,3 +238,41 @@ def chart_source_exposure(plan: dict) -> io.BytesIO | None:
                   label="narrows exposure only")]
     ax.legend(handles=leg, loc="best", frameon=False, fontsize=7.6)
     return _save(fig)
+
+
+def chart_fate_grid(plan: dict) -> io.BytesIO | None:
+    """'Every square is a system in PCI scope today' — the unit chart a business
+    reader parses in one glance. Green leaves the audit under full true-source
+    tokenization; red stays as the tokenization points; blue stays via RISE/APG.
+    Mirrors the dashboard FateGrid (same V-022-guarded numbers)."""
+    before = (plan or {}).get("before") or 0
+    if not before:
+        return None
+    fb = plan.get("floor_breakdown") or {}
+    green = plan.get("descopable") or 0
+    red = fb.get("origins_in_scope", max(0, before - green))
+    blue = fb.get("always_cde_in_scope", 0)
+    unit = max(1, -(-before // 180))            # ceil; ≤180 squares at any scale
+    cells = ([SAFE] * round(green / unit) + [HOT] * round(red / unit)
+             + [COOL] * round(blue / unit))
+    cols = 30
+    rows = -(-len(cells) // cols)
+    fig, ax = _fig(7.4, 0.28 * rows + 0.9)
+    ax.grid(False)
+    for i, c in enumerate(cells):
+        x, y = i % cols, rows - 1 - i // cols
+        ax.add_patch(plt.Rectangle((x * 1.0, y * 1.0), 0.86, 0.86, color=c, alpha=0.9))
+    ax.set_xlim(-0.2, cols)
+    ax.set_ylim(-0.2, rows)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    legend = [f"{green:,} can leave PCI scope", f"{red:,} stay — tokenization points"]
+    handles = [plt.Rectangle((0, 0), 1, 1, color=SAFE), plt.Rectangle((0, 0), 1, 1, color=HOT)]
+    if blue:
+        legend.append(f"{blue:,} stay — need RISE/APG")
+        handles.append(plt.Rectangle((0, 0), 1, 1, color=COOL))
+    ax.legend(handles, legend, loc="upper center", bbox_to_anchor=(0.5, -0.02),
+              ncol=3, frameon=False, fontsize=8.5)
+    unit_txt = f" (each square ≈ {unit} systems)" if unit > 1 else ""
+    ax.set_title(f"Every square is a system in PCI scope today{unit_txt}")
+    return _save(fig)
