@@ -641,6 +641,126 @@ function Overview({ d, onPick, onTab }) {
 }
 
 /* ============================ GRAPH ============================ */
+
+/* Line-of-business aggregation — the scale-proof alternative to a 4,000-node hairball.
+   Collapse every system into its LOB; draw one node per business (area ∝ #systems) and
+   one weighted arrow per cross-LOB CLEAR-PAN flow. The picture answers an exec question
+   the blob can't: where does clear cardholder data cross business boundaries, and which
+   org owns the most of it. Intra-LOB flow is omitted (it's not a boundary risk). Counts
+   only — never 4,000 dots. Click a cluster to drill into its highest-reach system. */
+
+const UNREC = '(LOB not recorded)'
+
+function LobBundle({ d, onPick }) {
+  const ref = useRef()
+  const { nodes, links, maxSys } = useMemo(() => {
+    const byId = new Map(d.viz.nodes.map(n => [n.id, n]))
+    const lobOf = n => n.lob || UNREC
+    const groups = new Map()
+    for (const n of d.viz.nodes) {
+      const k = lobOf(n)
+      if (!groups.has(k)) groups.set(k, { id: k, systems: 0, in_scope: 0, hidden: 0, carriers: 0, top: null, topReach: -1 })
+      const g = groups.get(k)
+      g.systems++; if (n.in_scope) g.in_scope++; if (n.hidden_pci) g.hidden++
+      if (n.carries_pan || n.true_source) g.carriers++
+      if ((n.reach || 0) > g.topReach) { g.topReach = n.reach || 0; g.top = n.id }
+    }
+    const lk = new Map()
+    for (const e of d.viz.edges) {
+      const s = byId.get(eid(e.source)), t = byId.get(eid(e.target))
+      if (!s || !t) continue
+      const sl = lobOf(s), tl = lobOf(t)
+      if (sl === tl) continue
+      if (!(s.carries_pan || s.true_source || s.hidden_pci)) continue
+      const key = sl + '\u0001' + tl
+      if (!lk.has(key)) lk.set(key, { count: 0, srcs: new Map() })
+      const rec = lk.get(key); rec.count++
+      rec.srcs.set(s.id, Math.max(rec.srcs.get(s.id) || 0, s.reach || 0))
+    }
+    const nodes = [...groups.values()]
+    const links = [...lk.entries()].map(([k, v]) => {
+      const [source, target] = k.split('\u0001')
+      const srcs = [...v.srcs.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0])
+      return { source, target, count: v.count, srcs }
+    })
+    // unclassified systems shouldn't set the size scale — measure against real LOBs
+    const real = nodes.filter(n => n.id !== UNREC)
+    return { nodes, links, maxSys: Math.max(1, ...(real.length ? real : nodes).map(n => n.systems)) }
+  }, [d])
+
+  useEffect(() => {
+    if (!ref.current) return
+    const W = ref.current.clientWidth, H = 560
+    const isUnrec = n => n.id === UNREC
+    // real LOBs scale by systems; the unclassified bucket is capped + parked so it never dominates
+    const rad = g => isUnrec(g) ? 16 : 12 + 34 * Math.sqrt(Math.min(1, g.systems / maxSys))
+    const svg = d3.select(ref.current).html('').append('svg').attr('width', W).attr('height', H).attr('viewBox', [0, 0, W, H])
+    svg.append('defs').append('marker').attr('id', 'lobarrow').attr('viewBox', '0 -5 10 10').attr('refX', 22)
+      .attr('refY', 0).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#D71E28').attr('fill-opacity', 0.55)
+    const g = svg.append('g')
+    svg.call(d3.zoom().scaleExtent([.3, 4]).on('zoom', e => g.attr('transform', e.transform)))
+    const N = nodes.map(n => ({ ...n })), L = links.map(e => ({ ...e }))
+    // park the unclassified bucket in the bottom-left corner so the real estate reads centre-stage
+    const ur = N.find(isUnrec); if (ur) { ur.fx = 86; ur.fy = H - 70 }
+    const maxCount = Math.max(1, ...L.map(e => e.count))
+    const color = n => isUnrec(n) ? '#C7CDD6' : n.hidden > 0 ? '#8F0E1E' : n.carriers > 0 ? '#E8A33D' : n.in_scope > 0 ? '#2563EB' : '#9FB0A6'
+    const sim = d3.forceSimulation(N)
+      .force('link', d3.forceLink(L).id(x => x.id).distance(170).strength(.25))
+      .force('charge', d3.forceManyBody().strength(-700))
+      .force('center', d3.forceCenter(W / 2, H / 2 - 30))
+      .force('collide', d3.forceCollide().radius(n => rad(n) + 14))
+    const link = g.append('g').selectAll('path').data(L).join('path')
+      .attr('fill', 'none').attr('stroke', e => (eid(e.source) === UNREC || eid(e.target) === UNREC) ? '#9AA4B2' : '#D71E28')
+      .attr('stroke-opacity', e => (eid(e.source) === UNREC || eid(e.target) === UNREC) ? 0.2 : 0.18 + 0.5 * (e.count / maxCount))
+      .attr('stroke-width', e => 1 + 4 * (e.count / maxCount)).attr('marker-end', 'url(#lobarrow)')
+    link.append('title').text(e => `${eid(e.source)} → ${eid(e.target)}\n${e.count} clear-PAN flows cross this boundary`
+      + (e.srcs?.length ? `\nvia: ${e.srcs.slice(0, 6).join(', ')}${e.srcs.length > 6 ? ` +${e.srcs.length - 6} more` : ''}` : ''))
+    const node = g.append('g').selectAll('g').data(N).join('g').style('cursor', 'pointer')
+      .attr('opacity', n => isUnrec(n) ? 0.55 : 1)
+      .on('click', (e, n) => n.top && onPick && onPick(n.top))
+      .call(d3.drag()
+        .on('start', (e, n) => { if (!e.active) sim.alphaTarget(.3).restart(); n.fx = n.x; n.fy = n.y })
+        .on('drag', (e, n) => { n.fx = e.x; n.fy = e.y })
+        .on('end', (e, n) => { if (!e.active) sim.alphaTarget(0); if (!isUnrec(n)) { n.fx = null; n.fy = null } }))
+    node.append('circle').attr('r', rad).attr('fill', color).attr('fill-opacity', 0.9)
+      .attr('stroke', n => n.hidden > 0 ? '#8F0E1E' : '#FFFFFF').attr('stroke-width', n => n.hidden > 0 ? 3 : 1.5)
+      .attr('stroke-dasharray', n => isUnrec(n) ? '3 2' : null)
+    node.append('text').attr('text-anchor', 'middle').attr('dy', n => rad(n) + 12)
+      .attr('font-size', 10).attr('fill', n => isUnrec(n) ? '#8B95A3' : '#1F2329').attr('class', 'mono')
+      .text(n => isUnrec(n) ? 'unclassified' : (String(n.id).length > 22 ? String(n.id).slice(0, 21) + '…' : n.id))
+    node.append('text').attr('text-anchor', 'middle').attr('dy', 4).attr('font-size', 11)
+      .attr('font-weight', 700).attr('fill', n => isUnrec(n) ? '#5A6472' : '#FFFFFF').attr('class', 'mono')
+      .text(n => n.systems)
+    node.append('title').text(n => (isUnrec(n) ? `${fmt(n.systems)} systems with no line-of-business recorded in BAM (parked — not a real cluster)` : `${n.id}\n${fmt(n.systems)} systems · ${fmt(n.in_scope)} in PCI scope · ${fmt(n.carriers)} carry PAN · ${fmt(n.hidden)} hidden-PCI`) + (n.top ? `\nclick → drill into ${n.top}` : ''))
+    sim.on('tick', () => {
+      link.attr('d', e => {
+        const dx = e.target.x - e.source.x, dy = e.target.y - e.source.y, dr = Math.hypot(dx, dy) * 1.6
+        return `M${e.source.x},${e.source.y}A${dr},${dr} 0 0,1 ${e.target.x},${e.target.y}`
+      })
+      node.attr('transform', n => `translate(${n.x},${n.y})`)
+    })
+    return () => sim.stop()
+  }, [nodes, links, maxSys, onPick])
+
+  const realCount = nodes.filter(n => n.id !== UNREC).length
+  return (
+    <div>
+      <div className="px-2 text-[11px] text-dim mb-1">
+        Every system collapsed into its line of business — <b>area = systems in that LOB</b>, <b>red arrows = clear-PAN flows that cross a business boundary</b> (thickness = volume). {realCount} business clusters; systems with no LOB in BAM are parked, greyed, bottom-left. Drag to rearrange, scroll to zoom, click a cluster to drill into its highest-reach system.
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 text-[11px] text-dim items-center">
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#8F0E1E' }} />LOB with hidden PCI</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#E8A33D' }} />carries PAN</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2563EB' }} />in scope, no PAN of its own</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-faint/40" style={{ background: '#C7CDD6' }} />no LOB recorded (parked)</span>
+        <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#D71E28" strokeWidth="3" /></svg>cross-LOB clear-PAN flow</span>
+      </div>
+      <div ref={ref} style={{ width: '100%' }} />
+    </div>
+  )
+}
+
 function GraphView({ d, selected, onPick }) {
   const ref = useRef()
   const [mode, setMode] = useState('heavy')
@@ -656,6 +776,10 @@ function GraphView({ d, selected, onPick }) {
   const [query, setQuery] = useState('')
   const [openList, setOpenList] = useState(false)
   const heavyList = useMemo(() => d.heavy_hitters.map(h => h.system), [d])
+  // Apps the tokenization simulator works on = true PAN sources (cutting their clear-PAN
+  // feed is what the sim models). Top few by reach are the highest-signal one-click demos.
+  const simReady = useMemo(() => d.viz.nodes.filter(n => n.true_source)
+    .sort((a, b) => (b.reach || 0) - (a.reach || 0)).slice(0, 6), [d])
   const heavySet = useMemo(() => new Set(heavyList), [heavyList])
   const exclBySys = useMemo(() => Object.fromEntries(d.heavy_hitters.map(h => [h.system, h.exclusive_reach])), [d])
 
@@ -671,7 +795,9 @@ function GraphView({ d, selected, onPick }) {
   // LIVE TOKENIZATION SIMULATOR (the hackathon's core question, on the graph itself):
   // block clear PAN at this source -> which downstream systems benefit, live.
   const [simulate, setSimulate] = useState(false)
-  useEffect(() => { setSimulate(false) }, [focusId])
+  const wantSimRef = useRef(false)
+  useEffect(() => { setSimulate(wantSimRef.current); wantSimRef.current = false }, [focusId])
+  const focusAndSimulate = id => { wantSimRef.current = true; pickFocus(id) }
   const seRow = useMemo(() => {
     const ps = (d.plan?.source_exposure?.per_source) || []
     return focusId ? ps.find(r => r.system === focusId) : null
@@ -701,6 +827,8 @@ function GraphView({ d, selected, onPick }) {
 
   useEffect(() => {
     const focused = !!focusId
+    if (!focused && mode === 'lob') return   // LOB view renders its own component, not the force graph
+    if (!ref.current) return
     const f = focused ? focusGraphCapped(d.viz, focusId, hops, dir) : null
     const base = focused ? { N: f.N, L: f.L } : filterGraph(d.viz, mode, heavyList)
     const W = ref.current.clientWidth, H = 600
@@ -782,10 +910,11 @@ function GraphView({ d, selected, onPick }) {
       .attr('stroke-width', n => n.id === selected ? 3.5 : (heavySet.has(n.id) ? 2 : (n.hidden_pci ? 2 : 1)))
   }, [selected, heavySet])
 
-  const modes = [['pan', 'PAN flow only'], ['heavy', 'Heavy-hitter subgraph'], ['all', 'All systems']]
+  const modes = [['pan', 'PAN flow only'], ['heavy', 'Heavy-hitter subgraph'], ['all', 'All systems'], ['lob', 'By business (LOB)']]
   const modeHelp = { pan: 'Only the cardholder-data lineage: edges originating from a PAN-carrying system.',
     heavy: 'The top PAN distributors (by downstream reach) and their direct consumers (first hop) — the decision-relevant subgraph, not the full downstream blob.',
-    all: 'Every system and dependency. Hover a node to isolate its neighbourhood.' }
+    all: 'Every system and dependency. Hover a node to isolate its neighbourhood.',
+    lob: 'The estate aggregated by line of business — one cluster per LOB, red arrows where clear PAN crosses a business boundary. The scale-proof read of a 4,000-system map.' }
   const dirLabel = { down: 'downstream — systems it feeds clear PAN to', up: 'upstream — systems that feed PAN into it', both: 'both directions' }
   const hopLabel = h => h === Infinity ? 'full lineage' : h === 1 ? '1 hop' : h + ' hops'
   const focusHelp = focusNode
@@ -821,7 +950,7 @@ function GraphView({ d, selected, onPick }) {
                 <button key={m.id} onClick={() => pickFocus(m.id)}
                   className="block w-full text-left px-2 py-1 hover:bg-cool/10 border-b border-line/40 last:border-0">
                   <span className="mono text-[11px] text-txt">{m.id}</span>
-                  {m.true_source && <span className="mono text-[9px] text-pan ml-1">true-source</span>}
+                  {m.true_source && <span className="mono text-[9px] text-pan ml-1">⚡ simulate</span>}
                   {m.hidden_pci && <span className="mono text-[9px] text-panhot ml-1">hidden-PCI</span>}
                   <span className="block text-[10px] text-dim truncate">{m.name}</span>
                 </button>
@@ -845,7 +974,17 @@ function GraphView({ d, selected, onPick }) {
                 className={'mono text-[11px] px-2 py-1 rounded border ' + (hops === k ? 'border-cool text-cool bg-cool/10' : 'border-[#D9D3C7] bg-white text-dim shadow-sm hover:text-txt hover:border-pan/60 hover:bg-gold/10')}>{l}</button>)}
           </>
         )}
-        {!focusId && <span className="text-[11px] text-faint">pick an app to isolate its PAN neighbourhood — or keep the full view above</span>}
+        {!focusId && (
+          <span className="flex items-center gap-1.5 flex-wrap text-[11px] text-faint">
+            pick an app to isolate its neighbourhood, or jump straight into the
+            <span className="text-pan font-semibold">⚡ tokenization simulator:</span>
+            {simReady.map(n => (
+              <button key={n.id} onClick={() => focusAndSimulate(n.id)}
+                title={`focus ${n.id} and turn on the simulator — see who benefits when its clear-PAN feed is cut`}
+                className="mono text-[11px] px-2 py-0.5 rounded border border-pan/40 text-pan bg-pan/5 hover:bg-pan/15">⚡ {n.id}</button>
+            ))}
+          </span>
+        )}
       </div>
 
       {focusId && focusNode?.true_source && (
@@ -880,7 +1019,9 @@ function GraphView({ d, selected, onPick }) {
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#B45309" strokeWidth="2" strokeDasharray="4 3" /></svg>inferred →</span>
         <span className="ml-auto text-faint">arrow = PAN flow (provider→consumer) · hover = isolate · scroll = zoom</span>
       </div>
-      <div ref={ref} style={{ width: '100%' }} />
+      {(!focusId && mode === 'lob')
+        ? <LobBundle d={d} onPick={onPick} />
+        : <div ref={ref} style={{ width: '100%' }} />}
       {focusId && counts.n <= 1 && (
         <div className="mx-2 mb-2 -mt-2 px-3 py-2 rounded border border-line bg-panel2 text-[11px] text-dim">
           <span className="text-txt mono">{focusId}</span> has no {dir === 'up' ? 'PAN providers' : dir === 'down' ? 'downstream consumers' : 'PAN-flow neighbours'} in this direction.
