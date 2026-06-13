@@ -531,8 +531,37 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
     plan = {**(getattr(result, "plan", {}) or {}), **(plan or {})}
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.chart import BarChart, LineChart, PieChart, Reference
+    from openpyxl.utils import get_column_letter
 
     wb = Workbook()
+    ws_sc = None; ws_econ = None        # optional sheets; charts skip them if absent
+
+    def _polish(ws):
+        # Tabular sheets get auto-filter + sensible number formats so the pack stays
+        # usable at 4K rows. Key/value sheets (Metric|Value, Category|Systems) are left alone.
+        h0 = ws.cell(1, 1).value
+        if h0 in ("Metric", "Category / requirement family") or ws.max_row < 2:
+            return
+        ws.auto_filter.ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+        for ci in range(1, ws.max_column + 1):
+            hs = str(ws.cell(1, ci).value or "").lower()
+            if "%" in hs:
+                fmt = '0.0"%"'
+            elif "risk" in hs:
+                fmt = "0.00"
+            elif any(k in hs for k in ("reach", "systems", "descoped", "feeds remov", "parent",
+                                       "edges", "budget", "reduction", "branch", "known",
+                                       "carriers", "hidden", "gap", "protects", "out-degree",
+                                       "scope after", "marginal", "min edges")):
+                fmt = "#,##0"
+            else:
+                continue
+            col = get_column_letter(ci)
+            for r in range(2, ws.max_row + 1):
+                c = ws[f"{col}{r}"]
+                if isinstance(c.value, (int, float)) and not isinstance(c.value, bool):
+                    c.number_format = fmt
     hdr_fill = PatternFill("solid", fgColor="0F1622")
     hdr_font = Font(color="FFFFFF", bold=True, size=10)
 
@@ -585,11 +614,13 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
           [12, 8, 14, 16, 12, 10, 18, 16, 30, 11, 12])
 
     # Heavy hitters
-    sheet(wb.create_sheet("HeavyHitters"),
+    ws_hh = wb.create_sheet("HeavyHitters")
+    sheet(ws_hh,
           ["System", "Downstream reach", "Solo descope", "Out-degree", "Risk"],
           [[h["system"], h["downstream_reach"], h.get("solo_descope", h.get("exclusive_reach", 0)),
             h.get("out_degree"), h["risk"]]
            for h in result.heavy_hitters], [12, 16, 14, 12, 8])
+    hh_n = len(result.heavy_hitters)
 
     # Hidden PCI — full evidence ledger (BAM miss + Splunk proof + propagation)
     hd = hidden.get("hidden_detail")
@@ -619,26 +650,31 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
     # Tokenization plan — cumulative descope curve (always populated, even when the
     # greedy full-descope plan halts at 0; an empty sheet reads as 'didn't finish').
     curve = plan.get("cumulative_curve") or []
+    ws_tp = wb.create_sheet("TokenizationPlan"); tp_curve = bool(curve)
     if curve:
-        sheet(wb.create_sheet("TokenizationPlan"),
+        sheet(ws_tp,
               ["k", "Tokenize source", "Marginal descoped", "Cumulative descoped",
                "Cumulative feeds removed"],
               [[c["k"], c["last_source"], c["marginal_descoped"], c["cumulative_descoped"],
                 c["cumulative_feeds_removed"]] for c in curve],
               [6, 18, 18, 20, 24])
+        tp_n = len(curve)
     else:
-        sheet(wb.create_sheet("TokenizationPlan"),
+        steps = plan.get("steps", [])
+        sheet(ws_tp,
               ["Step", "Tokenize source", "Marginal descoped", "Cumulative descoped", "Scope after", "% of descopable"],
               [[s["step"], s["tokenize"], s["marginal_descoped"], s["cumulative_descoped"],
-                s["scope_after"], s["pct_of_descopable"]] for s in plan.get("steps", [])],
+                s["scope_after"], s["pct_of_descopable"]] for s in steps],
               [8, 16, 18, 20, 12, 16])
+        tp_n = len(steps)
 
     # Source exposure — per-true-source block-this/measure-the-benefit table (§3),
     # now with % of scope and the NAMES of fully-freed systems (the block-A-benefits
     # report). Non-zero even when full descope is 0: feeds_removed = solo + parent_red.
     exp = analytics.source_exposure_impact(art.G, art.pan_sources, scores, top_k=50)
     scope_before = max(1, exp.get("scope_before", 1))
-    sheet(wb.create_sheet("SourceExposure"),
+    ws_se = wb.create_sheet("SourceExposure")
+    sheet(ws_se,
           ["True source", "Downstream reach", "Solo descope (fully freed)",
            "Feeds removed", "% of scope (feed)", "Parent-count reduction", "Risk",
            "Fully-freed systems (names)"],
@@ -648,6 +684,7 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
             ", ".join(row.get("solo_systems", []))]
            for row in exp.get("per_source", [])],
           [14, 16, 22, 14, 16, 22, 8, 48])
+    se_n = len(exp.get("per_source", []))
 
     # Optimization — certified-optimal vs greedy descope frontier (exact solver)
     opt = plan.get("optimization") or {}
@@ -680,7 +717,8 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
     econ = getattr(result, "economics", {}) or {}
     if econ.get("in_scope_now"):
         ass = econ.get("assumptions", {})
-        sheet(wb.create_sheet("Economics"), ["Metric", "Value"], [
+        ws_econ = wb.create_sheet("Economics")
+        sheet(ws_econ, ["Metric", "Value"], [
             ["In PCI scope now (CDE)", econ["in_scope_now"]],
             ["Achievable floor (full tokenization)", econ["achievable_floor"]],
             ["Systems removable from scope", econ["removable"]],
@@ -707,7 +745,8 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
                  ["Out of scope", c.get("out", 0)], ["", ""]]
         for k, v in sorted(fc.items(), key=lambda kv: -kv[1]):
             crows.append([labels.get(k, k), v])
-        sheet(wb.create_sheet("ScopeCategories"), ["Category / requirement family", "Systems"],
+        ws_sc = wb.create_sheet("ScopeCategories")
+        sheet(ws_sc, ["Category / requirement family", "Systems"],
               crows, [56, 12])
 
     # Segmentation — articulation choke points and the branch each would isolate
@@ -718,6 +757,142 @@ def build_xlsx(result, art, scores, plan: dict) -> bytes:
               [[s["system"], s["branch_size"], s.get("downstream_reach", 0), s.get("risk", 0),
                 "true source" if s.get("is_true_source") else "relay"] for s in seg],
               [14, 16, 18, 10, 14])
+
+    for ws in wb.worksheets:
+        _polish(ws)
+
+    # Notes — methodology, glossary, honesty statement and algorithm citations, mirroring
+    # the PDF/UI so the pack is self-explaining and auditable on its own.
+    notes = wb.create_sheet("Notes")
+    notes.column_dimensions["A"].width = 120
+    _nl = [
+        ("PCI-SENTINEL — methodology & reading notes", True, 14),
+        ("", False, 10),
+        ("WHAT THIS PACK CLAIMS", True, 11),
+        ("Current-state PCI data-flow lineage from BAM (authoritative) plus Splunk and survey "
+         "signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation "
+         "and a reproducible, explainable risk model.", False, 10),
+        ("WHAT IT DOES NOT CLAIM", True, 11),
+        ("It does not remediate controls, assert business need, or treat inferred signals as "
+         "ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails "
+         "the run.", False, 10),
+        ("", False, 10),
+        ("GLOSSARY", True, 11),
+        ("PAN — Primary Account Number (real card number, masked everywhere).  "
+         "CRN — tokenized reference for a PAN (non-reversible, non-transactable).  "
+         "CDE — Cardholder Data Environment (in PCI scope).  "
+         "True source — system that first emits clear PAN.  "
+         "Hidden PCI — flagged PCI=No in BAM but observed handling clear PAN.  "
+         "Descope — a system leaves scope once every clear-PAN feed it receives is tokenized.  "
+         "Clean-stream — tokenizing at a true source so downstream systems receive CRN, not PAN.",
+         False, 10),
+        ("", False, 10),
+        ("RISK MODEL", True, 11),
+        ("R(v) = 0.40·sensitivity + 0.30·downstream-reach + 0.20·betweenness + 0.10·true-source-flag, "
+         "each term scaled to its observed maximum. Weight sensitivity is structural — the ranking "
+         "is stable under reweighting — not hand-tuned to a target.", False, 10),
+        ("", False, 10),
+        ("ALGORITHMS", True, 11),
+        ("Cycle resolution: Tarjan strongly-connected-components then condensation to a DAG.  "
+         "Centrality: Brandes betweenness.  Segmentation: max-flow / min-cut (Menger's theorem) "
+         "for ring-fencing.  Tokenization frontier: branch-and-bound exact solver, compared "
+         "against a greedy heuristic.  The freed-systems objective is supermodular (a system "
+         "descopes only when ALL its true-source parents are tokenized), so greedy is reported "
+         "honestly as a heuristic with its measured gap to optimal — not under a (1-1/e) guarantee.",
+         False, 10),
+        ("", False, 10),
+        ("DATA SOURCES", True, 11),
+        ("BAM extracts (authoritative) define systems and metadata edges. Splunk clear-PAN "
+         "findings and the CDE end-state survey are inferred signals, rendered distinctly from "
+         "metadata edges throughout. Inferred edges never silently become ground truth.", False, 10),
+    ]
+    for i, (t, b, sz) in enumerate(_nl, 1):
+        c = notes.cell(i, 1, t)
+        c.font = Font(bold=b, size=sz, color="0F1622" if b else "333333")
+        c.alignment = Alignment(wrap_text=True, vertical="top")
+
+    # Dashboard — native, editable charts over the data sheets, for BA / exec readers.
+    # Wrapped so a charting failure can never corrupt the workbook (honesty-first: a
+    # working data export beats a broken pretty one).
+    try:
+        dash = wb.create_sheet("Dashboard")
+        dash["A1"] = "PCI-SENTINEL — visual summary"; dash["A1"].font = Font(bold=True, size=14)
+        dash["A2"] = "Charts read live from the data sheets — edit the data there and these refresh."
+        dash["A2"].font = Font(italic=True, size=9, color="666666")
+
+        # exec KPI band — headline numbers as big cells so the Dashboard reads at a glance
+        kpis = [("Systems exposed", head.get("systems_exposed_to_clear_pan")),
+                ("Metadata-confirmed", br.get("metadata_confirmed")),
+                ("Inferred-only", br.get("inferred_only")),
+                ("Hidden PCI", hidden.get("hidden_pci_count")),
+                ("Sources to tokenize", plan.get("k")),
+                ("Systems descoped", plan.get("total_descoped"))]
+        for i, (lab, val) in enumerate(kpis):
+            col = get_column_letter(1 + i * 2)
+            lc = dash[f"{col}4"]; lc.value = lab; lc.font = Font(size=9, color="666666")
+            vc = dash[f"{col}5"]; vc.value = val if val is not None else 0
+            vc.font = Font(bold=True, size=18, color="0F1622"); vc.number_format = "#,##0"
+
+        # openpyxl flags axes as "delete" by default, which hides tick + category labels in
+        # Excel — force them visible and print values on the bars so each chart is self-explaining.
+        from openpyxl.chart.label import DataLabelList
+        def _axes(c, vals=False):
+            c.x_axis.delete = False; c.y_axis.delete = False
+            c.x_axis.tickLblPos = "nextTo"; c.y_axis.tickLblPos = "nextTo"
+            if vals:
+                c.dataLabels = DataLabelList(); c.dataLabels.showVal = True
+
+        if hh_n:
+            n = min(hh_n, 15)
+            ch = BarChart(); ch.type = "bar"; ch.title = "Top distributors by downstream reach"
+            ch.x_axis.title = "system"; ch.y_axis.title = "systems fed clear PAN"; ch.legend = None
+            ch.height = 9.5; ch.width = 17
+            ch.add_data(Reference(ws_hh, min_col=2, min_row=1, max_row=1 + n), titles_from_data=True)
+            ch.set_categories(Reference(ws_hh, min_col=1, min_row=2, max_row=1 + n))
+            _axes(ch, vals=True)
+            dash.add_chart(ch, "A7")
+
+        if tp_n:
+            ch = LineChart(); ch.title = "Cumulative descope as sources are tokenized"
+            ch.x_axis.title = "sources tokenized (k)"; ch.y_axis.title = "systems"
+            ch.height = 9.5; ch.width = 17
+            ch.add_data(Reference(ws_tp, min_col=4, max_col=(5 if tp_curve else 4),
+                                  min_row=1, max_row=1 + tp_n), titles_from_data=True)
+            ch.set_categories(Reference(ws_tp, min_col=1, min_row=2, max_row=1 + tp_n))
+            _axes(ch)
+            dash.add_chart(ch, "A27")
+
+        if se_n:
+            n = min(se_n, 15)
+            ch = BarChart(); ch.type = "col"; ch.title = "Per-source benefit (feeds removed vs fully freed)"
+            ch.x_axis.title = "true source"; ch.y_axis.title = "systems"
+            ch.height = 9.5; ch.width = 17
+            ch.add_data(Reference(ws_se, min_col=3, max_col=4, min_row=1, max_row=1 + n), titles_from_data=True)
+            ch.set_categories(Reference(ws_se, min_col=1, min_row=2, max_row=1 + n))
+            _axes(ch, vals=True)
+            dash.add_chart(ch, "K7")
+
+        if ws_sc is not None:
+            ch = PieChart(); ch.title = "PCI scope composition"; ch.height = 9.5; ch.width = 11
+            ch.add_data(Reference(ws_sc, min_col=2, min_row=2, max_row=4))
+            ch.set_categories(Reference(ws_sc, min_col=1, min_row=2, max_row=4))
+            ch.dataLabels = DataLabelList(); ch.dataLabels.showPercent = True; ch.dataLabels.showCatName = True
+            dash.add_chart(ch, "K27")
+
+        if ws_econ is not None:
+            ch = BarChart(); ch.type = "col"; ch.title = "Audit scope: now vs achievable floor"
+            ch.y_axis.title = "systems in scope"; ch.legend = None; ch.height = 9.5; ch.width = 11
+            ch.add_data(Reference(ws_econ, min_col=2, min_row=2, max_row=3))
+            ch.set_categories(Reference(ws_econ, min_col=1, min_row=2, max_row=3))
+            _axes(ch, vals=True)
+            dash.add_chart(ch, "A47")
+
+        # place Dashboard then Notes right after Summary
+        wb._sheets.remove(dash); wb._sheets.insert(1, dash)
+        wb._sheets.remove(notes); wb._sheets.insert(2, notes)
+    except Exception as e:
+        try: wb.create_sheet("Dashboard")["A1"] = f"charts unavailable: {e}"
+        except Exception: pass
 
     out = io.BytesIO(); wb.save(out); out.seek(0)
     return out.read()
