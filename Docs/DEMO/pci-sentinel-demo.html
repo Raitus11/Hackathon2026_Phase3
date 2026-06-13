@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<!--
+  PCI-SENTINEL — demo / pitch page (single self-contained file).
+  NOTE BEFORE DEMO: the headline figures below are the verified real-4K spine
+  numbers from the handover. Re-confirm each against your FINAL run and replace
+  if anything moved. Do NOT show dev-dataset numbers. Optimizer/descope counts
+  were deliberately left out (they were still under reconciliation).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PCI-SENTINEL — Cardholder-Data Flow Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B111F; --ink2:#111A2E; --panel:#16223C; --panel2:#1C2B49;
+    --line:#26344F; --line2:#33456A;
+    --txt:#E7ECF6; --dim:#9AA8C4; --faint:#65769A;
+    --pan:#E5484D;        /* exposed / PAN — red */
+    --crn:#2DD4A7;        /* descoped / CRN / safe — teal-green */
+    --inf:#F5A623;        /* inferred signal — amber */
+    --human:#7C9CFF;      /* human gate — blue */
+    --disp:'Sora',system-ui,sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--txt);
+    font-family:var(--body); line-height:1.6; -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 80% -10%, rgba(45,212,167,.06), transparent),
+      radial-gradient(800px 500px at -10% 10%, rgba(229,72,77,.06), transparent);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .mono{font-family:var(--mono)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+  h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.01em;line-height:1.12;margin:0}
+  a{color:var(--crn)}
+
+  /* progress rail */
+  .rail{position:fixed;left:max(16px,calc((100vw - 1080px)/2 - 36px));top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:14px}
+  .rail a{width:9px;height:9px;border-radius:50%;background:var(--line2);display:block;transition:.25s;position:relative}
+  .rail a.on{background:var(--crn);box-shadow:0 0 0 4px rgba(45,212,167,.15)}
+  .rail a span{position:absolute;left:18px;top:-4px;white-space:nowrap;font-family:var(--mono);font-size:10px;color:var(--faint);opacity:0;pointer-events:none;transition:.2s}
+  .rail a:hover span{opacity:1}
+  @media(max-width:1180px){.rail{display:none}}
+
+  /* hero */
+  .hero{padding:120px 0 70px;position:relative}
+  .badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:999px;padding:6px 14px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--crn);box-shadow:0 0 10px var(--crn)}
+  .hero h1{font-size:clamp(38px,6vw,68px);font-weight:800;margin:22px 0 0}
+  .hero h1 .g{background:linear-gradient(100deg,var(--crn),var(--human));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .lede{font-size:clamp(16px,2.2vw,20px);color:var(--dim);max-width:680px;margin:20px 0 0}
+
+  /* clean-stream signature motif */
+  .motif{margin:46px 0 0;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,var(--ink2),rgba(17,26,46,.4));padding:22px 24px}
+  .motif .cap{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .motif .cap b{font-family:var(--disp);font-size:13px;font-weight:600}
+  .motif .cap .hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  svg .nd{transition:fill 1.1s ease, stroke 1.1s ease}
+  svg .lk{transition:stroke 1.1s ease}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  /* metric triad */
+  .triad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:42px}
+  .metric{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--ink2)}
+  .metric .n{font-family:var(--disp);font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1}
+  .metric .l{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:8px}
+  .metric .s{font-size:13px;color:var(--faint);margin-top:6px}
+  .metric.red .n{color:var(--pan)} .metric.amber .n{color:var(--inf)} .metric.green .n{color:var(--crn)}
+  @media(max-width:720px){.triad{grid-template-columns:1fr}}
+
+  /* sections */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .sec-head{margin-bottom:34px}
+  .sec-head h2{font-size:clamp(26px,4vw,38px);margin-top:10px}
+  .sec-head p{color:var(--dim);max-width:720px;margin:14px 0 0}
+
+  /* generic cards */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--ink2)}
+  .card h3{font-size:18px;margin-bottom:8px}
+  .card p{color:var(--dim);font-size:14px;margin:0}
+  .card .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:12px}
+
+  /* requirement -> delivered table */
+  .req{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .req .row{display:grid;grid-template-columns:1fr 1.25fr;gap:0;border-top:1px solid var(--line)}
+  .req .row:first-child{border-top:none}
+  .req .ask,.req .got{padding:18px 20px}
+  .req .ask{background:var(--ink2);border-right:1px solid var(--line)}
+  .req .ask b{font-family:var(--disp);font-size:14px;font-weight:600;color:var(--txt)}
+  .req .ask span{display:block;font-size:13px;color:var(--faint);margin-top:4px}
+  .req .got{font-size:14px;color:var(--dim)}
+  .req .got .tick{color:var(--crn);font-family:var(--mono);font-weight:600}
+  .req .got code{font-family:var(--mono);font-size:12px;color:var(--txt);background:var(--panel);padding:1px 6px;border-radius:5px}
+  @media(max-width:820px){.req .row{grid-template-columns:1fr}.req .ask{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* agents pipeline */
+  .agents{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.agents{grid-template-columns:1fr}}
+  .agent{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--ink2);position:relative;overflow:hidden}
+  .agent::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kindc,var(--line2))}
+  .agent .num{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .agent h3{font-size:15px;margin:4px 0 6px}
+  .agent p{font-size:13px;color:var(--dim);margin:0}
+  .agent .tag{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;border:1px solid var(--line2);color:var(--dim)}
+  .k-det{--kindc:var(--crn)} .k-safe{--kindc:var(--pan)} .k-ctrl{--kindc:var(--dim)} .k-human{--kindc:var(--human)} .k-llm{--kindc:var(--human)}
+  .agent.k-llm{background:linear-gradient(180deg,rgba(124,156,255,.10),var(--ink2));border-color:#34427a}
+  .agent .tag.llm{color:var(--human);border-color:#34427a}
+
+  /* math */
+  .formula{border:1px solid var(--line);border-radius:14px;background:#0E1830;padding:26px;text-align:center;margin-bottom:16px}
+  .formula .eq{font-family:var(--mono);font-size:clamp(15px,2.6vw,22px);color:var(--txt)}
+  .formula .eq .w{color:var(--crn)} .formula .eq .v{color:var(--inf)}
+  .terms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+  @media(max-width:820px){.terms{grid-template-columns:1fr 1fr}}
+  .term{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--ink2)}
+  .term .sym{font-family:var(--mono);font-weight:600;color:var(--inf)}
+  .term .nm{font-size:13px;margin-top:4px}
+  .term .ds{font-size:12px;color:var(--faint);margin-top:4px}
+  .cites{margin-top:16px;font-size:13px;color:var(--dim)}
+  .cites b{color:var(--txt);font-family:var(--disp)}
+  .cites ul{margin:8px 0 0;padding-left:18px}
+  .cites li{margin:3px 0}
+
+  /* screens */
+  .screens{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:820px){.screens{grid-template-columns:1fr}}
+  .screen{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--ink2);display:flex;gap:14px;align-items:flex-start}
+  .screen .ic{flex:0 0 30px;height:30px;border-radius:8px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--crn)}
+  .screen h3{font-size:15px;margin-bottom:3px}
+  .screen p{font-size:13px;color:var(--dim);margin:0}
+
+  /* why-win rubric */
+  .rubric{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:820px){.rubric{grid-template-columns:1fr}}
+  .rub{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--ink2)}
+  .rub .j{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--inf)}
+  .rub h3{font-size:16px;margin:6px 0 6px}
+  .rub p{font-size:13px;color:var(--dim);margin:0}
+
+  /* honest close */
+  .honest{background:linear-gradient(180deg,#0E1830,var(--ink));border-top:1px solid var(--line)}
+  .honest .box{border:1px solid var(--line2);border-radius:16px;padding:30px;background:rgba(124,156,255,.05)}
+  .honest h2{font-size:clamp(24px,4vw,34px)}
+  .honest ul{margin:16px 0 0;padding:0;list-style:none}
+  .honest li{padding:10px 0;border-top:1px solid var(--line);font-size:15px;color:var(--dim)}
+  .honest li:first-child{border-top:none}
+  .honest li b{color:var(--txt);font-family:var(--disp);font-weight:600}
+
+  footer{border-top:1px solid var(--line);padding:40px 0 70px;color:var(--faint);font-family:var(--mono);font-size:12px}
+  .stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .stack span{border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:var(--dim)}
+
+  /* process flow strip */
+  .flowstrip{border:1px solid var(--line);border-radius:14px;background:#0E1830;padding:20px 18px;margin-bottom:22px;overflow-x:auto}
+  .flowrow{display:flex;align-items:stretch;gap:0;min-width:760px}
+  .fstage{flex:1;border:1px solid var(--fc,var(--line2));border-radius:10px;padding:10px 12px;background:var(--ink2);position:relative}
+  .fstage .fn{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .fstage .ft{font-family:var(--disp);font-size:12px;font-weight:600;margin-top:2px;line-height:1.2}
+  .farrow{flex:0 0 26px;display:grid;place-items:center;color:var(--faint)}
+  .fdet{--fc:var(--crn)} .fsafe{--fc:var(--pan)} .fctrl{--fc:var(--line2)} .fhuman{--fc:var(--human)} .fllm{--fc:var(--human)}
+  .fbranch{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .fbranch b{color:var(--pan);font-weight:600}
+  .fbranch .rev b{color:var(--inf)}
+
+  /* worked example gauge */
+  .worked{border:1px solid var(--line);border-radius:14px;background:var(--ink2);padding:22px;margin-top:16px}
+  .worked .wh{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  .worked .wh h3{font-size:16px}
+  .worked .wh .sys{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .gtrack{height:30px;border-radius:8px;background:#0E1830;border:1px solid var(--line);display:flex;overflow:hidden;margin:14px 0 6px}
+  .gseg{height:100%}
+  .gscale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .gkeys{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .gkeys i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  .gtot{font-family:var(--disp);font-weight:800;color:var(--inf)}
+
+  /* sample outputs */
+  .outgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:820px){.outgrid{grid-template-columns:1fr}}
+  .outcard{border:1px solid var(--line);border-radius:14px;background:var(--ink2);padding:20px}
+  .outcard .oh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .outcard .oh h3{font-size:16px}
+  .outcard .badge-s{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--inf);border:1px solid var(--inf);border-radius:5px;padding:2px 7px;opacity:.85}
+  .outcard .badge-r{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--crn);border:1px solid var(--crn);border-radius:5px;padding:2px 7px;opacity:.85}
+  .outcard p{font-size:13px;color:var(--dim);margin:10px 0 0}
+  /* proportional triad bars */
+  .pbar{display:flex;align-items:center;gap:12px;margin:12px 0}
+  .pbar .pl{flex:0 0 120px;font-size:13px;color:var(--dim)}
+  .pbar .pt{flex:1;height:22px;border-radius:6px;background:#0E1830;border:1px solid var(--line);overflow:hidden}
+  .pbar .pf{height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:var(--mono);font-size:11px;color:#0B111F;font-weight:600}
+
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease, transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none} svg .nd,svg .lk{transition:none}}
+  a:focus-visible,.rail a:focus-visible{outline:2px solid var(--crn);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<nav class="rail" aria-label="Section progress">
+  <a href="#top" class="on"><span>Top</span></a>
+  <a href="#problem"><span>Problem</span></a>
+  <a href="#approach"><span>Approach</span></a>
+  <a href="#requirements"><span>Requirements met</span></a>
+  <a href="#agents"><span>Agents</span></a>
+  <a href="#math"><span>The math</span></a>
+  <a href="#outputs"><span>Outputs</span></a>
+  <a href="#features"><span>Features</span></a>
+  <a href="#screens"><span>Screens</span></a>
+  <a href="#win"><span>Why we win</span></a>
+  <a href="#honest"><span>Honest by design</span></a>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="badge"><span class="dot"></span> PCI-SENTINEL · cardholder-data flow intelligence</span>
+    <h1>We map where card data <span class="g">really</span> flows — and prove where to cut audit scope.</h1>
+    <p class="lede">An explainable, upload-driven engine that traces clear PAN across ~4,000 enterprise systems, surfaces the scope the business catalogue never recorded, and computes where tokenization removes the most systems from PCI DSS audit.</p>
+
+    <!-- signature: clean-stream motif -->
+    <div class="motif reveal" id="motif">
+      <div class="cap">
+        <b>The clean-stream effect</b>
+        <span class="hint">tokenize the true source → downstream descopes</span>
+      </div>
+      <svg viewBox="0 0 760 150" width="100%" height="150" role="img" aria-label="A red PAN source feeds downstream systems; tokenizing the source turns the stream green and descopes everything downstream.">
+        <!-- links -->
+        <g stroke-width="2" fill="none">
+          <path class="lk" d="M90,75 C160,75 170,40 250,40"/>
+          <path class="lk" d="M90,75 C160,75 170,75 250,75"/>
+          <path class="lk" d="M90,75 C160,75 170,110 250,110"/>
+          <path class="lk" d="M290,40 C360,40 370,75 450,75"/>
+          <path class="lk" d="M290,110 C360,110 370,75 450,75"/>
+          <path class="lk" d="M490,75 C560,75 570,55 650,55"/>
+          <path class="lk" d="M490,75 C560,75 570,95 650,95"/>
+        </g>
+        <!-- nodes -->
+        <g>
+          <circle class="nd src" cx="70" cy="75" r="20"/>
+          <circle class="nd" cx="270" cy="40" r="15"/>
+          <circle class="nd" cx="270" cy="75" r="15"/>
+          <circle class="nd" cx="270" cy="110" r="15"/>
+          <circle class="nd" cx="470" cy="75" r="15"/>
+          <circle class="nd" cx="670" cy="55" r="13"/>
+          <circle class="nd" cx="670" cy="95" r="13"/>
+        </g>
+        <text x="70" y="120" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#9AA8C4">true source</text>
+      </svg>
+      <div class="legend">
+        <span><i style="background:var(--pan)"></i>carries clear PAN (in scope)</span>
+        <span><i style="background:var(--crn)"></i>tokenized / descoped (CRN)</span>
+        <span><i style="background:var(--inf)"></i>inferred signal</span>
+      </div>
+    </div>
+
+    <!-- the headline triad -->
+    <div class="triad">
+      <div class="metric amber reveal">
+        <div class="n">458</div>
+        <div class="l">Declared in BAM</div>
+        <div class="s">PAN carriers the catalogue records.</div>
+      </div>
+      <div class="metric red reveal">
+        <div class="n">543</div>
+        <div class="l">Actually carrying PAN</div>
+        <div class="s">What the lineage proves is real.</div>
+      </div>
+      <div class="metric green reveal">
+        <div class="n">85</div>
+        <div class="l">Hidden PCI systems</div>
+        <div class="s">Clear PAN where BAM says PCI = No.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">01 · The problem</span>
+      <h2>The catalogue is authoritative — and incomplete.</h2>
+      <p>Cardholder data spreads across thousands of interconnected systems. The Business Application Metadata (BAM) is the system of record, but it under-reports who actually touches PAN. Scoping a PCI DSS audit by hand is slow, opaque, and easy to get wrong — and every system wrongly in or out of scope is either wasted audit cost or unguarded exposure.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card reveal"><h3>Invisible exposure</h3><p>Systems carrying clear PAN that the catalogue never flagged — undetected audit risk.</p></div>
+      <div class="card reveal"><h3>No defensible map</h3><p>Cycles, intermediaries and convergent feeds make "what flows where" impossible to argue line-by-line.</p></div>
+      <div class="card reveal"><h3>Blind remediation</h3><p>Tokenize the wrong system and downstream scope barely moves. The leverage points aren't obvious.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- APPROACH -->
+<section id="approach">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">02 · How we solved it</span>
+      <h2>Hybrid Intelligence: a verifiable engine, and a language layer that makes it usable.</h2>
+      <p>Two parts with distinct, complementary jobs. A deterministic graph engine produces every measured value — scope, reach, centrality, risk, the tokenization frontier — so the math is always reproducible and auditable. The language model owns the explanation layer: it turns a 4,000-system graph into plain-language lineage and "why-in-scope" reasoning, and powers an interactive Q&A over the grounded results. The engine guarantees the numbers are correct; the language layer makes them usable.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card reveal" style="border-color:var(--crn)">
+        <span class="eyebrow" style="color:var(--crn)">Deterministic engine</span>
+        <h3>Computes &amp; proves</h3>
+        <p>Graph construction, cycle resolution, risk scoring, reachability, the certified-optimal tokenization frontier, segmentation cuts, and the economics. Every figure traces to a rule, a statistic, or a cited algorithm.</p>
+        <div class="k">verifiable · reproducible · no black box</div>
+      </div>
+      <div class="card reveal" style="border-color:#34427a">
+        <span class="eyebrow" style="color:var(--human)">Language layer</span>
+        <h3>Explains &amp; answers</h3>
+        <p>Translates the engine's grounded results into an executive narrative every audience can act on, and drives a conversational interface where reviewers interrogate the findings directly. Anchored to numbers it never invents — so it informs without ever fabricating.</p>
+        <div class="k">explanation layer · interactive Q&amp;A · config-swappable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REQUIREMENTS MET -->
+<section id="requirements">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">03 · Brief → delivered</span>
+      <h2>Every requirement in the problem statement, answered.</h2>
+      <p>Mapped point-by-point against what the system actually produces.</p>
+    </div>
+    <div class="req reveal">
+      <div class="row">
+        <div class="ask"><b>Map interdependencies as an explainable DAG</b><span>cardholder-data flow across systems</span></div>
+        <div class="got"><span class="tick">✓</span> Provenance-typed <code>MultiDiGraph</code> → Tarjan SCC → condensation → an acyclic <strong>942-node DAG</strong> (from a 2,104-node source graph), <strong>2 cycle clusters</strong> resolved.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Distinguish documented vs inferred edges</b><span>never conflate sources</span></div>
+        <div class="got"><span class="tick">✓</span> Metadata edges (DS1–DS4, authoritative) and inferred signals (DS5–DS6) are kept first-class-distinct and rendered differently everywhere — never silently merged.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Prioritize tokenization for scope reduction</b><span>PAN → CRN</span></div>
+        <div class="got"><span class="tick">✓</span> Certified-optimal tokenization frontier via branch-and-bound MILP, surfaced in the Planner with a budget slider and ranked leverage points.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Show the clean-stream effect</b><span>tokenize source → descope downstream</span></div>
+        <div class="got"><span class="tick">✓</span> Clean-stream impact analysis plus a cumulative descope curve that shows exactly when downstream scope falls away.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Impact analysis</b><span>block this source — measure the benefit</span></div>
+        <div class="got"><span class="tick">✓</span> Per-source exposure impact (feeds removed, parent-count reduction) and side-by-side block-set comparison in the what-if simulator.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Analytics for most-connected systems</b><span>who distributes the most PAN</span></div>
+        <div class="got"><span class="tick">✓</span> Heavy-hitter ranking by downstream reach — top distributor <code>CTNMM</code> reaches <strong>1,817</strong> systems — plus drill-down and a Q&amp;A interface.</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>Surface undocumented scope</b><span>find what BAM missed</span></div>
+        <div class="got"><span class="tick">✓</span> <strong>85 hidden PCI systems</strong> — clear PAN observed where BAM says PCI = No (55 also propagate downstream).</div>
+      </div>
+      <div class="row">
+        <div class="ask"><b>PCI data-handling safety</b><span>never expose raw PAN</span></div>
+        <div class="got"><span class="tick">✓</span> Masked first-6/last-4 on ingest; a masking-leak validator <strong>hard-fails the entire run</strong> if any unmasked PAN ever escapes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section id="agents">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">04 · The agentic pipeline</span>
+      <h2>Nine single-responsibility agents, wired as a checkpointed LangGraph state machine.</h2>
+      <p>Each agent owns one job, has typed inputs and outputs, and emits an audit record. The run executes in order, pauses for human approval, and only then reports.</p>
+    </div>
+    <div class="flowstrip reveal">
+      <div class="flowrow">
+        <div class="fstage fctrl"><div class="fn">01</div><div class="ft">Control</div></div>
+        <div class="farrow">→</div>
+        <div class="fstage fdet"><div class="fn">02</div><div class="ft">Ingest &amp; mask</div></div>
+        <div class="farrow">→</div>
+        <div class="fstage fsafe"><div class="fn">03</div><div class="ft">Validate (leak gate)</div></div>
+        <div class="farrow">→</div>
+        <div class="fstage fdet"><div class="fn">04–07</div><div class="ft">Graph · DAG · Score · Analyze</div></div>
+        <div class="farrow">→</div>
+        <div class="fstage fhuman"><div class="fn">08</div><div class="ft">Human gate</div></div>
+        <div class="farrow">→</div>
+        <div class="fstage fllm"><div class="fn">09</div><div class="ft">Report + Q&amp;A</div></div>
+      </div>
+      <div class="fbranch">
+        <span>Conditional gates branch off the main path:</span>
+        <span>leak / abort → <b>run halts safely, no report</b></span>
+        <span class="rev">revise → <b>re-run analysis with reviewer feedback ↺</b></span>
+      </div>
+    </div>
+    <div class="agents">
+      <div class="agent k-ctrl reveal"><div class="num">01</div><h3>Supervisor / Orchestrator</h3><p>Owns graph state, routing, retries, and the human gate — drives every other agent.</p><span class="tag">control</span></div>
+      <div class="agent k-det reveal"><div class="num">02</div><h3>Ingestion &amp; Sanitiser</h3><p>Loads CSVs, validates schema, masks PAN first-6/last-4 at the boundary.</p><span class="tag">deterministic</span></div>
+      <div class="agent k-safe reveal"><div class="num">03</div><h3>Masking-Leak Validator</h3><p>Luhn + pattern scan on every cell. Any unmasked PAN fails the run.</p><span class="tag">safety · hard fail</span></div>
+      <div class="agent k-det reveal"><div class="num">04</div><h3>Graph Builder</h3><p>Typed MultiDiGraph of PAN flow; metadata vs inferred edges kept distinct.</p><span class="tag">deterministic</span></div>
+      <div class="agent k-det reveal"><div class="num">05</div><h3>Cycle Resolver</h3><p>Tarjan SCC → condensation so lineage is a valid, acyclic DAG.</p><span class="tag">deterministic</span></div>
+      <div class="agent k-det reveal"><div class="num">06</div><h3>Quant / Scoring</h3><p>Composite risk score, bounded 0–100, every term named and weighted.</p><span class="tag">deterministic</span></div>
+      <div class="agent k-det reveal"><div class="num">07</div><h3>Core Analyst</h3><p>Reachability, exclusive-reach, clean-stream impact, heavy hitters, hidden PCI.</p><span class="tag">deterministic</span></div>
+      <div class="agent k-human reveal"><div class="num">08</div><h3>Human-in-the-Loop Gate</h3><p>A real LangGraph interrupt — approve, revise, or abort before anything is reported.</p><span class="tag">human gate</span></div>
+      <div class="agent k-llm reveal"><div class="num">09</div><h3>Reporter — language layer</h3><p>Turns the engine's grounded results into executive narrative and powers the interactive Q&amp;A. Explains and answers; never decides.</p><span class="tag llm">explanation · Q&amp;A</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MATH -->
+<section id="math">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">05 · Mathematical rigor</span>
+      <h2>A defensible risk score — every term named, bounded, and cited.</h2>
+      <p>No magic constants. Each system gets a composite risk score on a fixed 0–100 scale, built from four interpretable factors.</p>
+    </div>
+    <div class="formula reveal">
+      <div class="eq">R(v) = 100 · ( <span class="w">0.40</span>·<span class="v">S</span> + <span class="w">0.30</span>·<span class="v">R</span> + <span class="w">0.20</span>·<span class="v">B</span> + <span class="w">0.10</span>·<span class="v">T</span> )</div>
+    </div>
+    <div class="terms reveal">
+      <div class="term"><div class="sym">S</div><div class="nm">Sensitivity tier</div><div class="ds">PCI data-element class (0–4), normalized.</div></div>
+      <div class="term"><div class="sym">R</div><div class="nm">Downstream reach</div><div class="ds">Systems it can feed, max-scaled to [0,1].</div></div>
+      <div class="term"><div class="sym">B</div><div class="nm">Betweenness</div><div class="ds">Brandes centrality — how much flow routes through it.</div></div>
+      <div class="term"><div class="sym">T</div><div class="nm">True-source flag</div><div class="ds">Originates clear PAN vs merely relays it.</div></div>
+    </div>
+    <div class="worked reveal">
+      <div class="wh">
+        <h3>Worked example — the score is fully checkable</h3>
+        <span class="sys">system 8MEC</span>
+      </div>
+      <div class="gtrack" role="img" aria-label="Stacked risk contribution for system 8MEC totalling 74.55 out of 100">
+        <div class="gseg" style="width:40%;background:var(--inf)" title="Sensitivity 0.40×1.000 = 40.0"></div>
+        <div class="gseg" style="width:24.5%;background:var(--crn)" title="Reach 0.30×0.818 = 24.5"></div>
+        <div class="gseg" style="width:0%;background:var(--human)" title="Betweenness 0.20×0.000 = 0.0"></div>
+        <div class="gseg" style="width:10%;background:var(--pan)" title="True-source 0.10×1 = 10.0"></div>
+      </div>
+      <div class="gscale"><span>0</span><span>R(8MEC) = <span class="gtot">74.55</span></span><span>100</span></div>
+      <div class="gkeys">
+        <span><i style="background:var(--inf)"></i>S 0.40×1.000 = 40.0</span>
+        <span><i style="background:var(--crn)"></i>R 0.30×0.818 = 24.5</span>
+        <span><i style="background:var(--human)"></i>B 0.20×0.000 = 0.0</span>
+        <span><i style="background:var(--pan)"></i>T 0.10×1 = 10.0</span>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card reveal">
+        <span class="eyebrow" style="color:var(--inf)">Beyond the score</span>
+        <h3>Optimization &amp; structure</h3>
+        <p>Certified-optimal tokenization frontier via branch-and-bound integer programming with a reported greedy optimality gap; network segmentation choke-points via max-flow / min-cut. The full computation is deterministic and reproducible.</p>
+      </div>
+      <div class="card reveal">
+        <span class="eyebrow" style="color:var(--inf)">Stability check</span>
+        <h3>Weights are structural, not tuned</h3>
+        <p>A weight-sensitivity analysis shows the ranking is driven by the graph itself — re-running with different weights leaves the ordering essentially unchanged (Spearman ρ ≈ 1.00). The result isn't fitted to a desired answer.</p>
+      </div>
+    </div>
+    <div class="cites card reveal" style="margin-top:16px">
+      <b>Cited foundations</b>
+      <ul>
+        <li>Betweenness centrality — Brandes (2001); unbiased sampled estimator at scale — Brandes &amp; Pich (2007)</li>
+        <li>Cycle resolution — Tarjan (1972), strongly-connected components → condensation</li>
+        <li>Segmentation — max-flow / min-cut (Menger's theorem)</li>
+        <li>Data-element sensitivity ordering — PCI DSS</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SAMPLE OUTPUTS -->
+<section id="outputs">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">06 · What it produces</span>
+      <h2>Sample outputs, visualized.</h2>
+      <p>Headline figures below are from the real ~4,000-system run. Diagrams marked <em>schematic</em> illustrate the method — the live app renders the actual data.</p>
+    </div>
+    <div class="outgrid">
+
+      <!-- scope triad proportional -->
+      <div class="outcard reveal">
+        <div class="oh"><h3>Declared vs real vs hidden scope</h3><span class="badge-r">Real · 4K run</span></div>
+        <div class="pbar"><span class="pl">Declared in BAM</span><div class="pt"><div class="pf" style="width:84%;background:var(--inf)">458</div></div></div>
+        <div class="pbar"><span class="pl">Actually carrying PAN</span><div class="pt"><div class="pf" style="width:100%;background:var(--pan)">543</div></div></div>
+        <div class="pbar"><span class="pl">Hidden (PCI=No)</span><div class="pt"><div class="pf" style="width:16%;background:var(--crn)">85</div></div></div>
+        <p>The gap between the catalogue and reality — 85 systems carrying clear PAN that BAM never flagged — is the audit-risk headline.</p>
+      </div>
+
+      <!-- clean-stream descope curve (schematic) -->
+      <div class="outcard reveal">
+        <div class="oh"><h3>Cumulative descope curve</h3><span class="badge-s">Schematic</span></div>
+        <svg viewBox="0 0 320 160" width="100%" height="150" role="img" aria-label="Schematic curve: systems descoped stays low until most true sources are tokenized, then ramps up.">
+          <line x1="40" y1="20" x2="40" y2="130" stroke="#33456A"/>
+          <line x1="40" y1="130" x2="305" y2="130" stroke="#33456A"/>
+          <path d="M40,126 L120,123 L180,116 L225,100 L260,64 L300,30" fill="none" stroke="#2DD4A7" stroke-width="2.5"/>
+          <circle cx="300" cy="30" r="3.5" fill="#2DD4A7"/>
+          <text x="172" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#65769A">true sources tokenized →</text>
+          <text x="20" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#65769A" transform="rotate(-90 20 78)">systems descoped</text>
+        </svg>
+        <p>Full descope ramps only once most of the true-source front is tokenized — which is exactly why tokenizing one source rarely frees a multi-parent system. Told as insight, not failure.</p>
+      </div>
+
+      <!-- lineage ego-graph (illustrative) -->
+      <div class="outcard reveal">
+        <div class="oh"><h3>Focused lineage (drill-down)</h3><span class="badge-s">Sample view</span></div>
+        <svg viewBox="0 0 320 160" width="100%" height="150" role="img" aria-label="A focused system with solid metadata edges to parents and children, and one dashed inferred edge.">
+          <g stroke-width="2" fill="none">
+            <line class="lk" x1="60" y1="50" x2="155" y2="80" stroke="#9AA8C4"/>
+            <line x1="60" y1="110" x2="155" y2="80" stroke="#9AA8C4"/>
+            <line x1="165" y1="80" x2="260" y2="50" stroke="#9AA8C4"/>
+            <line x1="165" y1="80" x2="260" y2="110" stroke="#F5A623" stroke-dasharray="5 4"/>
+          </g>
+          <circle cx="60" cy="50" r="11" fill="#16223C" stroke="#9AA8C4" stroke-width="2"/>
+          <circle cx="60" cy="110" r="11" fill="#16223C" stroke="#9AA8C4" stroke-width="2"/>
+          <circle cx="160" cy="80" r="16" fill="#E5484D"/>
+          <circle cx="260" cy="50" r="11" fill="#16223C" stroke="#9AA8C4" stroke-width="2"/>
+          <circle cx="260" cy="110" r="11" fill="#16223C" stroke="#F5A623" stroke-width="2"/>
+          <text x="160" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#9AA8C4">in scope</text>
+        </svg>
+        <p>Solid lines are documented (metadata) edges; the dashed amber edge is an inferred signal — kept visibly distinct so scope is always defensible.</p>
+      </div>
+
+      <!-- min-cut segmentation (illustrative) -->
+      <div class="outcard reveal">
+        <div class="oh"><h3>Segmentation choke-points</h3><span class="badge-s">Method</span></div>
+        <svg viewBox="0 0 320 160" width="100%" height="150" role="img" aria-label="Two clusters separated by a minimum cut crossing two edges.">
+          <g stroke="#9AA8C4" stroke-width="1.5" fill="none">
+            <line x1="55" y1="45" x2="55" y2="115"/><line x1="55" y1="45" x2="100" y2="80"/><line x1="55" y1="115" x2="100" y2="80"/>
+            <line x1="220" y1="80" x2="265" y2="45"/><line x1="220" y1="80" x2="265" y2="115"/>
+          </g>
+          <g stroke="#E5484D" stroke-width="2.5" fill="none">
+            <line x1="100" y1="80" x2="220" y2="80"/>
+            <line x1="55" y1="45" x2="220" y2="80"/>
+          </g>
+          <line x1="160" y1="20" x2="160" y2="140" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="6 5"/>
+          <g fill="#16223C" stroke="#9AA8C4" stroke-width="2">
+            <circle cx="55" cy="45" r="10"/><circle cx="55" cy="115" r="10"/><circle cx="100" cy="80" r="10"/>
+            <circle cx="220" cy="80" r="10"/><circle cx="265" cy="45" r="10"/><circle cx="265" cy="115" r="10"/>
+          </g>
+          <text x="160" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#F5A623">min-cut</text>
+        </svg>
+        <p>Max-flow / min-cut finds the fewest edges whose tokenization severs cardholder-data flow between segments — the leverage points to isolate the CDE.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">07 · Blockbuster features (business view)</span>
+      <h2>What it gives the people who own the audit.</h2>
+      <p>Framed in the language of the work — scope, cost, risk, and remediation.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card reveal"><h3>Hidden-scope discovery</h3><p>Finds the systems carrying clear PAN that the catalogue never flagged — the single highest-value audit-risk finding, surfaced automatically.</p><div class="k">unguarded exposure → visible</div></div>
+      <div class="card reveal"><h3>Defensible scope map</h3><p>A lineage you can argue line-by-line, with every system's "why-in-scope" reasoning and its documented-vs-inferred basis on record.</p><div class="k">audit-ready evidence</div></div>
+      <div class="card reveal"><h3>Tokenization planner</h3><p>Ranked leverage points and a budget slider that answers "if I can tokenize N systems, which N cut the most scope?" — backed by a certified-optimal solver.</p><div class="k">maximum descope per dollar</div></div>
+      <div class="card reveal"><h3>Block-A-vs-Block-B comparison</h3><p>A what-if simulator that quantifies the downstream benefit of any intervention set and compares candidates side by side.</p><div class="k">decisions, not guesses</div></div>
+      <div class="card reveal"><h3>Exposure economics</h3><p>Translates scope into audit-cost terms so the reduction is expressed in language leadership acts on.</p><div class="k">scope → cost</div></div>
+      <div class="card reveal"><h3>Conversational interrogation</h3><p>Ask the analysis directly — "why is this system in scope?", "what feeds it?" — and get grounded, plain-language answers from the language layer.</p><div class="k">self-serve for any audience</div></div>
+      <div class="card reveal"><h3>Evidence bundle</h3><p>A PDF executive report and a multi-sheet XLSX dashboard with a per-stage audit trail — reproducible, shareable, submission-ready.</p><div class="k">PDF · XLSX · audit log</div></div>
+      <div class="card reveal"><h3>Onboarding &amp; drift</h3><p>Assess a new system against the existing graph, and track how scope changes over time — built to extend, not just to demo once.</p><div class="k">enterprise extensibility</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENS -->
+<section id="screens">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">08 · The interface</span>
+      <h2>Thirteen analyst views — legible in the first ten seconds, rewarding on drill-down.</h2>
+      <p>React 18 + D3, grouped into Operations, Lineage, and Governance.</p>
+    </div>
+    <div class="screens">
+      <div class="screen reveal"><div class="ic">◆</div><div><h3>Overview</h3><p>Sankey of PAN flow, risk × reach prioritization, exclusive-reach bars.</p></div></div>
+      <div class="screen reveal"><div class="ic">▤</div><div><h3>Business View</h3><p>The plain-English executive framing — scope, exposure, the headline triad.</p></div></div>
+      <div class="screen reveal"><div class="ic">◎</div><div><h3>Hidden Scope</h3><p>The systems BAM never flagged, with the evidence behind each.</p></div></div>
+      <div class="screen reveal"><div class="ic">▥</div><div><h3>Planner / Optimizer</h3><p>Budget slider and min-cut choke-point list for tokenization decisions.</p></div></div>
+      <div class="screen reveal"><div class="ic">⊕</div><div><h3>Block &amp; Benefit</h3><p>What-if simulator — block a source set, see the downstream benefit.</p></div></div>
+      <div class="screen reveal"><div class="ic">⌥</div><div><h3>Flow Graph</h3><p>Focused ego-graph with hop selector and direction toggle — no hairball.</p></div></div>
+      <div class="screen reveal"><div class="ic">▦</div><div><h3>Exposure Map</h3><p>Heatmap of where cardholder-data exposure concentrates.</p></div></div>
+      <div class="screen reveal"><div class="ic">⊞</div><div><h3>Drill-down</h3><p>Per-system lineage: sensitivity tier, reach, scope basis, why-in-scope.</p></div></div>
+      <div class="screen reveal"><div class="ic">∑</div><div><h3>Methods</h3><p>Risk-weight sensitivity panel and the algorithms citation table.</p></div></div>
+      <div class="screen reveal"><div class="ic">✦</div><div><h3>Ask</h3><p>Conversational Q&amp;A over the grounded analysis.</p></div></div>
+      <div class="screen reveal"><div class="ic">↗</div><div><h3>Scope Drift</h3><p>How scope changes across runs over time.</p></div></div>
+      <div class="screen reveal"><div class="ic">⊡</div><div><h3>Onboarding</h3><p>Assess a new system against the existing graph.</p></div></div>
+      <div class="screen reveal"><div class="ic">◷</div><div><h3>Pipeline</h3><p>Live agent run with per-stage timing and audit trail.</p></div></div>
+      <div class="screen reveal"><div class="ic">$</div><div><h3>Economics</h3><p>Scope reduction expressed in audit-cost terms.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY WE WIN -->
+<section id="win">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">09 · Why we win</span>
+      <h2>Mapped to what the judges score.</h2>
+    </div>
+    <div class="rubric">
+      <div class="rub reveal"><div class="j">Surface-area reduction</div><h3>The headline outcome</h3><p>A ranked, certified-optimal tokenization plan that measurably shrinks the PCI DSS audit boundary — the core ask, delivered.</p></div>
+      <div class="rub reveal"><div class="j">Clarity, both audiences</div><h3>Executive + engineer</h3><p>Plain-language business framing and a conversational interface up top; full lineage, formulas, and citations underneath.</p></div>
+      <div class="rub reveal"><div class="j">Fidelity to inputs</div><h3>Never invents</h3><p>Only systems and edges the data defines. Inferred signals are surfaced but never promoted to ground truth.</p></div>
+      <div class="rub reveal"><div class="j">Explainability</div><h3>Nothing opaque</h3><p>Every score, edge, and scope decision traces to a rule, a statistic, or a cited algorithm — and the language layer narrates it.</p></div>
+      <div class="rub reveal"><div class="j">Metadata vs inferred</div><h3>First-class distinction</h3><p>The two classes of evidence are kept visibly separate end-to-end — the honesty axis judges look for.</p></div>
+      <div class="rub reveal"><div class="j">Enterprise scale</div><h3>Real, not a toy</h3><p>Runs end-to-end on the real ~4,000-system dataset, cycles and convergence included.</p></div>
+      <div class="rub reveal"><div class="j">Extensibility</div><h3>Built to grow</h3><p>Onboarding and drift views, a config-swappable language layer, and typed contracts make it a platform, not a one-off.</p></div>
+      <div class="rub reveal"><div class="j">Safety &amp; rigor</div><h3>Won't embarrass you</h3><p>Masking-leak hard-fail, per-stage audit log, a passing test suite, and a language layer that can't fabricate a figure.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HONEST CLOSE -->
+<section id="honest" class="honest">
+  <div class="wrap">
+    <div class="box reveal">
+      <span class="eyebrow" style="color:var(--human)">10 · Honest by design</span>
+      <h2>What it claims — and what it does not.</h2>
+      <ul>
+        <li><b>It does</b> present current-state PCI lineage from authoritative metadata plus clearly-marked inferred signals, with a reproducible risk model.</li>
+        <li><b>It does not</b> remediate controls, assert business need, or treat inferred signals as ground truth.</li>
+        <li><b>Absence of a finding is not proof of a clean system</b> — the signal feeds list observations, not a comprehensive sweep.</li>
+        <li><b>The engine guarantees the numbers</b>; the language layer makes them legible and answerable — and is structurally prevented from inventing one.</li>
+      </ul>
+      <p style="color:var(--dim);margin-top:18px">The value is in a defensible map of where cardholder data really flows — and where to cut scope — not in over-claiming. That honesty is the credibility the rest of the system is built on.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    PCI-SENTINEL · Intelligent Mapping of Interdependencies Across PCI Systems
+    <div class="stack">
+      <span>Python 3.13</span><span>FastAPI</span><span>LangGraph</span><span>networkx</span>
+      <span>NumPy</span><span>React 18</span><span>D3</span><span>reportlab · openpyxl · matplotlib</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // scroll reveal
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // clean-stream motif: red exposed -> green descoped, cascading
+  (function(){
+    const PAN='#E5484D', CRN='#2DD4A7', LINE='#33456A', LINEG='#2DD4A7';
+    const nodes=[...document.querySelectorAll('#motif .nd')];
+    const links=[...document.querySelectorAll('#motif .lk')];
+    function paint(state){ // 'exposed' or 'clean'
+      nodes.forEach(n=>{ n.setAttribute('fill', state==='clean'?CRN:PAN); n.setAttribute('stroke', state==='clean'?CRN:PAN); n.setAttribute('stroke-width','2'); });
+      links.forEach(l=>{ l.setAttribute('stroke', state==='clean'?LINEG:PAN); l.setAttribute('opacity', state==='clean'?'.8':'.45'); });
+    }
+    paint('exposed');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){ paint('clean'); return; }
+    let on=false;
+    setInterval(()=>{ on=!on; paint(on?'clean':'exposed'); }, 2600);
+  })();
+
+  // rail active state
+  const railLinks=[...document.querySelectorAll('.rail a')];
+  const secs=railLinks.map(a=>document.querySelector(a.getAttribute('href')));
+  const ro=new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){
+      const i=secs.indexOf(e.target);
+      railLinks.forEach(l=>l.classList.remove('on'));
+      if(railLinks[i]) railLinks[i].classList.add('on');
+    }});
+  },{threshold:.5});
+  secs.forEach(s=>s&&ro.observe(s));
+</script>
+</body>
+</html>
