@@ -649,11 +649,14 @@ function Overview({ d, onPick, onTab }) {
    org owns the most of it. Intra-LOB flow is omitted (it's not a boundary risk). Counts
    only — never 4,000 dots. Click a cluster to drill into its highest-reach system. */
 
+
+
 const UNREC = '(LOB not recorded)'
 
 function LobBundle({ d, onPick }) {
   const ref = useRef()
-  const { nodes, links, maxSys } = useMemo(() => {
+  const [showUnrec, setShowUnrec] = useState(false)
+  const { nodes, links, maxSys, unrecCount, isolatedCount } = useMemo(() => {
     const byId = new Map(d.viz.nodes.map(n => [n.id, n]))
     const lobOf = n => n.lob || UNREC
     const groups = new Map()
@@ -683,16 +686,24 @@ function LobBundle({ d, onPick }) {
       const srcs = [...v.srcs.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0])
       return { source, target, count: v.count, srcs }
     })
-    // unclassified systems shouldn't set the size scale — measure against real LOBs
     const real = nodes.filter(n => n.id !== UNREC)
-    return { nodes, links, maxSys: Math.max(1, ...(real.length ? real : nodes).map(n => n.systems)) }
+    const unrec = nodes.find(n => n.id === UNREC)
+    // real LOBs that take part in NO cross-boundary flow (ignoring the unclassified bucket)
+    const connectedReal = new Set()
+    links.filter(e => e.source !== UNREC && e.target !== UNREC).forEach(e => { connectedReal.add(e.source); connectedReal.add(e.target) })
+    const isolated = real.filter(n => !connectedReal.has(n.id))
+    return { nodes, links, maxSys: Math.max(1, ...(real.length ? real : nodes).map(n => n.systems)),
+             unrecCount: unrec ? unrec.systems : 0, isolatedCount: isolated.length }
   }, [d])
 
   useEffect(() => {
     if (!ref.current) return
-    const W = ref.current.clientWidth, H = 560
-    const isUnrec = n => n.id === UNREC
-    // real LOBs scale by systems; the unclassified bucket is capped + parked so it never dominates
+    const isUnrec = n => (typeof n === 'object' ? n.id : n) === UNREC
+    const L0 = showUnrec ? links : links.filter(e => e.source !== UNREC && e.target !== UNREC)
+    // show only the connected core — LOBs that actually take part in a cross-boundary flow
+    const conn = new Set(); L0.forEach(e => { conn.add(e.source); conn.add(e.target) })
+    const N0 = nodes.filter(n => conn.has(n.id))
+    const W = ref.current.clientWidth, H = 540
     const rad = g => isUnrec(g) ? 16 : 12 + 34 * Math.sqrt(Math.min(1, g.systems / maxSys))
     const svg = d3.select(ref.current).html('').append('svg').attr('width', W).attr('height', H).attr('viewBox', [0, 0, W, H])
     svg.append('defs').append('marker').attr('id', 'lobarrow').attr('viewBox', '0 -5 10 10').attr('refX', 22)
@@ -700,15 +711,20 @@ function LobBundle({ d, onPick }) {
       .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#D71E28').attr('fill-opacity', 0.55)
     const g = svg.append('g')
     svg.call(d3.zoom().scaleExtent([.3, 4]).on('zoom', e => g.attr('transform', e.transform)))
-    const N = nodes.map(n => ({ ...n })), L = links.map(e => ({ ...e }))
-    // park the unclassified bucket in the bottom-left corner so the real estate reads centre-stage
+    if (!N0.length) {
+      svg.append('text').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').attr('fill', '#8B95A3').attr('font-size', 13)
+        .text('No clear-PAN flows cross a business boundary in this dataset.')
+      return
+    }
+    const N = N0.map(n => ({ ...n })), L = L0.map(e => ({ ...e }))
     const ur = N.find(isUnrec); if (ur) { ur.fx = 86; ur.fy = H - 70 }
     const maxCount = Math.max(1, ...L.map(e => e.count))
     const color = n => isUnrec(n) ? '#C7CDD6' : n.hidden > 0 ? '#8F0E1E' : n.carriers > 0 ? '#E8A33D' : n.in_scope > 0 ? '#2563EB' : '#9FB0A6'
     const sim = d3.forceSimulation(N)
-      .force('link', d3.forceLink(L).id(x => x.id).distance(170).strength(.25))
-      .force('charge', d3.forceManyBody().strength(-700))
-      .force('center', d3.forceCenter(W / 2, H / 2 - 30))
+      .force('link', d3.forceLink(L).id(x => x.id).distance(150).strength(.3))
+      .force('charge', d3.forceManyBody().strength(-560))
+      .force('center', d3.forceCenter(W / 2, H / 2))
+      .force('x', d3.forceX(W / 2).strength(0.06)).force('y', d3.forceY(H / 2).strength(0.06))
       .force('collide', d3.forceCollide().radius(n => rad(n) + 14))
     const link = g.append('g').selectAll('path').data(L).join('path')
       .attr('fill', 'none').attr('stroke', e => (eid(e.source) === UNREC || eid(e.target) === UNREC) ? '#9AA4B2' : '#D71E28')
@@ -741,20 +757,24 @@ function LobBundle({ d, onPick }) {
       node.attr('transform', n => `translate(${n.x},${n.y})`)
     })
     return () => sim.stop()
-  }, [nodes, links, maxSys, onPick])
+  }, [nodes, links, maxSys, onPick, showUnrec])
 
-  const realCount = nodes.filter(n => n.id !== UNREC).length
   return (
     <div>
       <div className="px-2 text-[11px] text-dim mb-1">
-        Every system collapsed into its line of business — <b>area = systems in that LOB</b>, <b>red arrows = clear-PAN flows that cross a business boundary</b> (thickness = volume). {realCount} business clusters; systems with no LOB in BAM are parked, greyed, bottom-left. Drag to rearrange, scroll to zoom, click a cluster to drill into its highest-reach system.
+        Business units that <b>exchange clear PAN across a boundary</b> — <b>area = systems in that LOB</b>, <b>red arrows = cross-boundary clear-PAN flows</b> (thickness = volume). Drag to rearrange, scroll to zoom, click a cluster to drill into its highest-reach system.{isolatedCount > 0 ? ` ${fmt(isolatedCount)} business units have no cross-boundary flow and are not shown.` : ''}
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 text-[11px] text-dim items-center">
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#8F0E1E' }} />LOB with hidden PCI</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#E8A33D' }} />carries PAN</span>
         <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#2563EB' }} />in scope, no PAN of its own</span>
-        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block ring-1 ring-faint/40" style={{ background: '#C7CDD6' }} />no LOB recorded (parked)</span>
         <span className="flex items-center gap-1"><svg width="26" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#D71E28" strokeWidth="3" /></svg>cross-LOB clear-PAN flow</span>
+        {unrecCount > 0 && (
+          <label className="flex items-center gap-1 ml-auto cursor-pointer select-none">
+            <input type="checkbox" className="accent-pan" checked={showUnrec} onChange={e => setShowUnrec(e.target.checked)} />
+            include {fmt(unrecCount)} systems with no LOB in BAM
+          </label>
+        )}
       </div>
       <div ref={ref} style={{ width: '100%' }} />
     </div>
