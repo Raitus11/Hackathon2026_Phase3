@@ -2182,6 +2182,65 @@ function ExposureMap({ d, onPick }) {
    this tab is therefore an ADVISORY sequence, not an execution plan — it tells the
    program owner the order of work and who is in each wave, derived entirely from the
    computed graph. Scale-aware: counts + ranked samples, never 4,000 rows on screen. */
+
+/* Roadmap swimlane — the transformation JOURNEY as a flow, not three text cards.
+   Top: Day-0 hidden scope (parallel triage). Middle descope path: W1 tokenize sources
+   → (conjunctive dependency) → W2 downstream accepts CRN → scope leaves the audit.
+   Bottom: W3 RISE/APG, independent, ends in permanent CDE. Counts only — scale-proof. */
+function RoadmapFlow({ w1, w2, w3, hidden, onTab }) {
+  const W = 940, H = 330
+  const C = { red: '#D71E28', green: '#0E7C4A', blue: '#2563EB', hidden: '#8F0E1E' }
+  const Block = ({ x, y, w, h, color, tint, tag, title, sub, count, onClick }) => (
+    <g style={{ cursor: onClick ? 'pointer' : 'default' }} onClick={onClick}>
+      <rect x={x} y={y} width={w} height={h} rx="10" fill={tint} stroke={color} strokeWidth="2" />
+      <rect x={x} y={y} width="6" height={h} rx="3" fill={color} />
+      {tag && <text x={x + 16} y={y + 24} fontSize="15" fontWeight="800" fill={color} className="mono">{tag}</text>}
+      <text x={x + (tag ? 48 : 16)} y={y + 24} fontSize="13" fontWeight="700" fill="#1F2329">{title}</text>
+      {sub && <text x={x + 16} y={y + 44} fontSize="10.5" fill="#5A6472">{sub}</text>}
+      {count != null && <text x={x + w - 12} y={y + h - 12} textAnchor="end" fontSize="13" fontWeight="800" fill={color} className="mono">{fmt(count)} systems</text>}
+    </g>
+  )
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 360 }}>
+      <defs>
+        <marker id="ra" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,-4L8,0L0,4" fill="#5A6472" /></marker>
+        <marker id="rr" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,-4L8,0L0,4" fill="#D71E28" /></marker>
+      </defs>
+
+      {/* Day-0 parallel: hidden scope */}
+      <Block x={30} y={20} w={250} h={66} color={C.hidden} tint="#FBEFEF" tag="0"
+        title="Hidden scope — triage now" sub="BAM never flagged · unmanaged today" count={hidden}
+        onClick={() => onTab && onTab('hidden')} />
+      <text x={300} y={42} fontSize="10.5" fill="#8B95A3" fontStyle="italic">parallel track — independent of any wave,</text>
+      <text x={300} y={58} fontSize="10.5" fill="#8B95A3" fontStyle="italic">close before W1 budgets are set</text>
+      <line x1={155} y1={86} x2={155} y2={150} stroke={C.hidden} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.6" markerEnd="url(#rr)" />
+
+      {/* descope path */}
+      <Block x={30} y={150} w={250} h={92} color={C.red} tint="#FBEFEF" tag="W1"
+        title="Tokenize true sources" sub="PAN → CRN where card data originates" count={w1} />
+      <Block x={400} y={150} w={300} h={92} color={C.green} tint="#ECF4EF" tag="W2"
+        title="Downstream accepts CRN" sub="receives only tokens → leaves PCI scope" count={w2} />
+      <Block x={760} y={162} w={160} h={68} color={C.green} tint="#ECF4EF"
+        title="Scope reduced" sub="out of the audit" />
+
+      {/* W1 -> W2 conjunctive dependency (the rule, drawn) */}
+      <line x1={280} y1={196} x2={400} y2={196} stroke={C.red} strokeWidth="2.5" markerEnd="url(#rr)" />
+      <text x={340} y={186} textAnchor="middle" fontSize="10" fontWeight="700" fill={C.red}>depends on</text>
+      <text x={340} y={214} textAnchor="middle" fontSize="9.5" fill="#5A6472">ALL true-source parents</text>
+      <line x1={700} y1={196} x2={760} y2={196} stroke={C.green} strokeWidth="2.5" markerEnd="url(#ra)" />
+
+      {/* W3 independent path */}
+      <Block x={30} y={262} w={250} h={56} color={C.blue} tint="#EEF3FB" tag="W3"
+        title="Onboard RISE/APG" sub="genuinely needs real PAN" count={w3} />
+      <Block x={400} y={264} w={220} h={52} color={C.blue} tint="#EEF3FB"
+        title="Permanent CDE — by design" sub="de-tokenizes CRN → PAN centrally" />
+      <line x1={280} y1={290} x2={400} y2={290} stroke={C.blue} strokeWidth="2" markerEnd="url(#ra)" />
+      <text x={636} y={284} fontSize="9.5" fill="#8B95A3" fontStyle="italic">no dependency —</text>
+      <text x={636} y={298} fontSize="9.5" fill="#8B95A3" fontStyle="italic">start immediately</text>
+    </svg>
+  )
+}
+
 function MigrationAdvisory({ d, onPick, onTab }) {
   const plan = d.plan || {}, imp = d.impact || {}, hid = d.hidden || {}, st = d.structure || {}
   const steps = plan.steps || []
@@ -2232,6 +2291,19 @@ function MigrationAdvisory({ d, onPick, onTab }) {
           audited lineage as the rest of the analysis; nothing is invented.
         </p>
       </div>
+
+      <div className="card p-5">
+        <div className="disp font-bold text-base mb-1">The transformation journey <span className="text-faint text-xs font-normal">— how a system moves out of scope, and the one dependency that governs it</span></div>
+        <RoadmapFlow
+          w1={plan.true_source_count || sources.length}
+          w2={plan.descopable ?? acceptCrn.length}
+          w3={retainedList.length}
+          hidden={hid.hidden_pci_count || 0}
+          onTab={onTab} />
+        <div className="text-[11px] text-faint mt-1">Read left→right: tokenizing the true sources (W1) lets each downstream system accept CRN and leave the audit (W2) — but only once <b className="text-txt">all</b> of its true-source parents have converted (conjunctive). W3 is independent. The curve below proves the dependency: descope stays flat until most of the source front is tokenized.</div>
+      </div>
+
+      <SaturationCurve plan={plan} />
 
       <div className="flex flex-wrap gap-4">
         <Wave n="W1" title="Tokenize the true sources" count={plan.true_source_count || sources.length} color="#D71E28">
