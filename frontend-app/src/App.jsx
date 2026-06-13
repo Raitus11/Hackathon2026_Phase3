@@ -2781,6 +2781,364 @@ function PresentMode({ d, onTab, onClose }) {
   )
 }
 
+/* ===================== BUSINESS VIEW (exec / BA reporting) =====================
+   Tableau-style master→detail→detail: portfolio KPIs + charts → line-of-business table
+   → drill a LOB to its applications → drill an app to its upstream providers and
+   downstream consumers. Built entirely from data already on the client — every node
+   carries its LOB and scope flags; every edge carries metadata-vs-inferred provenance. */
+
+function Donut({ segments, size = 156 }) {
+  const r = size / 2, ir = r * 0.58
+  const arcs = useMemo(() => {
+    const total = segments.reduce((s, x) => s + x.value, 0) || 1
+    let a0 = -Math.PI / 2
+    return segments.filter(s => s.value > 0).map(s => {
+      const a1 = a0 + (s.value / total) * Math.PI * 2
+      const p = d3.arc()({ innerRadius: ir, outerRadius: r, startAngle: a0, endAngle: a1 })
+      a0 = a1
+      return { ...s, p, pct: Math.round(100 * s.value / total) }
+    })
+  }, [segments])
+  const total = segments.reduce((s, x) => s + x.value, 0)
+  return (
+    <div className="flex items-center gap-5">
+      <svg width={size} height={size} viewBox={`${-r} ${-r} ${size} ${size}`} className="shrink-0">
+        {arcs.map((a, i) => <path key={i} d={a.p} fill={a.color} stroke="#fff" strokeWidth="1.5" />)}
+        <text textAnchor="middle" dy="-1" className="disp" style={{ fontSize: 22, fontWeight: 800, fill: '#1F2329' }}>{fmt(total)}</text>
+        <text textAnchor="middle" dy="15" style={{ fontSize: 9, fill: '#8A8F98' }}>systems</text>
+      </svg>
+      <div className="space-y-1.5 flex-1">
+        {arcs.map((a, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            <i className="w-3 h-3 rounded-sm inline-block shrink-0" style={{ background: a.color }} />
+            <span className="text-dim flex-1">{a.label}</span>
+            <span className="mono text-txt">{fmt(a.value)}</span>
+            <span className="mono text-faint w-9 text-right">{a.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function LineageList({ title, empty, edges, side, onGo }) {
+  const items = edges.map(e => ({ id: eid(side === 'source' ? e.source : e.target), prov: e.provenance }))
+  return (
+    <div>
+      <div className="text-[11px] uppercase tracking-widest text-faint mb-2">{title} <span className="mono text-faint">({items.length})</span></div>
+      {items.length === 0 ? <div className="text-xs text-dim">{empty}</div> : (
+        <div className="scroll overflow-auto max-h-[260px] space-y-1">
+          {items.map((it, i) => (
+            <button key={i} onClick={() => onGo(it.id)} className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-panel2 text-sm">
+              <span className="flex items-center gap-1.5 mono text-txt">
+                <i className="w-2 h-2 rounded-full inline-block" style={{ background: it.prov === 'inferred' ? '#B45309' : '#9AA4B2' }} />
+                {it.id}
+              </span>
+              <span className="mono text-[10px] text-faint">{it.prov === 'inferred' ? 'inferred' : 'metadata'}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BusinessReport({ d, onPick }) {
+  const [lob, setLob] = useState(null)
+  const [app, setApp] = useState(null)
+  const nodes = d.viz.nodes
+  const lobOf = n => n.lob || UNREC
+
+  const ins = useMemo(() => { const m = new Map(); d.viz.edges.forEach(e => { const t = eid(e.target); (m.get(t) || m.set(t, []).get(t)).push(e) }); return m }, [d])
+  const outs = useMemo(() => { const m = new Map(); d.viz.edges.forEach(e => { const s = eid(e.source); (m.get(s) || m.set(s, []).get(s)).push(e) }); return m }, [d])
+
+  const rollup = useMemo(() => {
+    const m = new Map()
+    for (const n of nodes) {
+      const k = lobOf(n)
+      const o = m.get(k) || { lob: k, systems: 0, inScope: 0, hidden: 0, carriers: 0, sources: 0, maxRisk: 0, apps: [] }
+      o.systems++; if (n.in_scope) o.inScope++; if (n.hidden_pci) o.hidden++
+      if (n.carries_pan) o.carriers++; if (n.true_source) o.sources++
+      o.maxRisk = Math.max(o.maxRisk, n.risk || 0); o.apps.push(n); m.set(k, o)
+    }
+    return [...m.values()].sort((a, b) => b.inScope - a.inScope || b.systems - a.systems)
+  }, [d])
+
+  const totals = useMemo(() => ({
+    inScope: nodes.filter(n => n.in_scope).length,
+    meta: nodes.filter(n => n.in_scope && n.scope_prov === 'metadata').length,
+    inf: nodes.filter(n => n.in_scope && n.scope_prov !== 'metadata').length,
+    out: nodes.filter(n => !n.in_scope).length,
+    hidden: nodes.filter(n => n.hidden_pci).length,
+    carriers: nodes.filter(n => n.carries_pan).length,
+    sources: nodes.filter(n => n.true_source).length,
+    lobs: rollup.filter(r => r.lob !== UNREC).length,
+  }), [d, rollup])
+
+  const scopeSeg = [
+    { label: 'In scope — metadata-confirmed', value: totals.meta, color: '#2563EB' },
+    { label: 'In scope — inferred-only', value: totals.inf, color: '#E8A33D' },
+    { label: 'Out of scope', value: totals.out, color: '#C7CDD6' },
+  ]
+  const maxLob = Math.max(1, ...rollup.slice(0, 12).map(r => r.systems))
+  const sel = lob ? rollup.find(r => r.lob === lob) : null
+  const appNode = app ? nodes.find(n => n.id === app) : null
+  const roleOf = n => n.true_source ? 'true source' : n.carries_pan ? 'PAN carrier' : (outs.get(n.id) || []).length ? 'relay' : 'leaf consumer'
+  const goApp = id => { const n = nodes.find(x => x.id === id); if (n) { setApp(id); setLob(lobOf(n)) } }
+  const riskCell = v => <span className="px-2 py-0.5 rounded" style={{ background: 'rgba(215,30,40,' + ((v || 0) / 120) + ')', color: (v || 0) > 55 ? '#fff' : '#1F2329' }}>{Math.round(v || 0)}</span>
+
+  // rich drill-down modal state + the two analyst lenses (BA reconciliation, tokenization verdict)
+  const [mLob, setMLob] = useState(null)
+  const [mTab, setMTab] = useState('apps')
+  const [mApp, setMApp] = useState(null)
+  const [mMismOnly, setMMismOnly] = useState(false)
+  const [mCopied, setMCopied] = useState(false)
+  const openModal = id => { setMLob(id); setMTab('apps'); setMApp(null); setMMismOnly(false) }
+  const recon = n => {                       // BAM (system of record) vs Splunk (observed)
+    if (n.hidden_pci) return { bam: 'No', splunk: 'PAN seen', status: 'UNDECLARED — investigate', tone: 'text-panhot', bg: 'tint-red', bad: true }
+    if (n.carries_pan && n.pan_in_logs_observed) return { bam: 'Yes', splunk: 'PAN seen', status: 'declared & observed', tone: 'text-safe', bg: '' }
+    if (n.carries_pan) return { bam: 'Yes', splunk: '—', status: 'declared, no log signal', tone: 'text-dim', bg: '' }
+    return { bam: 'No', splunk: '—', status: 'no PAN', tone: 'text-faint', bg: '' }
+  }
+  const tok = n => n.true_source ? 'Tokenize here — becomes a CRN emitter; stays in CDE as the tokenization point'
+    : n.carries_pan ? 'Descopes once every true-source parent feeding it is tokenized (conjunctive)'
+    : n.in_scope ? 'Connected — leaves scope when its upstream PAN feed is tokenized'
+    : 'Out of PCI scope'
+
+  return (
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="disp font-bold text-xl">Business view <span className="text-faint text-sm font-normal">— PCI exposure by line of business, drill to application lineage</span></div>
+        <div className="text-xs text-dim mt-0.5">Portfolio at a glance → click a business unit to see its applications → click an application to see exactly what feeds it and what it feeds.</div>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <KPI label="In PCI scope" value={fmt(totals.inScope)} sub={`${fmt(totals.meta)} confirmed · ${fmt(totals.inf)} inferred`} tone="pan" delay={0} />
+        <KPI label="Hidden PCI" value={fmt(totals.hidden)} sub="BAM=No, PAN in Splunk" tone="hot" delay={60} />
+        <KPI label="Clear-PAN carriers" value={fmt(totals.carriers)} sub="systems holding PAN" tone="pan" delay={120} />
+        <KPI label="True PAN sources" value={fmt(totals.sources)} sub="origin systems" tone="safe" delay={180} />
+        <KPI label="Business units touched" value={fmt(totals.lobs)} sub="lines of business" tone="cool" delay={240} />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-5">
+        <div className="card p-5">
+          <div className="disp font-bold text-lg mb-3">Scope composition</div>
+          <Donut segments={scopeSeg} />
+          <div className="text-[11px] text-faint mt-3">Confirmed = reached via authoritative BAM edges. Inferred-only = surfaced by survey/Splunk signals (a lead to investigate, never assumed fact).</div>
+        </div>
+        <div className="card p-5">
+          <div className="disp font-bold text-lg mb-1">Exposure by business unit</div>
+          <div className="text-xs text-dim mb-3">Top 12 by system count. Grey = all systems, <b className="text-pan">red</b> = in scope, <b className="text-panhot">dark</b> = hidden PCI. Click a bar to drill.</div>
+          <div className="space-y-2">
+            {rollup.slice(0, 12).map(r => (
+              <div key={r.lob} className="cursor-pointer" onClick={() => { setLob(r.lob); setApp(null) }}>
+                <div className="flex justify-between text-[11px] mb-0.5">
+                  <span className={'truncate pr-2 ' + (lob === r.lob ? 'text-pan font-semibold' : 'text-dim')}>{r.lob}</span>
+                  <span className="mono text-faint shrink-0">{r.inScope}/{r.systems}</span>
+                </div>
+                <div className="h-4 rounded bg-panel2 overflow-hidden relative">
+                  <div className="h-full bg-[#C7CDD6]" style={{ width: 100 * r.systems / maxLob + '%' }} />
+                  <div className="h-full bg-pan absolute top-0 left-0" style={{ width: 100 * r.inScope / maxLob + '%', opacity: .85 }} />
+                  {r.hidden > 0 && <div className="h-full bg-[#8F0E1E] absolute top-0 left-0" style={{ width: 100 * r.hidden / maxLob + '%' }} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card p-5">
+        <div className="disp font-bold text-lg mb-2">Lines of business <span className="text-faint text-sm font-normal">— click a row to open its applications</span></div>
+        <div className="scroll overflow-auto max-h-[340px]">
+          <table className="dt w-full text-sm">
+            <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+              <th className="w-8"></th><th>Business unit</th><th>Systems</th><th>In scope</th><th>Hidden PCI</th><th>PAN carriers</th><th>True sources</th><th>Max risk</th></tr></thead>
+            <tbody>{rollup.map(r => (
+              <tr key={r.lob} className={'hh mono cursor-pointer ' + (lob === r.lob ? 'bg-pan/10' : '')} onClick={() => { setLob(r.lob); setApp(null) }}>
+                <td><button title="open detailed view" onClick={e => { e.stopPropagation(); openModal(r.lob) }}
+                  className="w-5 h-5 rounded border border-[#D9D3C7] text-dim hover:border-pan hover:text-pan leading-none">+</button></td>
+                <td className={lob === r.lob ? 'text-pan font-semibold' : 'text-txt'}>{r.lob}</td>
+                <td>{fmt(r.systems)}</td>
+                <td className="text-pan">{fmt(r.inScope)}</td>
+                <td className={r.hidden ? 'text-panhot font-semibold' : 'text-faint'}>{fmt(r.hidden)}</td>
+                <td>{fmt(r.carriers)}</td>
+                <td className="text-safe">{fmt(r.sources)}</td>
+                <td>{riskCell(r.maxRisk)}</td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+      </div>
+
+      {sel && (
+        <div className="card p-5" style={{ borderTop: '3px solid #2563EB' }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="disp font-bold text-lg">{sel.lob} <span className="text-faint text-sm font-normal">— {fmt(sel.systems)} systems · {fmt(sel.inScope)} in scope · {fmt(sel.hidden)} hidden · {fmt(sel.sources)} sources</span></div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => openModal(sel.lob)} className="mono text-[11px] px-2 py-1 rounded tint-blue text-cool">⊞ detailed view</button>
+              <button onClick={() => { setLob(null); setApp(null) }} className="text-[11px] text-faint hover:text-pan">✕ close</button>
+            </div>
+          </div>
+          <div className="scroll overflow-auto max-h-[300px]">
+            <table className="dt w-full text-sm">
+              <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+                <th>Application</th><th>Role</th><th>Tier</th><th>Reach</th><th>Scope basis</th><th>Risk</th></tr></thead>
+              <tbody>{sel.apps.slice().sort((a, b) => (b.risk || 0) - (a.risk || 0)).map(n => (
+                <tr key={n.id} className={'hh mono cursor-pointer ' + (app === n.id ? 'bg-cool/10' : '')} onClick={() => setApp(n.id)}>
+                  <td className="flex items-center gap-1.5">
+                    <i className="w-2 h-2 rounded-full inline-block" style={{ background: n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6' }} />
+                    <span className={app === n.id ? 'text-cool font-semibold' : 'text-txt'}>{n.id}</span>
+                  </td>
+                  <td className="text-dim">{roleOf(n)}</td>
+                  <td>{n.tier}/4</td>
+                  <td>{fmt(n.reach || 0)}</td>
+                  <td className={n.scope_prov === 'inferred' ? 'text-pan' : n.scope_prov === 'metadata' ? 'text-safe' : 'text-faint'}>{n.in_scope ? (n.scope_prov === 'metadata' ? 'confirmed' : 'inferred') : 'out'}</td>
+                  <td>{riskCell(n.risk)}</td>
+                </tr>))}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {appNode && (
+        <div className="card p-5" style={{ borderTop: '3px solid #FFCD41', background: 'linear-gradient(180deg,#FFFCF1,#fff 60%)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-[11px] uppercase tracking-widest text-faint">Application lineage</div>
+              <div className="disp font-black text-2xl text-pan">{appNode.id} <span className="text-sm font-normal text-dim">{appNode.name || ''}</span></div>
+              <div className="text-[11px] text-dim mt-0.5">{roleOf(appNode)} · tier {appNode.tier}/4 · {appNode.in_scope ? 'in scope' : 'out of scope'} · {lobOf(appNode)}</div>
+            </div>
+            <button onClick={() => onPick(appNode.id)} className="mono text-[11px] px-2 py-1 rounded tint-blue text-cool whitespace-nowrap">open full drill-down →</button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            <LineageList title="Upstream — feeds this app" empty="No upstream — this is a true source / origin." edges={ins.get(appNode.id) || []} side="source" onGo={goApp} />
+            <LineageList title="Downstream — this app feeds" empty="No downstream — leaf consumer." edges={outs.get(appNode.id) || []} side="target" onGo={goApp} />
+          </div>
+          <div className="text-[11px] text-faint mt-3"><i className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#B45309' }} />amber = inferred edge (signal, not BAM metadata) · grey = metadata-confirmed. Click any neighbour to walk the lineage.</div>
+        </div>
+      )}
+
+      {mLob && (() => {
+        const r = rollup.find(x => x.lob === mLob); if (!r) return null
+        const apps = r.apps.slice().sort((a, b) => (b.risk || 0) - (a.risk || 0))
+        const mism = apps.filter(n => n.hidden_pci)
+        const mNode = mApp ? nodes.find(n => n.id === mApp) : null
+        const Tab = ({ k, label, n }) => (
+          <button onClick={() => setMTab(k)} data-on={mTab === k ? '1' : '0'}
+            className="tab mono text-[12px] px-3 py-2 rounded-lg text-dim whitespace-nowrap">{label}{n != null && <span className="ml-1 text-faint">({n})</span>}</button>
+        )
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,22,34,.45)' }} onClick={() => setMLob(null)}>
+            <div className="card w-full max-w-5xl max-h-[88vh] flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="p-5 border-b border-line flex items-start justify-between">
+                <div>
+                  <div className="text-[11px] uppercase tracking-widest text-faint">Line of business</div>
+                  <div className="disp font-black text-2xl text-txt">{r.lob}</div>
+                  <div className="flex flex-wrap gap-2 mt-2 text-[11px]">
+                    <span className="px-2 py-0.5 rounded bg-panel2 text-dim mono">{fmt(r.systems)} systems</span>
+                    <span className="px-2 py-0.5 rounded tint-red text-pan mono">{fmt(r.inScope)} in scope</span>
+                    {r.hidden > 0 && <span className="px-2 py-0.5 rounded tint-red text-panhot mono font-semibold">{fmt(r.hidden)} hidden PCI</span>}
+                    <span className="px-2 py-0.5 rounded tint-gold mono">{fmt(r.carriers)} PAN carriers</span>
+                    <span className="px-2 py-0.5 rounded tint-green text-safe mono">{fmt(r.sources)} true sources</span>
+                    <span className="px-2 py-0.5 rounded bg-panel2 mono">max risk {Math.round(r.maxRisk)}</span>
+                  </div>
+                </div>
+                <button onClick={() => setMLob(null)} className="text-dim hover:text-pan text-lg leading-none">✕</button>
+              </div>
+
+              <div className="px-5 pt-3 flex gap-1.5 flex-wrap">
+                <Tab k="apps" label="Applications" n={apps.length} />
+                <Tab k="recon" label="BAM ⟷ Splunk" n={mism.length} />
+                <Tab k="lineage" label="Lineage" />
+              </div>
+
+              <div className="scroll overflow-auto p-5 pt-3">
+                {mTab === 'apps' && (
+                  <table className="dt w-full text-sm">
+                    <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+                      <th>Application</th><th>Role</th><th>Tier</th><th>Reach</th><th>Scope basis</th><th>BAM/Splunk</th><th>Risk</th></tr></thead>
+                    <tbody>{apps.map(n => { const rc = recon(n); return (
+                      <tr key={n.id} className="hh mono cursor-pointer" onClick={() => { setMApp(n.id); setMTab('lineage') }}>
+                        <td className="flex items-center gap-1.5">
+                          <i className="w-2 h-2 rounded-full inline-block" style={{ background: n.hidden_pci ? '#8F0E1E' : n.true_source ? '#D71E28' : n.carries_pan ? '#E8A33D' : n.in_scope ? '#2563EB' : '#C7CDD6' }} />
+                          <span className="text-txt">{n.id}</span></td>
+                        <td className="text-dim">{roleOf(n)}</td>
+                        <td>{n.tier}/4</td><td>{fmt(n.reach || 0)}</td>
+                        <td className={n.scope_prov === 'inferred' ? 'text-pan' : n.scope_prov === 'metadata' ? 'text-safe' : 'text-faint'}>{n.in_scope ? (n.scope_prov === 'metadata' ? 'confirmed' : 'inferred') : 'out'}</td>
+                        <td className={rc.tone}>{rc.bam}/{rc.splunk === '—' ? '—' : 'PAN'}</td>
+                        <td>{riskCell(n.risk)}</td>
+                      </tr>) })}</tbody>
+                  </table>
+                )}
+
+                {mTab === 'recon' && (() => {
+                  const reconRows = mMismOnly ? mism : apps
+                  const copyCsv = () => {
+                    const head = ['Application', 'Name', 'BAM', 'Splunk', 'Reconciliation', 'Tier', 'Risk']
+                    const body = reconRows.map(n => { const rc = recon(n); return [n.id, (n.name || '').replace(/[",\n]/g, ' '), 'PCI=' + rc.bam, rc.splunk, rc.status, n.tier + '/4', n.risk] })
+                    const text = [head, ...body].map(r => r.map(c => '"' + String(c) + '"').join(',')).join('\n')
+                    try { navigator.clipboard.writeText(text); setMCopied(true); setTimeout(() => setMCopied(false), 1500) } catch (e) { }
+                  }
+                  return (
+                  <div>
+                    <div className={'rounded-lg px-4 py-3 mb-3 text-sm ' + (mism.length ? 'tint-red' : 'tint-green')}>
+                      {mism.length
+                        ? <span><b className="text-panhot">{mism.length}</b> application{mism.length > 1 ? 's' : ''} in this unit are <b>undeclared</b> — BAM records PCI=No, but Splunk shows clear PAN. These are the catalogue gaps to close first.</span>
+                        : <span className="text-safe">No reconciliation gaps — BAM and Splunk agree across this unit.</span>}
+                    </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <label className="flex items-center gap-1.5 text-[11px] text-dim cursor-pointer select-none">
+                        <input type="checkbox" className="accent-pan" checked={mMismOnly} onChange={e => setMMismOnly(e.target.checked)} /> mismatches only
+                      </label>
+                      <button onClick={copyCsv} className="mono text-[11px] px-2 py-1 rounded border border-[#D9D3C7] text-dim hover:border-pan hover:text-pan">{mCopied ? '✓ copied' : '⧉ copy gap list (CSV)'}</button>
+                      <span className="mono text-[11px] text-faint ml-auto">{fmt(reconRows.length)} rows</span>
+                    </div>
+                    <table className="dt w-full text-sm">
+                      <thead><tr className="text-faint text-[11px] uppercase tracking-wider sticky top-0 bg-panel">
+                        <th>Application</th><th>Name</th><th>BAM (record)</th><th>Splunk (observed)</th><th>Reconciliation</th><th>Tier</th><th>Risk</th></tr></thead>
+                      <tbody>{reconRows.map(n => { const rc = recon(n); return (
+                        <tr key={n.id} className={'mono ' + rc.bg}>
+                          <td className="text-txt">{n.id}</td>
+                          <td className="text-dim font-sans text-xs max-w-[180px] truncate">{n.name || '—'}</td>
+                          <td className={rc.bam === 'No' && rc.bad ? 'text-panhot font-semibold' : 'text-dim'}>PCI = {rc.bam}</td>
+                          <td className={rc.splunk === 'PAN seen' ? 'text-pan' : 'text-faint'}>{rc.splunk}</td>
+                          <td className={rc.tone + ' font-semibold'}>{rc.bad ? '⚠ ' : ''}{rc.status}</td>
+                          <td>{n.tier}/4</td><td>{riskCell(n.risk)}</td>
+                        </tr>) })}
+                        {reconRows.length === 0 && <tr><td colSpan="7" className="text-center text-dim py-6">No mismatches in this unit — BAM and Splunk agree.</td></tr>}</tbody>
+                    </table>
+                    <div className="text-[11px] text-faint mt-3">BAM is the authoritative system of record; Splunk is observed log reality. A mismatch (BAM=No, Splunk=PAN) is unknown scope — the catalogue missed a PAN-handling system.</div>
+                  </div>
+                  )
+                })()}
+
+                {mTab === 'lineage' && (!mNode
+                  ? <div className="text-center text-dim py-10">Pick an application from the <button className="text-cool underline" onClick={() => setMTab('apps')}>Applications</button> tab to see what feeds it and what it feeds.</div>
+                  : (
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="disp font-black text-xl text-pan">{mNode.id} <span className="text-sm font-normal text-dim">{mNode.name || ''}</span></div>
+                          <div className="text-[11px] text-dim mt-0.5">{roleOf(mNode)} · tier {mNode.tier}/4 · risk {mNode.risk} · {mNode.in_scope ? (mNode.scope_prov === 'metadata' ? 'confirmed in scope' : 'inferred in scope') : 'out of scope'}</div>
+                        </div>
+                        <button onClick={() => { onPick(mNode.id); setMLob(null) }} className="mono text-[11px] px-2 py-1 rounded tint-blue text-cool whitespace-nowrap">open full drill-down →</button>
+                      </div>
+                      <div className="rounded-lg px-4 py-2.5 tint-gold text-xs text-dim"><b>Tokenization:</b> {tok(mNode)}</div>
+                      <div className="grid md:grid-cols-2 gap-5">
+                        <LineageList title="Upstream — feeds this app" empty="No upstream — this is a true source / origin." edges={ins.get(mNode.id) || []} side="source" onGo={id => setMApp(id)} />
+                        <LineageList title="Downstream — this app feeds" empty="No downstream — leaf consumer." edges={outs.get(mNode.id) || []} side="target" onGo={id => setMApp(id)} />
+                      </div>
+                      <div className="text-[11px] text-faint"><i className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#B45309' }} />amber = inferred edge · grey = metadata-confirmed. Click a neighbour to walk the chain.</div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+    </div>
+  )
+}
+
 /* ============================ APP ============================ */
 export default function App() {
   const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, reset, clearError } = useData()
@@ -2817,7 +3175,7 @@ export default function App() {
       </div>
       <div className="max-w-[1280px] mx-auto px-5 py-5">
       <nav className="navbar flex gap-0.5 items-center justify-between mb-5 bg-panel rounded-xl p-1 w-full border border-line shadow-sm overflow-x-auto">
-        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['roadmap', 'Roadmap'], ['graph', 'Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
+        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['business', 'Business View'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['roadmap', 'Roadmap'], ['graph', 'Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
           <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-[12px] px-2.5 py-2 rounded-lg text-dim whitespace-nowrap">{l}</button>
           {['hidden', 'roadmap', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
         </React.Fragment>))}
@@ -2825,6 +3183,7 @@ export default function App() {
       {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} onTab={setTab} />}
+      {tab === 'business' && <BusinessReport d={d} onPick={pick} />}
       {tab === 'hidden' && <HiddenScope d={d} onPick={pick} />}
       {tab === 'planner' && <Planner d={d} live={src === 'live'} onPick={pick} />}
       {tab === 'blast' && <BlastRadius d={d} onPick={pick} />}
