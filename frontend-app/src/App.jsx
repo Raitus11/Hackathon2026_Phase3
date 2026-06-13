@@ -2328,7 +2328,7 @@ function ExposureMap({ d, onPick }) {
               </span>
               <span className="text-[11px] text-faint">feeds {fmt(focusNode.reach || 0)} · risk {Math.round(focusNode.risk || 0)} · tier {focusNode.tier != null ? focusNode.tier : '—'}</span>
               {focusNode.true_source && (
-                <button onClick={() => { setMode('sim'); setSimSrc(focusApp) }}
+                <button onClick={() => { setMode('sim'); setSimSrc(focusApp); setFocusApp(null) }}
                   className="mono text-[11px] px-2 py-0.5 rounded border border-pan/40 text-pan bg-pan/5 hover:bg-pan/15">⚡ simulate cutting {focusApp}</button>
               )}
             </>
@@ -2411,7 +2411,7 @@ function ExposureMap({ d, onPick }) {
                     : simSets.down.has(n.id) ? ('→ loses the clear-PAN feed from ' + simSrc)
                     : n.id === simSrc ? '→ the tokenization point' : '→ unaffected by this cut') : ''
                 return (
-                  <g key={li} style={{ cursor: 'pointer' }} opacity={focusApp && n.id !== focusApp ? 0.16 : 1} onClick={() => onPick(n.id)}>
+                  <g key={li} style={{ cursor: 'pointer' }} opacity={mode !== 'sim' && focusApp && n.id !== focusApp ? 0.16 : 1} onClick={() => onPick(n.id)}>
                     <rect x={leaf.x0} y={leaf.y0} width={w} height={h} fill={fill(n)} rx="2"
                       style={{ transition: mode === 'sim' ? 'fill .4s ease' : 'none' }}
                       stroke={focusApp === n.id ? '#0E7C4A' : n.hidden_pci ? '#8F0E1E' : '#FFFFFF'} strokeWidth={focusApp === n.id ? 3 : n.hidden_pci ? 2 : 0.75}>
