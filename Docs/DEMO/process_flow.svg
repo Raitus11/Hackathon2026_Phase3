@@ -1,0 +1,160 @@
+<svg viewBox="0 0 1440 920" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0F1622"/>
+    </marker>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#8F0E1E"/>
+    </marker>
+    <marker id="ag" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B07A1E"/>
+    </marker>
+    <style>
+      .h1{font-size:30px;font-weight:800;fill:#0F1622}
+      .sub{font-size:14px;fill:#5A6472}
+      .n-t{font-size:15px;font-weight:700;fill:#0F1622}
+      .n-s{font-size:11px;fill:#5A6472}
+      .step{font-size:11px;font-weight:800;letter-spacing:1px;fill:#8A8F98}
+      .prod{font-size:10.5px;fill:#0E7C4A;font-weight:700}
+      .mono{font-family:ui-monospace,SF Mono,Consolas,monospace}
+      .lbl{font-size:11px;font-weight:700}
+    </style>
+  </defs>
+  <rect width="1440" height="920" fill="#FAF8F3"/>
+  <text x="60" y="50" class="h1">PCI-SENTINEL — Process Flow</text>
+  <text x="60" y="74" class="sub">LangGraph StateGraph. Solid = main path; the two conditional gates (validate, human review) can branch to abort or loop back to re-analyze.</text>
+
+  <!-- terminals -->
+  <ellipse cx="120" cy="150" rx="46" ry="24" fill="#0F1622"/><text x="120" y="155" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">START</text>
+
+  <!-- helper: each node is a rounded rect 220x118 with step tag, title, method, product -->
+  <!-- Row 1: Supervisor, Ingest, Validate -->
+  <g>
+    <rect x="208" y="104" width="232" height="118" rx="11" fill="#0F1622"/>
+    <text x="224" y="128" class="step" fill="#9AA4B2">STAGE 1 · CONTROL</text>
+    <text x="224" y="150" class="n-t" fill="#fff">Supervisor</text>
+    <text x="224" y="172" class="n-s" fill="#C9CFDA">Initializes graph state, routing,</text>
+    <text x="224" y="187" class="n-s" fill="#C9CFDA">retries; drives every stage.</text>
+    <text x="224" y="210" class="prod" fill="#7FB69B">→ run context + audit start</text>
+  </g>
+  <g>
+    <rect x="486" y="104" width="232" height="118" rx="11" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <text x="502" y="128" class="step">STAGE 2 · DETERMINISTIC</text>
+    <text x="502" y="150" class="n-t">Ingest &amp; Sanitise</text>
+    <text x="502" y="172" class="n-s">Load CSVs, validate schema,</text>
+    <text x="502" y="187" class="n-s">mask PAN first-6/last-4 on entry.</text>
+    <text x="502" y="210" class="prod">→ masked typed dataset</text>
+  </g>
+  <g>
+    <rect x="764" y="104" width="232" height="118" rx="11" fill="#fff" stroke="#8F0E1E" stroke-width="2"/>
+    <text x="780" y="128" class="step" fill="#8F0E1E">STAGE 3 · SAFETY GATE</text>
+    <text x="780" y="150" class="n-t">Validate (masking leak)</text>
+    <text x="780" y="172" class="n-s">Luhn + pattern scan every cell.</text>
+    <text x="780" y="187" class="n-s">Any unmasked PAN ⇒ abort.</text>
+    <text x="780" y="210" class="prod">→ clean dataset · or ABORT</text>
+  </g>
+
+  <!-- abort target -->
+  <g>
+    <rect x="1064" y="120" width="200" height="86" rx="11" fill="#FBE9EA" stroke="#8F0E1E" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="1080" y="146" class="lbl" fill="#8F0E1E">ABORTED</text>
+    <text x="1080" y="168" class="n-s">Run halts safely — no report</text>
+    <text x="1080" y="183" class="n-s">is produced. Leak or reviewer</text>
+    <text x="1080" y="198" class="n-s">abort both land here.</text>
+  </g>
+
+  <!-- Row 2: Graph, DAG, Score -->
+  <g>
+    <rect x="486" y="290" width="232" height="118" rx="11" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <text x="502" y="314" class="step">STAGE 4 · DETERMINISTIC</text>
+    <text x="502" y="336" class="n-t">Build Graph</text>
+    <text x="502" y="358" class="n-s">Typed MultiDiGraph of PAN flow;</text>
+    <text x="502" y="373" class="n-s">metadata vs inferred edges.</text>
+    <text x="502" y="396" class="prod">→ interdependency graph G</text>
+  </g>
+  <g>
+    <rect x="764" y="290" width="232" height="118" rx="11" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <text x="780" y="314" class="step">STAGE 5 · DETERMINISTIC</text>
+    <text x="780" y="336" class="n-t">Condense to DAG</text>
+    <text x="780" y="358" class="n-s">Tarjan SCC → condensation;</text>
+    <text x="780" y="373" class="n-s">acyclicity asserted.</text>
+    <text x="780" y="396" class="prod">→ acyclic lineage DAG</text>
+  </g>
+  <g>
+    <rect x="1042" y="290" width="232" height="118" rx="11" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <text x="1058" y="314" class="step">STAGE 6 · DETERMINISTIC</text>
+    <text x="1058" y="336" class="n-t">Score (Quant)</text>
+    <text x="1058" y="358" class="n-s">Composite risk R(v) ∈ [0,100],</text>
+    <text x="1058" y="373" class="n-s">four named, bounded factors.</text>
+    <text x="1058" y="396" class="prod">→ per-system risk scores</text>
+  </g>
+
+  <!-- Row 3: Analyze, Human gate, Report -->
+  <g>
+    <rect x="1042" y="476" width="232" height="118" rx="11" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <text x="1058" y="500" class="step">STAGE 7 · DETERMINISTIC</text>
+    <text x="1058" y="522" class="n-t">Analyze (Core)</text>
+    <text x="1058" y="544" class="n-s">Scope, heavy hitters, clean-</text>
+    <text x="1058" y="559" class="n-s">stream impact, hidden PCI.</text>
+    <text x="1058" y="582" class="prod">→ findings + visual contracts</text>
+  </g>
+  <g>
+    <rect x="764" y="476" width="232" height="118" rx="11" fill="#FBF1DF" stroke="#E8A33D" stroke-width="2.5"/>
+    <text x="780" y="500" class="step" fill="#B07A1E">STAGE 8 · HUMAN GATE</text>
+    <text x="780" y="522" class="n-t">Human-in-the-Loop</text>
+    <text x="780" y="544" class="n-s">Run pauses (LangGraph interrupt).</text>
+    <text x="780" y="559" class="n-s">Approve · Revise · Abort.</text>
+    <text x="780" y="582" class="lbl" fill="#B07A1E">decision required</text>
+  </g>
+  <g>
+    <rect x="486" y="476" width="232" height="118" rx="11" fill="#EAF1FE" stroke="#2563EB" stroke-width="2.5"/>
+    <text x="502" y="500" class="step" fill="#2563EB">STAGE 9 · LLM (NARRATE)</text>
+    <text x="502" y="522" class="n-t">Report</text>
+    <text x="502" y="544" class="n-s">LLM explains the computed numbers</text>
+    <text x="502" y="559" class="n-s">in plain language — never decides.</text>
+    <text x="502" y="582" class="prod" fill="#2563EB">→ PDF · XLSX · UI JSON</text>
+  </g>
+
+  <!-- END -->
+  <ellipse cx="300" cy="535" rx="46" ry="24" fill="#0F1622"/><text x="300" y="540" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">END</text>
+
+  <!-- ===== main-path arrows ===== -->
+  <line x1="166" y1="150" x2="206" y2="160" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="440" y1="163" x2="484" y2="163" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="718" y1="163" x2="762" y2="163" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <!-- validate -> abort (branch) -->
+  <line x1="996" y1="163" x2="1062" y2="163" stroke="#8F0E1E" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+  <text x="1004" y="155" class="lbl" fill="#8F0E1E">leak ✕</text>
+  <!-- validate -> graph (down then left into stage4) -->
+  <path d="M820,222 L820,260 L602,260 L602,288" fill="none" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <text x="640" y="252" class="lbl" fill="#0E7C4A">clean ✓</text>
+  <!-- graph -> dag -> score -->
+  <line x1="718" y1="349" x2="762" y2="349" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="996" y1="349" x2="1040" y2="349" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <!-- score -> analyze (down) -->
+  <line x1="1158" y1="408" x2="1158" y2="474" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <!-- analyze -> human gate -->
+  <line x1="1040" y1="535" x2="998" y2="535" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <!-- human gate -> report (approve) -->
+  <line x1="762" y1="535" x2="720" y2="535" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+  <text x="726" y="527" class="lbl" fill="#0E7C4A">approve ✓</text>
+  <!-- report -> END -->
+  <line x1="484" y1="535" x2="348" y2="535" stroke="#0F1622" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- human gate -> revise (loop back to analyze) -->
+  <path d="M880,594 L880,648 L1158,648 L1158,596" fill="none" stroke="#B07A1E" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+  <text x="980" y="668" class="lbl" fill="#B07A1E">revise — re-run analysis with reviewer feedback ↺</text>
+  <!-- human gate -> abort (routed through the column gap + top margin, clear of cards) -->
+  <path d="M764,498 L740,498 L740,90 L1110,90 L1110,118" fill="none" stroke="#8F0E1E" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar)"/>
+  <text x="752" y="84" class="lbl" fill="#8F0E1E">gate abort ✕</text>
+
+  <!-- legend -->
+  <rect x="60" y="724" width="1320" height="150" rx="12" fill="#fff" stroke="#E3DED4"/>
+  <text x="80" y="752" class="step" fill="#0F1622">HOW TO READ THIS FLOW</text>
+  <g font-size="12.5" fill="#3A414C">
+    <text x="80" y="782">●  Nine stages run as explicit, checkpointed LangGraph nodes. The pipeline is <tspan font-weight="700">resumable</tspan> — state is persisted at every step, so a paused or failed run continues without recomputation.</text>
+    <text x="80" y="806">●  <tspan fill="#8F0E1E" font-weight="700">Two safety/decision gates.</tspan>  Validate aborts the run on any unmasked-PAN leak; the human gate pauses for a reviewer to approve, revise (loop back to Analyze), or abort.</text>
+    <text x="80" y="830">●  <tspan fill="#0E7C4A" font-weight="700">Stages 2–7 are deterministic</tspan> (masking, graph, Tarjan SCC→DAG, scoring, analysis) — verifiable and reproducible.  <tspan fill="#2563EB" font-weight="700">Only Stage 9 (Report) uses the LLM</tspan>, and only to narrate computed numbers.</text>
+    <text x="80" y="854">●  Every stage emits an audit line (name + timing), so the agentic structure and run cost are visible end-to-end.</text>
+  </g>
+</svg>

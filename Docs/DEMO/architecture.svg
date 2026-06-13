@@ -1,0 +1,157 @@
+<svg viewBox="0 0 1440 980" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#5A6472"/>
+    </marker>
+    <style>
+      .h1{font-size:30px;font-weight:800;fill:#0F1622}
+      .sub{font-size:14px;fill:#5A6472}
+      .band{font-size:12px;font-weight:700;letter-spacing:2px;fill:#8A8F98}
+      .card-t{font-size:15px;font-weight:700;fill:#0F1622}
+      .card-s{font-size:11.5px;fill:#5A6472}
+      .tag{font-size:9.5px;font-weight:700;letter-spacing:1px}
+      .mono{font-family:ui-monospace,SF Mono,Consolas,monospace}
+    </style>
+  </defs>
+
+  <rect width="1440" height="980" fill="#FAF8F3"/>
+  <text x="60" y="50" class="h1">PCI-SENTINEL — System Architecture</text>
+  <text x="60" y="74" class="sub">Hybrid Intelligence: a deterministic graph engine performs every verifiable computation; the LLM only narrates the already-computed numbers.</text>
+
+  <!-- ============ DATA INPUTS ============ -->
+  <text x="60" y="116" class="band">DATA INPUTS</text>
+  <!-- authoritative BAM -->
+  <rect x="60" y="128" width="640" height="96" rx="10" fill="#EAF1FE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="74" y="148" class="tag" fill="#2563EB">BAM EXTRACTS — AUTHORITATIVE (SYSTEM OF RECORD)</text>
+  <g>
+    <rect x="74" y="158" width="148" height="54" rx="7" fill="#fff" stroke="#C9D6F5"/><text x="84" y="180" class="card-s" font-weight="700" fill="#0F1622">DS1</text><text x="84" y="198" class="card-s">PCI systems + up/down rels</text>
+    <rect x="230" y="158" width="148" height="54" rx="7" fill="#fff" stroke="#C9D6F5"/><text x="240" y="180" class="card-s" font-weight="700" fill="#0F1622">DS2</text><text x="240" y="198" class="card-s">all systems upstream→PCI</text>
+    <rect x="386" y="158" width="148" height="54" rx="7" fill="#fff" stroke="#C9D6F5"/><text x="396" y="180" class="card-s" font-weight="700" fill="#0F1622">DS3</text><text x="396" y="198" class="card-s">all systems downstream←PCI</text>
+    <rect x="542" y="158" width="148" height="54" rx="7" fill="#fff" stroke="#C9D6F5"/><text x="552" y="180" class="card-s" font-weight="700" fill="#0F1622">DS4</text><text x="552" y="198" class="card-s">any system with PCI data</text>
+  </g>
+  <!-- inferred signals -->
+  <rect x="720" y="128" width="660" height="96" rx="10" fill="#FBF1DF" stroke="#E8A33D" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="734" y="148" class="tag" fill="#B07A1E">SUPPLEMENTAL — SIGNALS ONLY (INFERRED, NEVER GROUND TRUTH)</text>
+  <rect x="734" y="158" width="300" height="54" rx="7" fill="#fff" stroke="#EAD3A6"/><text x="744" y="180" class="card-s" font-weight="700" fill="#0F1622">DS5 — CDE end-state survey</text><text x="744" y="198" class="card-s">declared target-state / detokenization</text>
+  <rect x="1044" y="158" width="324" height="54" rx="7" fill="#fff" stroke="#EAD3A6"/><text x="1054" y="180" class="card-s" font-weight="700" fill="#0F1622">DS6 — Splunk clear-PAN findings</text><text x="1054" y="198" class="card-s">observed PAN in logs (PCI=No in BAM)</text>
+
+  <line x1="720" y1="232" x2="720" y2="258" stroke="#5A6472" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ============ AGENT PIPELINE (HERO) ============ -->
+  <rect x="48" y="252" width="1344" height="430" rx="16" fill="#fff" stroke="#0F1622" stroke-width="2"/>
+  <text x="68" y="284" class="band" fill="#0F1622">AGENTIC PIPELINE — LangGraph StateGraph (checkpointed · resumable · audited per stage)</text>
+
+  <!-- supervisor -->
+  <rect x="68" y="298" width="1304" height="46" rx="9" fill="#0F1622"/>
+  <text x="86" y="320" font-size="14" font-weight="800" fill="#fff">▣ SUPERVISOR / ORCHESTRATOR</text>
+  <text x="86" y="336" font-size="11" fill="#B9C0CC">Owns graph state, routing, retries and the human approval gate — the agent that drives every other agent.</text>
+  <rect x="1230" y="308" width="128" height="26" rx="13" fill="#2A3242"/><text x="1294" y="325" font-size="9.5" font-weight="700" letter-spacing="1" fill="#fff" text-anchor="middle">CONTROL</text>
+
+  <!-- deterministic engine -->
+  <rect x="68" y="356" width="966" height="312" rx="12" fill="#E8F3EC" stroke="#0E7C4A" stroke-width="1.5" stroke-dasharray="7 4"/>
+  <text x="86" y="380" class="tag" fill="#0E7C4A">DETERMINISTIC GRAPH ENGINE — VERIFIABLE · REPRODUCIBLE · NO BLACK BOX (8 of 9 agents)</text>
+
+  <!-- 6 deterministic agent cards: 3 cols x 2 rows -->
+  <!-- row 1 -->
+  <g>
+    <rect x="86" y="392" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="106" cy="416" r="6" fill="#0E7C4A"/><text x="120" y="420" class="card-t">① Ingestion &amp; Sanitiser</text>
+    <text x="100" y="446" class="card-s">Loads CSV exports, validates schema, and</text>
+    <text x="100" y="462" class="card-s">masks PAN at the boundary — nothing</text>
+    <text x="100" y="478" class="card-s">unmasked passes downstream.</text>
+    <rect x="100" y="488" width="190" height="20" rx="10" fill="#E8F3EC"/><text x="110" y="502" class="tag" fill="#0E7C4A">first-6 / last-4 ON INGEST</text>
+  </g>
+  <g>
+    <rect x="398" y="392" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="418" cy="416" r="6" fill="#8F0E1E"/><text x="432" y="420" class="card-t">② Masking-Leak Validator</text>
+    <text x="412" y="446" class="card-s">Luhn + pattern scan across every ingested</text>
+    <text x="412" y="462" class="card-s">cell. The entire run FAILS if any unmasked</text>
+    <text x="412" y="478" class="card-s">PAN ever escapes ingestion.</text>
+    <rect x="412" y="488" width="170" height="20" rx="10" fill="#FBE9EA"/><text x="422" y="502" class="tag" fill="#8F0E1E">SAFETY — HARD FAIL</text>
+  </g>
+  <g>
+    <rect x="710" y="392" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="730" cy="416" r="6" fill="#0E7C4A"/><text x="744" y="420" class="card-t">③ Graph Builder</text>
+    <text x="724" y="446" class="card-s">Builds the system interdependency graph of</text>
+    <text x="724" y="462" class="card-s">cardholder-data flow as a typed MultiDiGraph.</text>
+    <rect x="724" y="488" width="266" height="20" rx="10" fill="#EAF1FE"/><text x="734" y="502" class="tag" fill="#2563EB">METADATA vs INFERRED EDGES KEPT DISTINCT</text>
+  </g>
+  <!-- row 2 -->
+  <g>
+    <rect x="86" y="528" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="106" cy="552" r="6" fill="#0E7C4A"/><text x="120" y="556" class="card-t">④ Cycle Resolver</text>
+    <text x="100" y="582" class="card-s">Surfaces circular dependencies, then</text>
+    <text x="100" y="598" class="card-s">condenses each strongly-connected</text>
+    <text x="100" y="614" class="card-s">component so lineage is a valid DAG.</text>
+    <rect x="100" y="624" width="240" height="20" rx="10" fill="#E8F3EC"/><text x="110" y="638" class="tag" fill="#0E7C4A">TARJAN SCC → CONDENSATION → DAG</text>
+  </g>
+  <g>
+    <rect x="398" y="528" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="418" cy="552" r="6" fill="#D71E28"/><text x="432" y="556" class="card-t">⑤ Quant / Scoring</text>
+    <text x="412" y="582" class="card-s">Assigns each system a defensible composite</text>
+    <text x="412" y="598" class="card-s">risk score, bounded 0–100, every term named.</text>
+    <rect x="412" y="610" width="270" height="34" rx="8" fill="#0F1622"/>
+    <text x="424" y="632" class="mono" font-size="11.5" fill="#fff">R(v)=100·(.40S+.30R+.20B+.10T)</text>
+  </g>
+  <g>
+    <rect x="710" y="528" width="296" height="124" rx="9" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+    <circle cx="730" cy="552" r="6" fill="#0E7C4A"/><text x="744" y="556" class="card-t">⑥ Core Analyst</text>
+    <text x="724" y="582" class="card-s">Graph reachability + exclusive-reach set</text>
+    <text x="724" y="598" class="card-s">logic — the heart of the analysis.</text>
+    <rect x="724" y="610" width="266" height="34" rx="8" fill="#FBF1DF"/>
+    <text x="734" y="626" class="card-s" font-weight="700" fill="#B07A1E">scope · heavy hitters · clean-stream</text>
+    <text x="734" y="640" class="card-s" font-weight="700" fill="#B07A1E">impact · hidden PCI (BAM misses)</text>
+  </g>
+
+  <!-- Human gate + Reporter (right column) -->
+  <g>
+    <rect x="1050" y="392" width="306" height="124" rx="9" fill="#FBF1DF" stroke="#E8A33D" stroke-width="2.5"/>
+    <circle cx="1070" cy="416" r="6" fill="#E8A33D"/><text x="1084" y="420" class="card-t">⑦ Human-in-the-Loop Gate</text>
+    <text x="1064" y="446" class="card-s">The run genuinely pauses for a reviewer to</text>
+    <text x="1064" y="462" class="card-s">approve, revise, or abort before anything</text>
+    <text x="1064" y="478" class="card-s">is reported.</text>
+    <rect x="1064" y="488" width="180" height="20" rx="10" fill="#fff"/><text x="1074" y="502" class="tag" fill="#B07A1E">LangGraph INTERRUPT · HUMAN</text>
+  </g>
+  <g>
+    <rect x="1050" y="528" width="306" height="124" rx="9" fill="#EAF1FE" stroke="#2563EB" stroke-width="2.5"/>
+    <circle cx="1070" cy="552" r="6" fill="#2563EB"/><text x="1084" y="556" class="card-t">⑧ Reporter</text>
+    <text x="1064" y="582" class="card-s">Narrates the already-computed, grounded</text>
+    <text x="1064" y="598" class="card-s">numbers in plain language. It explains —</text>
+    <text x="1064" y="614" class="card-s" font-weight="700" fill="#2563EB">it never decides.</text>
+    <rect x="1064" y="624" width="250" height="20" rx="10" fill="#fff"/><text x="1074" y="638" class="tag" fill="#2563EB">THE ONLY LLM STEP · config-swappable</text>
+  </g>
+
+  <!-- internal flow arrows -->
+  <line x1="234" y1="344" x2="234" y2="390" stroke="#5A6472" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="1034" y1="454" x2="1048" y2="454" stroke="#5A6472" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="1203" y1="516" x2="1203" y2="526" stroke="#5A6472" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <line x1="720" y1="682" x2="720" y2="712" stroke="#5A6472" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ============ DELIVERY ============ -->
+  <text x="60" y="734" class="band">DELIVERY</text>
+  <rect x="60" y="746" width="404" height="92" rx="10" fill="#fff" stroke="#E3DED4"/>
+  <text x="78" y="772" class="card-t">FastAPI service</text>
+  <text x="78" y="794" class="card-s">Async, typed Pydantic I/O, OpenAPI docs.</text>
+  <text x="78" y="812" class="card-s">Fresh-frontier recompute on report endpoints.</text>
+  <rect x="486" y="746" width="404" height="92" rx="10" fill="#fff" stroke="#E3DED4"/>
+  <text x="504" y="772" class="card-t">React 18 + D3 frontend</text>
+  <text x="504" y="794" class="card-s">13 analyst tabs — overview, business view, flow</text>
+  <text x="504" y="812" class="card-s">graph, exposure map, planner, drill-down, methods.</text>
+  <rect x="912" y="746" width="468" height="92" rx="10" fill="#fff" stroke="#E3DED4"/>
+  <text x="930" y="772" class="card-t">Reports &amp; evidence bundle</text>
+  <text x="930" y="794" class="card-s">PDF executive report · XLSX with charted Dashboard ·</text>
+  <text x="930" y="812" class="card-s">metrics + per-stage audit trail for reproducibility.</text>
+
+  <!-- ============ CROSS-CUTTING + LEGEND ============ -->
+  <rect x="60" y="862" width="1320" height="92" rx="10" fill="#0F1622"/>
+  <text x="78" y="888" class="tag" fill="#9AA4B2">CROSS-CUTTING GUARANTEES</text>
+  <text x="78" y="912" font-size="12.5" fill="#fff">● Masking-leak safety — run FAILS on any unmasked PAN   ● Per-stage audit log   ● Metadata vs inferred provenance preserved end-to-end   ● LLM behind a config-swappable client (no vendor lock)</text>
+  <g font-size="11" fill="#B9C0CC">
+    <rect x="78" y="926" width="11" height="11" rx="2" fill="#0F1622" stroke="#fff"/><text x="95" y="936">Control</text>
+    <rect x="170" y="926" width="11" height="11" rx="2" fill="#0E7C4A"/><text x="187" y="936">Deterministic engine</text>
+    <rect x="330" y="926" width="11" height="11" rx="2" fill="#E8A33D"/><text x="347" y="936">Human gate</text>
+    <rect x="450" y="926" width="11" height="11" rx="2" fill="#2563EB"/><text x="467" y="936">LLM (narration only)</text>
+    <rect x="620" y="926" width="11" height="11" rx="2" fill="#8F0E1E"/><text x="637" y="936">Safety / critical</text>
+  </g>
+</svg>

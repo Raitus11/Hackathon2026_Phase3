@@ -1,0 +1,142 @@
+<svg viewBox="0 0 1440 980" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#5A6472"/>
+    </marker>
+    <style>
+      .h1{font-size:30px;font-weight:800;fill:#0F1622}
+      .sub{font-size:14px;fill:#5A6472}
+      .band{font-size:12px;font-weight:700;letter-spacing:2px;fill:#8A8F98}
+      .ct{font-size:16px;font-weight:800;fill:#0F1622}
+      .cs{font-size:11.5px;fill:#5A6472}
+      .w{font-size:22px;font-weight:800}
+      .mono{font-family:ui-monospace,SF Mono,Consolas,monospace}
+      .cite{font-size:10px;font-style:italic;fill:#8A8F98}
+    </style>
+  </defs>
+  <rect width="1440" height="980" fill="#FAF8F3"/>
+  <text x="60" y="50" class="h1">PCI-SENTINEL — Risk Score Calculation Logic</text>
+  <text x="60" y="74" class="sub">A composite per-system exposure score R(v) ∈ [0,100]: a weighted sum of four normalized, individually-defensible factors. No magic constants, no black box.</text>
+
+  <!-- formula banner -->
+  <rect x="60" y="98" width="1320" height="78" rx="12" fill="#0F1622"/>
+  <text x="84" y="135" class="mono" font-size="22" fill="#fff">R(v) = 100 × ( <tspan fill="#E8A33D">0.40·S</tspan> + <tspan fill="#2563EB">0.30·R</tspan> + <tspan fill="#7FB69B">0.20·B</tspan> + <tspan fill="#F4A8AF">0.10·T</tspan> )</text>
+  <text x="84" y="160" class="mono" font-size="12.5" fill="#9AA4B2">each factor scaled to [0,1] · weights from config (sum = 1.0, env-tunable) · result rounded to 2dp</text>
+  <rect x="1120" y="116" width="236" height="44" rx="8" fill="#1E2738"/>
+  <text x="1238" y="136" font-size="12" fill="#9AA4B2" text-anchor="middle">output range</text>
+  <text x="1238" y="153" class="mono" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">0 → 100</text>
+
+  <!-- four factor cards -->
+  <text x="60" y="208" class="band">THE FOUR FACTORS</text>
+
+  <!-- S -->
+  <rect x="60" y="220" width="320" height="248" rx="12" fill="#fff" stroke="#E8A33D" stroke-width="2"/>
+  <rect x="60" y="220" width="320" height="40" rx="12" fill="#FBF1DF"/>
+  <text x="80" y="246" class="ct" fill="#B07A1E">S · Sensitivity</text>
+  <text x="356" y="246" class="w" fill="#E8A33D" text-anchor="end">.40</text>
+  <text x="80" y="284" class="mono" font-size="13" fill="#0F1622">S = sensitivity_tier / 4</text>
+  <text x="80" y="312" class="cs">What cardholder data the system declares</text>
+  <text x="80" y="328" class="cs">(from BAM / DS4):</text>
+  <text x="80" y="352" class="cs"><tspan font-weight="700" fill="#8F0E1E">tier 4</tspan> — untokenized PAN / track / PIN /</text>
+  <text x="80" y="367" class="cs">  detokenization service</text>
+  <text x="80" y="388" class="cs"><tspan font-weight="700" fill="#B07A1E">tier 3</tspan> — CRN-only / PCI-connected</text>
+  <text x="80" y="409" class="cs"><tspan font-weight="700" fill="#2563EB">tier 2</tspan> — inferred PAN (DS6 signal)</text>
+  <line x1="80" y1="426" x2="360" y2="426" stroke="#F0E6D2"/>
+  <text x="80" y="448" class="cite">PCI-DSS data-element risk ordering</text>
+  <text x="80" y="462" class="cite">(highest weight: what data is most decisive)</text>
+
+  <!-- R -->
+  <rect x="396" y="220" width="320" height="248" rx="12" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+  <rect x="396" y="220" width="320" height="40" rx="12" fill="#EAF1FE"/>
+  <text x="416" y="246" class="ct" fill="#2563EB">R · Reach</text>
+  <text x="692" y="246" class="w" fill="#2563EB" text-anchor="end">.30</text>
+  <text x="416" y="284" class="mono" font-size="12.5" fill="#0F1622">R = |descendants(v)| / max_reach</text>
+  <text x="416" y="312" class="cs">Downstream blast radius: how many systems</text>
+  <text x="416" y="328" class="cs">v can propagate PAN to, via the transitive</text>
+  <text x="416" y="344" class="cs">closure of the data-flow graph.</text>
+  <text x="416" y="372" class="cs">Max-scaled to the most-reaching system, so</text>
+  <text x="416" y="388" class="cs">"the widest distributor" carries the full</text>
+  <text x="416" y="404" class="cs">reach weight relative to the real estate.</text>
+  <line x1="416" y1="426" x2="696" y2="426" stroke="#DCE6FB"/>
+  <text x="416" y="448" class="cite">Reachability / transitive closure on the DAG.</text>
+  <text x="416" y="462" class="cite">Larger reach ⇒ larger exposure.</text>
+
+  <!-- B -->
+  <rect x="732" y="220" width="320" height="248" rx="12" fill="#fff" stroke="#0E7C4A" stroke-width="2"/>
+  <rect x="732" y="220" width="320" height="40" rx="12" fill="#E8F3EC"/>
+  <text x="752" y="246" class="ct" fill="#0E7C4A">B · Betweenness</text>
+  <text x="1028" y="246" class="w" fill="#0E7C4A" text-anchor="end">.20</text>
+  <text x="752" y="284" class="mono" font-size="12.5" fill="#0F1622">B = betweenness(v) / max_betw</text>
+  <text x="752" y="312" class="cs">Conduit role — how many shortest PAN paths</text>
+  <text x="752" y="328" class="cs">route through v. Captures choke-points that</text>
+  <text x="752" y="344" class="cs">reach alone misses.</text>
+  <text x="752" y="372" class="cs">Exact on small graphs; pivot-sampled (k=400,</text>
+  <text x="752" y="388" class="cs">fixed seed) above 600 nodes so scoring stays</text>
+  <text x="752" y="404" class="cs">sub-second at enterprise scale.</text>
+  <line x1="752" y1="426" x2="1032" y2="426" stroke="#D5EADD"/>
+  <text x="752" y="448" class="cite">Freeman 1977; Brandes 2001 (algorithm);</text>
+  <text x="752" y="462" class="cite">Brandes &amp; Pich 2007 (unbiased sampled estimator).</text>
+
+  <!-- T -->
+  <rect x="1068" y="220" width="312" height="248" rx="12" fill="#fff" stroke="#D71E28" stroke-width="2"/>
+  <rect x="1068" y="220" width="312" height="40" rx="12" fill="#FBE9EA"/>
+  <text x="1088" y="246" class="ct" fill="#D71E28">T · True-source flag</text>
+  <text x="1356" y="246" class="w" fill="#D71E28" text-anchor="end">.10</text>
+  <text x="1088" y="284" class="mono" font-size="12.5" fill="#0F1622">T = 1 if true source else 0</text>
+  <text x="1088" y="312" class="cs">A true PAN source = in-degree 0 in the</text>
+  <text x="1088" y="328" class="cs">data-flow graph AND carries / originates PAN.</text>
+  <text x="1088" y="356" class="cs">These are where tokenization yields the</text>
+  <text x="1088" y="372" class="cs">clean-stream effect, so they carry the</text>
+  <text x="1088" y="388" class="cs">intervention leverage — a small but decisive</text>
+  <text x="1088" y="404" class="cs">tie-breaker toward where to act.</text>
+  <line x1="1088" y1="426" x2="1364" y2="426" stroke="#F4D4D7"/>
+  <text x="1088" y="448" class="cite">Origin detection on the typed graph;</text>
+  <text x="1088" y="462" class="cite">drives the tokenization recommendation.</text>
+
+  <!-- assembly arrows into a sum bar -->
+  <line x1="220" y1="468" x2="220" y2="500" stroke="#5A6472" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="556" y1="468" x2="556" y2="500" stroke="#5A6472" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="892" y1="468" x2="892" y2="500" stroke="#5A6472" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="1224" y1="468" x2="1224" y2="500" stroke="#5A6472" stroke-width="1.4" marker-end="url(#a)"/>
+  <rect x="60" y="504" width="1320" height="56" rx="10" fill="#EAF1FE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="84" y="538" class="mono" font-size="15" fill="#0F1622">weighted sum  →  × 100  →  round(2dp)  →  bounded composite risk score R(v) ∈ [0,100]</text>
+
+  <!-- worked example -->
+  <text x="60" y="600" class="band">WORKED EXAMPLE — VERIFIES AGAINST THE SHIPPED NUMBER</text>
+  <rect x="60" y="612" width="660" height="240" rx="12" fill="#0F1622"/>
+  <text x="84" y="642" font-size="15" font-weight="800" fill="#fff">System 8MEC <tspan font-size="12" font-weight="400" fill="#9AA4B2">— a tier-4 true PAN source</tspan></text>
+  <g class="mono" font-size="13.5" fill="#C9CFDA">
+    <text x="84" y="676">S = tier 4/4         = 1.000   → 0.40 × 1.000 = <tspan fill="#E8A33D">0.400</tspan></text>
+    <text x="84" y="702">R = reach 27 / 33    = 0.818   → 0.30 × 0.818 = <tspan fill="#7FB6FF">0.245</tspan></text>
+    <text x="84" y="728">B = betweenness norm = 0.000   → 0.20 × 0.000 = <tspan fill="#7FB69B">0.000</tspan></text>
+    <text x="84" y="754">T = true source      = 1       → 0.10 × 1     = <tspan fill="#F4A8AF">0.100</tspan></text>
+  </g>
+  <line x1="84" y1="770" x2="696" y2="770" stroke="#2A3242"/>
+  <text x="84" y="800" class="mono" font-size="15" fill="#fff">R(8MEC) = 100 × (0.400 + 0.245 + 0.000 + 0.100)</text>
+  <text x="84" y="832" class="mono" font-size="20" font-weight="800" fill="#fff">          = 74.55  <tspan font-size="13" fill="#7FB69B">✓ matches shipped score exactly</tspan></text>
+
+  <!-- design notes -->
+  <rect x="740" y="612" width="640" height="240" rx="12" fill="#fff" stroke="#E3DED4"/>
+  <text x="764" y="640" class="band" fill="#0F1622">WHY IT'S DEFENSIBLE</text>
+  <g font-size="12.5" fill="#3A414C">
+    <text x="764" y="668">●  <tspan font-weight="700">Max-scaling, not /(N−1).</tspan>  Each varying factor is scaled to its</text>
+    <text x="784" y="685">observed maximum, so a 0.30 weight actually moves the score on a</text>
+    <text x="784" y="702">large estate (raw |desc|/(N−1) would squash reach to near-zero).</text>
+    <text x="764" y="726">●  <tspan font-weight="700">Weight sensitivity is structural.</tspan>  Re-running with different</text>
+    <text x="784" y="743">weights leaves the ranking essentially unchanged (ρ ≈ 1.00) — the</text>
+    <text x="784" y="760">order is driven by the graph, not tuned to a desired answer.</text>
+    <text x="764" y="784">●  <tspan font-weight="700">Every term is named, bounded, cited.</tspan>  No opaque model output;</text>
+    <text x="784" y="801">the four factor values are exposed per system for audit.</text>
+    <text x="764" y="825">●  <tspan font-weight="700">Deterministic.</tspan>  Same inputs → same scores, every run (fixed</text>
+    <text x="784" y="842">seed on the sampled betweenness above the threshold).</text>
+  </g>
+
+  <!-- footer -->
+  <text x="60" y="900" class="cite" font-size="11">Computed in the Quant / Scoring agent (deterministic). The LLM never produces or adjusts a score — it only narrates the values shown here.</text>
+  <g font-size="11" fill="#5A6472">
+    <rect x="60" y="918" width="11" height="11" rx="2" fill="#E8A33D"/><text x="77" y="928">Sensitivity .40</text>
+    <rect x="200" y="918" width="11" height="11" rx="2" fill="#2563EB"/><text x="217" y="928">Reach .30</text>
+    <rect x="310" y="918" width="11" height="11" rx="2" fill="#0E7C4A"/><text x="327" y="928">Betweenness .20</text>
+    <rect x="460" y="918" width="11" height="11" rx="2" fill="#D71E28"/><text x="477" y="928">True-source .10</text>
+  </g>
+</svg>
