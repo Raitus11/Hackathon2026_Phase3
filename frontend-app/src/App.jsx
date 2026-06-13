@@ -2894,11 +2894,17 @@ function BusinessReport({ d, onPick }) {
   const [mMismOnly, setMMismOnly] = useState(false)
   const [mCopied, setMCopied] = useState(false)
   const openModal = id => { setMLob(id); setMTab('apps'); setMApp(null); setMMismOnly(false) }
-  const recon = n => {                       // BAM (system of record) vs Splunk (observed)
+  useEffect(() => {
+    if (!mLob) return
+    const onKey = e => { if (e.key === 'Escape') setMLob(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mLob])
+  const recon = n => {                       // BAM (system of record) vs Splunk findings (DS6)
     if (n.hidden_pci) return { bam: 'No', splunk: 'PAN seen', status: 'UNDECLARED — investigate', tone: 'text-panhot', bg: 'tint-red', bad: true }
     if (n.carries_pan && n.pan_in_logs_observed) return { bam: 'Yes', splunk: 'PAN seen', status: 'declared & observed', tone: 'text-safe', bg: '' }
-    if (n.carries_pan) return { bam: 'Yes', splunk: '—', status: 'declared, no log signal', tone: 'text-dim', bg: '' }
-    return { bam: 'No', splunk: '—', status: 'no PAN', tone: 'text-faint', bg: '' }
+    if (n.carries_pan) return { bam: 'Yes', splunk: '—', status: 'declared in BAM', tone: 'text-dim', bg: '' }
+    return { bam: 'No', splunk: '—', status: 'not flagged', tone: 'text-faint', bg: '' }
   }
   const tok = n => n.true_source ? 'Tokenize here — becomes a CRN emitter; stays in CDE as the tokenization point'
     : n.carries_pan ? 'Descopes once every true-source parent feeding it is tokenized (conjunctive)'
@@ -3106,7 +3112,7 @@ function BusinessReport({ d, onPick }) {
                         </tr>) })}
                         {reconRows.length === 0 && <tr><td colSpan="7" className="text-center text-dim py-6">No mismatches in this unit — BAM and Splunk agree.</td></tr>}</tbody>
                     </table>
-                    <div className="text-[11px] text-faint mt-3">BAM is the authoritative system of record; Splunk is observed log reality. A mismatch (BAM=No, Splunk=PAN) is unknown scope — the catalogue missed a PAN-handling system.</div>
+                    <div className="text-[11px] text-faint mt-3">BAM is the authoritative system of record; the Splunk column shows DS6 findings — where clear PAN was <i>observed</i> in logs. A mismatch (BAM=No, Splunk=PAN) is unknown scope: the catalogue missed a PAN-handling system. Absence of a Splunk finding isn't proof a system is clean — DS6 lists observations, not a full sweep.</div>
                   </div>
                   )
                 })()}
