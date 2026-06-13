@@ -2216,14 +2216,46 @@ function ExposureMap({ d, onPick }) {
   const retained = useMemo(() => new Set(((d.impact || {}).retained_via_detokenization) || []), [d])
   const maxRisk = useMemo(() => Math.max(1, ...inScope.map(n => n.risk || 0)), [inScope])
 
+  // find-an-app: locate one system among thousands of tiles (the 4K-scale navigation aid)
+  const [focusApp, setFocusApp] = useState(null)
+  const [query, setQuery] = useState('')
+  const [openList, setOpenList] = useState(false)
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    return inScope.filter(n => n.id.toLowerCase().includes(q) || (n.name || '').toLowerCase().includes(q)).slice(0, 10)
+  }, [query, inScope])
+  const focusNode = useMemo(() => focusApp ? inScope.find(n => n.id === focusApp) : null, [focusApp, inScope])
+  const pickApp = id => { setFocusApp(id); setQuery(''); setOpenList(false); setLobFilter(null); setDistOnly(false) }
+
+  // 4K-scale navigation: narrow the grid to one business unit, and/or hide pure leaf
+  // consumers (reach 0) so only systems that actually distribute card data are shown.
+  const [lobFilter, setLobFilter] = useState(null)
+  const [distOnly, setDistOnly] = useState(false)
+  const [wave, setWave] = useState(99)        // BFS ring currently revealed; 99 = fully shown
+  const [replayKey, setReplayKey] = useState(0)
+  const lobs = useMemo(() => [...new Set(inScope.map(n => n.lob || '(LOB not recorded)'))].sort(), [inScope])
+  const filteredScope = useMemo(() => inScope.filter(n =>
+    (!lobFilter || (n.lob || '(LOB not recorded)') === lobFilter) && (!distOnly || (n.reach || 0) > 0)
+  ), [inScope, lobFilter, distOnly])
+
   const simSets = useMemo(() => {
     if (mode !== 'sim' || !simSrc) return null
     const out = new Map()
     d.viz.edges.forEach(e => { const a = eid(e.source); (out.get(a) || out.set(a, []).get(a)).push(eid(e.target)) })
-    const down = new Set(); let fr = [simSrc]
-    while (fr.length) { const nx = []; fr.forEach(u => (out.get(u) || []).forEach(v => { if (!down.has(v) && v !== simSrc) { down.add(v); nx.push(v) } })); fr = nx }
-    return { down, freed: new Set((seRow && seRow.solo_systems) || []) }
+    const down = new Set(); const hop = new Map(); let fr = [simSrc]; let depth = 0
+    while (fr.length) { depth++; const nx = []; fr.forEach(u => (out.get(u) || []).forEach(v => { if (!down.has(v) && v !== simSrc) { down.add(v); hop.set(v, depth); nx.push(v) } })); fr = nx }
+    return { down, hop, maxHop: depth, freed: new Set((seRow && seRow.solo_systems) || []) }
   }, [mode, simSrc, d, seRow])
+  // live "highlighter": when a source is picked (or replay pressed) light the source, then
+  // ripple the benefit outward one BFS hop at a time so the clear-PAN cut is seen propagating.
+  useEffect(() => {
+    if (mode !== 'sim' || !simSets) { setWave(99); return }
+    setWave(0)
+    let w = 0; const maxH = simSets.maxHop
+    const t = setInterval(() => { w++; setWave(w); if (w >= maxH) clearInterval(t) }, 260)
+    return () => clearInterval(t)
+  }, [simSets, mode, replayKey])
 
   const riskColor = r => {
     const t = Math.min(1, (r || 0) / maxRisk)
@@ -2233,6 +2265,8 @@ function ExposureMap({ d, onPick }) {
   const fateColor = n => n.true_source ? '#D71E28' : retained.has(n.id) ? '#2563EB' : '#0E7C4A'
   const simColor = n => {
     if (!simSets) return '#EDEAE2'
+    const h = n.id === simSrc ? 0 : simSets.hop.get(n.id)
+    if (h == null || h > wave) return '#EDEAE2'   // unaffected, or the sweep hasn't reached it yet
     if (n.id === simSrc) return '#8F0E1E'
     if (simSets.freed.has(n.id)) return '#0E7C4A'
     if (simSets.down.has(n.id)) return '#8CC2A6'
@@ -2246,14 +2280,14 @@ function ExposureMap({ d, onPick }) {
 
   const layout = useMemo(() => {
     const byLob = new Map()
-    inScope.forEach(n => { const k = n.lob || '(LOB not recorded)'; (byLob.get(k) || byLob.set(k, []).get(k)).push(n) })
+    filteredScope.forEach(n => { const k = n.lob || '(LOB not recorded)'; (byLob.get(k) || byLob.set(k, []).get(k)).push(n) })
     const root = d3.hierarchy({
       children: [...byLob.entries()].map(([lob, kids]) => ({ lob, children: kids.map(n => ({ node: n })) }))
     }).sum(x => x.node ? 1 + (x.node.reach || 0) : 0).sort((a, b) => b.value - a.value)
     const W = 1180, H = 640
     d3.treemap().size([W, H]).paddingInner(2).paddingTop(18).paddingOuter(3).round(true)(root)
     return { root, W, H }
-  }, [inScope])
+  }, [filteredScope])
 
   const Mode = ({ k, l }) => (
     <button onClick={() => setMode(k)}
@@ -2264,6 +2298,59 @@ function ExposureMap({ d, onPick }) {
       <div className="card p-5">
         <div className="disp font-bold text-lg">PCI Exposure Map <span className="text-faint text-xs font-normal">— every tile is an in-scope system · area = how many systems it feeds · built to stay legible at 4,000+ apps</span></div>
         <div className="text-xs text-dim mt-1 max-w-4xl">Grouped by line of business, read like a market heatmap. Big tiles are the distributors that matter; tiny tiles are leaf consumers. Switch the coloring: <b>Risk heat</b> (deeper red = riskier), <b>Fate</b> (what happens under full tokenization), or <b>⚡ Simulate</b> — pick a source and watch exactly which systems benefit when its clear-PAN feed is cut. Click any tile to drill into its lineage.</div>
+
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <span className="text-[11px] text-faint">find an app:</span>
+          <div className="relative" style={{ minWidth: 220 }}>
+            <input value={query} placeholder="search id or name…"
+              onChange={e => { setQuery(e.target.value); setOpenList(true) }}
+              onFocus={() => setOpenList(true)}
+              onKeyDown={e => { if (e.key === 'Enter' && matches[0]) pickApp(matches[0].id); if (e.key === 'Escape') setOpenList(false) }}
+              className="mono text-[11px] px-2 py-1 rounded-lg border border-[#D9D3C7] bg-white text-txt w-full outline-none focus:border-pan focus:ring-2 focus:ring-gold/50" />
+            {openList && matches.length > 0 && (
+              <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded border border-line bg-white shadow-xl">
+                {matches.map(m => (
+                  <button key={m.id} onClick={() => pickApp(m.id)}
+                    className="block w-full text-left px-2 py-1 hover:bg-gold/10 border-b border-line/40 last:border-0">
+                    <span className="mono text-[11px] text-txt">{m.id}</span>
+                    {m.true_source && <span className="mono text-[9px] text-pan ml-1">⚡ source</span>}
+                    {m.hidden_pci && <span className="mono text-[9px] text-panhot ml-1">hidden-PCI</span>}
+                    <span className="block text-[10px] text-dim truncate">{m.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {focusNode && (
+            <>
+              <span className="mono text-[11px] px-2 py-1 rounded bg-gold/15 text-pan border border-pan/40 flex items-center gap-1">
+                {focusApp}<button onClick={() => setFocusApp(null)} className="ml-1 text-dim hover:text-txt" title="clear">✕</button>
+              </span>
+              <span className="text-[11px] text-faint">feeds {fmt(focusNode.reach || 0)} · risk {Math.round(focusNode.risk || 0)} · tier {focusNode.tier != null ? focusNode.tier : '—'}</span>
+              {focusNode.true_source && (
+                <button onClick={() => { setMode('sim'); setSimSrc(focusApp) }}
+                  className="mono text-[11px] px-2 py-0.5 rounded border border-pan/40 text-pan bg-pan/5 hover:bg-pan/15">⚡ simulate cutting {focusApp}</button>
+              )}
+            </>
+          )}
+          {!focusApp && <span className="text-[11px] text-faint">spotlight any system in the grid — the rest dim out</span>}
+        </div>
+
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <span className="text-[11px] text-faint">narrow to:</span>
+          <select value={lobFilter || ''} onChange={e => setLobFilter(e.target.value || null)}
+            className="mono text-[11px] px-2 py-1 rounded-lg border border-[#D9D3C7] bg-white text-txt outline-none focus:border-pan">
+            <option value="">all business units</option>
+            {lobs.map(l => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <label className="flex items-center gap-1 text-[11px] text-dim cursor-pointer select-none">
+            <input type="checkbox" className="accent-pan" checked={distOnly} onChange={e => setDistOnly(e.target.checked)} />
+            distributors only (hide leaf consumers)
+          </label>
+          <span className="mono text-[11px] text-faint ml-1">{fmt(filteredScope.length)} of {fmt(inScope.length)} tiles</span>
+          {(lobFilter || distOnly) && <button onClick={() => { setLobFilter(null); setDistOnly(false) }} className="text-[11px] text-pan hover:underline">reset</button>}
+        </div>
+
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <span className="text-[11px] text-faint">color by:</span>
           <Mode k="risk" l="Risk heat" /><Mode k="fate" l="Fate under full tokenization" /><Mode k="sim" l="⚡ Simulate a source" />
@@ -2284,9 +2371,12 @@ function ExposureMap({ d, onPick }) {
             <span><b className="disp text-safe text-base">{fmt(seRow.feeds_removed)}</b> stop receiving its clear-PAN feed</span>
             <span><b className="disp text-cool text-base">{fmt(seRow.parent_reduction)}</b> have exposure narrowed</span>
             <span className="text-faint">{simSrc} stays in the CDE as the tokenization point</span>
+            <button onClick={() => setReplayKey(k => k + 1)} title="replay the propagation sweep"
+              className="mono text-[11px] px-2 py-0.5 rounded border border-safe/40 text-safe bg-safe/5 hover:bg-safe/10 ml-auto">
+              {wave < simSets?.maxHop ? `sweeping… hop ${wave}/${simSets?.maxHop}` : '▶ replay sweep'}</button>
           </div>
         )}
-        {mode === 'sim' && !simSrc && <div className="mt-3 text-[11px] text-faint">Pick a source above — the map recolors to show exactly who benefits.</div>}
+        {mode === 'sim' && !simSrc && <div className="mt-3 text-[11px] text-faint">Pick a source above (these are the true PAN origins). The map recolors live: <b className="text-safe">green</b> = systems fully freed if you tokenize it, <b style={{ color: '#8CC2A6' }}>pale green</b> = lose its clear-PAN feed but stay in scope via another source, grey = unaffected. It answers "if we cut clear PAN here, exactly who benefits?"</div>}
         <div className="flex flex-wrap gap-4 mt-3 text-[11px] text-dim">
           {mode === 'risk' && <>
             <span><i className="inline-block w-3 h-3 rounded-sm align-[-2px] mr-1.5" style={{ background: riskColor(maxRisk * 0.15) }} />lower risk</span>
@@ -2321,9 +2411,12 @@ function ExposureMap({ d, onPick }) {
                     : simSets.down.has(n.id) ? ('→ loses the clear-PAN feed from ' + simSrc)
                     : n.id === simSrc ? '→ the tokenization point' : '→ unaffected by this cut') : ''
                 return (
-                  <g key={li} style={{ cursor: 'pointer' }} onClick={() => onPick(n.id)}>
+                  <g key={li} style={{ cursor: 'pointer' }} opacity={focusApp && n.id !== focusApp ? 0.16 : 1} onClick={() => onPick(n.id)}>
                     <rect x={leaf.x0} y={leaf.y0} width={w} height={h} fill={fill(n)} rx="2"
-                      stroke={n.hidden_pci ? '#8F0E1E' : '#FFFFFF'} strokeWidth={n.hidden_pci ? 2 : 0.75} />
+                      style={{ transition: mode === 'sim' ? 'fill .4s ease' : 'none' }}
+                      stroke={focusApp === n.id ? '#0E7C4A' : n.hidden_pci ? '#8F0E1E' : '#FFFFFF'} strokeWidth={focusApp === n.id ? 3 : n.hidden_pci ? 2 : 0.75}>
+                      {focusApp === n.id && <animate attributeName="stroke-width" values="3;5;3" dur="1.4s" repeatCount="indefinite" />}
+                    </rect>
                     {w > 34 && h > 14 && <text x={leaf.x0 + w / 2} y={leaf.y0 + h / 2 + 3} textAnchor="middle"
                       fontSize={Math.min(11, h - 4)} fontWeight="700" fill={textOn(n)} className="mono" style={{ pointerEvents: 'none' }}>{n.id}</text>}
                     <title>{n.id + (n.name ? ' — ' + n.name : '') + '\nfeeds ' + fmt(n.reach || 0) + ' systems · risk ' + Math.round(n.risk || 0) + ' · tier ' + (n.tier != null ? n.tier : '—') + (n.true_source ? '\ntrue PAN source' : '') + (n.hidden_pci ? '\n⚠ hidden PCI — BAM never flagged it' : '') + simNote + '\nclick to drill into lineage'}</title>
