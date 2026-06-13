@@ -1,4 +1,53 @@
 
+```mermaid
+flowchart LR
+    subgraph PROBLEM["THE PROBLEM"]
+        direction TB
+        P1["Cardholder data spreads across<br/>thousands of enterprise systems"]
+        P2["The catalogue (BAM) is<br/>authoritative but incomplete"]
+        P3["Manual PCI scoping is slow,<br/>opaque, and error-prone"]
+    end
+
+    subgraph ENGINE["PCI-SENTINEL"]
+        direction TB
+        E1["Build a provenance-typed lineage DAG<br/>(metadata vs inferred edges kept distinct)"]
+        E2["Score every system — R(v) in [0,100]"]
+        E3["Surface hidden PCI<br/>(clear PAN where BAM says PCI=No)"]
+        E4["Compute the clean-stream<br/>tokenization frontier"]
+        E1 --> E2 --> E3 --> E4
+    end
+
+    subgraph OUTCOME["WHAT YOU GET"]
+        direction TB
+        O1["A defensible, explainable scope map"]
+        O2["A prioritized tokenization plan →<br/>smaller PCI DSS audit surface"]
+        O3["Plain-language narrative<br/>for every audience"]
+    end
+
+    PROBLEM ==> ENGINE ==> OUTCOME
+```
+
+
+PCI-SENTINEL turns an incomplete system catalogue and a sprawl of cardholder-data
+relationships into a defensible, explainable map of true PCI scope — and a ranked
+plan for shrinking it.
+
+- **The problem.** Cardholder data flows across thousands of enterprise systems. The
+  business catalogue (BAM) is the system of record, but it is incomplete — and
+  scoping a PCI DSS audit by hand is slow, opaque, and easy to get wrong.
+- **The engine.** A deterministic graph engine builds a provenance-typed lineage DAG
+  (metadata edges and inferred signals kept strictly distinct), scores every system
+  on a bounded 0–100 risk model, surfaces *hidden* PCI systems carrying clear PAN
+  that BAM never flagged, and computes the **clean-stream tokenization frontier** —
+  where tokenizing a true source descopes everything downstream.
+- **What you get.** A scope map you can defend line-by-line, a prioritized
+  tokenization plan that measurably reduces audit surface, and a plain-language
+  narrative — produced by the LLM over the engine's grounded results — so a
+  compliance lead, an auditor, and an engineer can each act on the same analysis.
+
+
+
+
 > **Hybrid Intelligence:** a deterministic graph engine performs every verifiable computation; the LLM owns the explanation layer that turns those grounded results into language a compliance lead, an auditor, and an engineer can each act on.
 
 ## Data inputs — two classes, never conflated
