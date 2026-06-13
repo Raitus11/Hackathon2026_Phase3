@@ -826,9 +826,9 @@ function GraphView({ d, selected, onPick }) {
     if (!simulate || !focusId) return null
     const out = new Map()
     d.viz.edges.forEach(e => { const a = eid(e.source); (out.get(a) || out.set(a, []).get(a)).push(eid(e.target)) })
-    const down = new Set(); let fr = [focusId]
-    while (fr.length) { const nx = []; fr.forEach(u => (out.get(u) || []).forEach(v => { if (!down.has(v) && v !== focusId) { down.add(v); nx.push(v) } })); fr = nx }
-    return { down, freed: new Set((seRow?.solo_systems) || []) }
+    const down = new Set(); const hop = new Map(); let fr = [focusId]; let depth = 0
+    while (fr.length) { depth++; const nx = []; fr.forEach(u => (out.get(u) || []).forEach(v => { if (!down.has(v) && v !== focusId) { down.add(v); hop.set(v, depth); nx.push(v) } })); fr = nx }
+    return { down, hop, maxHop: depth, freed: new Set((seRow?.solo_systems) || []) }
   }, [simulate, focusId, d, seRow])
 
   const focusResult = useMemo(() => focusId ? focusGraphCapped(d.viz, focusId, hops, dir) : null, [d, focusId, hops, dir])
@@ -889,6 +889,16 @@ function GraphView({ d, selected, onPick }) {
       .attr('stroke-width', e => Math.min(3, 1 + (e.count || 1) * .25))
       .attr('stroke-dasharray', e => (simOn && eid(e.source) === focusId) ? '5 3' : e.provenance === 'inferred' ? '4 3' : null)
       .attr('stroke-opacity', e => simOn ? ((eid(e.source) === focusId || simSets.down.has(eid(e.source))) ? .8 : .12) : null)
+    // amber "current" overlay: thick animated line that runs along the cut source's
+    // downstream PAN-flow tree — layered above links, below nodes, revealed hop-by-hop.
+    let flow = null
+    if (simOn) {
+      const flowEdges = Lv.filter(e => { const s = eid(e.source), t = eid(e.target); return (s === focusId || simSets.down.has(s)) && simSets.down.has(t) })
+      flow = g.append('g').attr('pointer-events', 'none').selectAll('line').data(flowEdges).join('line')
+        .attr('stroke', '#F5A623').attr('stroke-width', 4.5).attr('stroke-linecap', 'round')
+        .attr('stroke-opacity', 0).attr('stroke-dasharray', '10 8').attr('marker-end', 'url(#arrow)')
+      flow.append('animate').attr('attributeName', 'stroke-dashoffset').attr('values', '0;-18').attr('dur', '0.5s').attr('repeatCount', 'indefinite')
+    }
     const node = g.append('g').selectAll('circle').data(N).join('circle')
       .attr('class', 'node').attr('r', rad).attr('fill', color)
       .attr('stroke', n => isRoot(n) ? '#0E7C4A' : n.hidden_pci ? '#8F0E1E' : (heavySet.has(n.id) ? '#1F2329' : (n.scope_prov === 'inferred' ? '#B45309' : '#FFFFFF')))
@@ -917,11 +927,26 @@ function GraphView({ d, selected, onPick }) {
       .attr('font-size', n => isRoot(n) ? 12 : heavySet.has(n.id) ? 10 : 9)
       .attr('fill', n => isRoot(n) ? '#0E7C4A' : heavySet.has(n.id) ? '#1F2329' : '#5A6472')
       .attr('class', 'mono').attr('dx', n => isRoot(n) ? 13 : 8).attr('dy', 3)
+    let sweepTimer = null
+    if (simOn) {
+      // live highlighter: reveal the benefit one BFS hop at a time from the cut source
+      const hop = simSets.hop
+      const colorAt = (n, w) => { const h = n.id === focusId ? 0 : hop.get(n.id); return (h == null || h > w) ? baseColor(n) : color(n) }
+      let w = 0
+      node.attr('fill', n => colorAt(n, 0))
+      if (flow) flow.attr('stroke-opacity', 0)
+      sweepTimer = setInterval(() => {
+        w++; node.transition().duration(220).attr('fill', n => colorAt(n, w))
+        if (flow) flow.transition().duration(220).attr('stroke-opacity', e => (hop.get(eid(e.target)) || 1e9) <= w ? 0.92 : 0)
+        if (w >= simSets.maxHop) { clearInterval(sweepTimer); sweepTimer = null }
+      }, 300)
+    }
     sim.on('tick', () => {
       link.attr('x1', e => e.source.x).attr('y1', e => e.source.y).attr('x2', e => e.target.x).attr('y2', e => e.target.y)
+      if (flow) flow.attr('x1', e => e.source.x).attr('y1', e => e.source.y).attr('x2', e => e.target.x).attr('y2', e => e.target.y)
       node.attr('cx', n => n.x).attr('cy', n => n.y); label.attr('x', n => n.x).attr('y', n => n.y)
     })
-    return () => sim.stop()
+    return () => { sim.stop(); if (sweepTimer) clearInterval(sweepTimer) }
   }, [d, mode, showInferred, heavyList, heavySet, exclBySys, onPick, focusId, hops, dir, simSets])
   useEffect(() => {
     if (!selected) return
