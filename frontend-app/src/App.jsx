@@ -2926,6 +2926,143 @@ function EmergingScopeWatch() {
   )
 }
 
+/* Onboarding topology — a DETERMINISTIC three-lane picture of WHERE a planned system
+   lands: the providers that would feed it (left) → the planned app (centre) → the
+   consumers it would feed (right). No force layout — a fixed layered DAG so the picture
+   is stable and reads in one glance. Colour = scope/role; a RED provider edge means that
+   upstream sends CLEAR PAN today; a RED downstream edge means this app would FORWARD clear
+   PAN onward — i.e. the exposure it spreads. Every node here is real (resolved against the
+   authoritative graph); planned neighbours that don't exist are reported below, never drawn. */
+
+function OnboardTopology({ d, res, onPick }) {
+  const byId = useMemo(() => new Map((d.viz?.nodes || []).map(n => [n.id, n])), [d])
+  const provs = res.providers_resolved || []
+  const cons = res.consumers_resolved || []
+  const panProv = new Set(res.pan_providers || [])
+  const dragged = new Set(res.scope_expansion_sample || [])
+  // True origins that reach it but are NOT themselves named providers (multi-hop case).
+  // Drawn as a far-left lane: tokenize THESE upstream and the app receives CRN. When a
+  // provider IS the origin (e.g. a direct true-source feed) the lane is empty — no
+  // redundant or invented nodes.
+  const origins = (res.origins_reaching || []).filter(o => !provs.includes(o))
+  const hasOrig = origins.length > 0
+  const CAP = 8, OCAP = 6
+  const provShow = provs.slice(0, CAP), consShow = cons.slice(0, CAP), origShow = origins.slice(0, OCAP)
+  const provMore = Math.max(0, provs.length - provShow.length)
+  const consMore = Math.max(0, cons.length - consShow.length)
+  const origMore = Math.max(0, origins.length - origShow.length)
+  const appCarries = !!res.receives_clear_pan || res.category === 'cde'
+
+  const W = hasOrig ? 800 : 760, H = 360, R = 13, AR = 28, OR = 9
+  const X = hasOrig ? { orig: 56, prov: 250, app: 470, cons: W - 110 }
+                    : { prov: 132, app: W / 2, cons: W - 132 }
+  const laneY = (i, n) => n <= 1 ? H / 2 : 56 + (H - 112) * (i / (n - 1))
+  const catColor = res.category === 'cde' ? '#D71E28' : res.category === 'connected' ? '#2563EB' : '#0E7C4A'
+  const nodeColor = id => {
+    const n = byId.get(id); if (!n) return '#C7CDD6'
+    if (n.hidden_pci) return '#8F0E1E'
+    if (n.true_source) return '#D71E28'
+    if (n.carries_pan) return '#E8A33D'
+    if (n.in_scope) return '#2563EB'
+    return '#9FB0A6'
+  }
+  const provPts = provShow.map((id, i) => ({ id, x: X.prov, y: laneY(i, provShow.length) }))
+  const consPts = consShow.map((id, i) => ({ id, x: X.cons, y: laneY(i, consShow.length) }))
+  const origPts = origShow.map((id, i) => ({ id, x: X.orig, y: laneY(i, origShow.length) }))
+  const appY = H / 2
+  const tier = res.sensitivity_tier || 0
+  const tierColor = tier >= 3 ? '#D71E28' : tier >= 1 ? '#E8A33D' : '#0E7C4A'
+
+  const Node = ({ p, isProv }) => {
+    const col = nodeColor(p.id)
+    const isPan = isProv && panProv.has(p.id)
+    const isDrag = !isProv && dragged.has(p.id)
+    return (
+      <g style={{ cursor: 'pointer' }} onClick={() => onPick && onPick(p.id)}>
+        <circle cx={p.x} cy={p.y} r={R} fill={col}
+          stroke={isPan ? '#D71E28' : isDrag ? '#8F0E1E' : '#FFFFFF'} strokeWidth={isPan || isDrag ? 3 : 1.5} />
+        <text x={p.x} y={p.y - R - 4} textAnchor="middle" fontSize="9.5" className="mono" fill="#1F2329">{p.id}</text>
+        <title>{p.id + (byId.get(p.id)?.name ? ' — ' + byId.get(p.id).name : '')
+          + (isPan ? '\n→ feeds CLEAR PAN to ' + res.app_id : '')
+          + (isDrag ? '\n→ dragged INTO scope by this onboarding' : '') + '\nclick to drill in'}</title>
+      </g>
+    )
+  }
+  return (
+    <div className="card p-5">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="disp font-bold text-base">Where {res.app_id} lands <span className="text-faint text-xs font-normal">— providers → planned app → consumers, drawn from the live graph</span></div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider text-faint">sensitivity</span>
+          {[0, 1, 2, 3, 4].map(t => (
+            <span key={t} className="w-5 h-2.5 rounded-sm" title={'tier ' + t}
+              style={{ background: t <= tier ? tierColor : '#E6E2DA' }} />
+          ))}
+          <span className="mono text-xs font-bold" style={{ color: tierColor }}>tier {tier}/4</span>
+        </div>
+      </div>
+
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-2" style={{ maxHeight: 380 }}>
+        <defs>
+          <marker id="oa" viewBox="0 -5 10 10" refX="9" refY="0" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,-4L8,0L0,4" fill="#9AA4B2" /></marker>
+          <marker id="op" viewBox="0 -5 10 10" refX="9" refY="0" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,-4L8,0L0,4" fill="#D71E28" /></marker>
+        </defs>
+        {hasOrig && <text x={X.orig} y="28" textAnchor="middle" fontSize="10" fontWeight="700" fill="#5A6472" className="mono">TRUE ORIGINS</text>}
+        {hasOrig && <text x={X.orig} y="40" textAnchor="middle" fontSize="7.5" fill="#8B95A3">tokenize → CRN</text>}
+        <text x={X.prov} y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#5A6472" className="mono">PROVIDERS</text>
+        <text x={X.app} y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#5A6472" className="mono">{res.app_id}</text>
+        <text x={X.cons} y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#5A6472" className="mono">CONSUMERS</text>
+
+        {/* origin → app (transitive reachability: dashed, distinct from the solid PAN feeds) */}
+        {origPts.map((o, i) => (
+          <line key={'oe' + i} x1={o.x + OR} y1={o.y} x2={X.app - AR} y2={appY}
+            stroke="#B45309" strokeWidth="1" strokeOpacity="0.4" strokeDasharray="4 3" />
+        ))}
+        {provPts.map((p, i) => {
+          const pan = panProv.has(p.id)
+          return <line key={'pe' + i} x1={p.x + R} y1={p.y} x2={X.app - AR} y2={appY}
+            stroke={pan ? '#D71E28' : '#9AA4B2'} strokeWidth={pan ? 2 : 1} strokeOpacity={pan ? 0.9 : 0.5}
+            markerEnd={pan ? 'url(#op)' : 'url(#oa)'} />
+        })}
+        {consPts.map((c, i) => (
+          <line key={'ce' + i} x1={X.app + AR} y1={appY} x2={c.x - R} y2={c.y}
+            stroke={appCarries ? '#D71E28' : '#9AA4B2'} strokeWidth={appCarries ? 2 : 1}
+            strokeOpacity={appCarries ? 0.85 : 0.5} markerEnd={appCarries ? 'url(#op)' : 'url(#oa)'} />
+        ))}
+
+        {origPts.map((o, i) => (
+          <g key={'on' + i} style={{ cursor: 'pointer' }} onClick={() => onPick && onPick(o.id)}>
+            <circle cx={o.x} cy={o.y} r={OR} fill="#D71E28" stroke="#B45309" strokeWidth="1.5" strokeDasharray="2 2" />
+            <text x={o.x} y={o.y - OR - 3} textAnchor="middle" fontSize="8.5" className="mono" fill="#1F2329">{o.id}</text>
+            <title>{o.id + '\ntrue PAN origin reaching ' + res.app_id + ' through its providers\ntokenize here → the app receives CRN'}</title>
+          </g>
+        ))}
+        {provPts.map((p, i) => <Node key={'pn' + i} p={p} isProv={true} />)}
+        {consPts.map((c, i) => <Node key={'cn' + i} p={c} isProv={false} />)}
+        {origMore > 0 && <text x={X.orig} y={H - 18} textAnchor="middle" fontSize="10" fill="#8B95A3" className="mono">+{fmt(origMore)} more</text>}
+        {provMore > 0 && <text x={X.prov} y={H - 18} textAnchor="middle" fontSize="10" fill="#8B95A3" className="mono">+{fmt(provMore)} more</text>}
+        {consMore > 0 && <text x={X.cons} y={H - 18} textAnchor="middle" fontSize="10" fill="#8B95A3" className="mono">+{fmt(consMore)} more</text>}
+        {provs.length === 0 && <text x={X.prov} y={appY + 4} textAnchor="middle" fontSize="10" fill="#8B95A3" className="mono">{res.permanent_cde || res.category === 'cde' ? '(originates PAN itself)' : 'no providers'}</text>}
+        {cons.length === 0 && <text x={X.cons} y={appY + 4} textAnchor="middle" fontSize="10" fill="#8B95A3" className="mono">no consumers</text>}
+
+        <circle cx={X.app} cy={appY} r={AR + 4} fill="none" stroke={catColor} strokeWidth="2" strokeDasharray="4 3" />
+        <circle cx={X.app} cy={appY} r={AR} fill={catColor} stroke="#FFFFFF" strokeWidth="3" />
+        <text x={X.app} y={appY - 2} textAnchor="middle" fontSize="10" fontWeight="700" fill="#FFFFFF" className="mono">{res.app_id.slice(0, 8)}</text>
+        <text x={X.app} y={appY + 11} textAnchor="middle" fontSize="8" fill="#FFFFFF">{res.category === 'cde' ? 'CDE' : res.category === 'connected' ? 'CONNECTED' : 'OUT'}</text>
+      </svg>
+
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-dim items-center mt-1">
+        <span className="flex items-center gap-1"><svg width="24" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#D71E28" strokeWidth="2" /></svg>clear-PAN flow</span>
+        <span className="flex items-center gap-1"><svg width="24" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#9AA4B2" strokeWidth="1.5" /></svg>token / non-PAN flow</span>
+        {hasOrig && <span className="flex items-center gap-1"><svg width="24" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#B45309" strokeWidth="1.5" strokeDasharray="4 3" /></svg>origin reaches it (transitive)</span>}
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#fff', boxShadow: 'inset 0 0 0 2px #D71E28' }} />feeds it clear PAN</span>
+        <span className="flex items-center gap-1"><i className="w-3 h-3 rounded-full inline-block" style={{ background: '#fff', boxShadow: 'inset 0 0 0 2px #8F0E1E' }} />dragged into scope</span>
+        {res.scope_expansion_count > 0 && <span className="text-panhot ml-auto">⚠ transitively drags <b>{fmt(res.scope_expansion_count)}</b> currently-out-of-scope systems into scope</span>}
+      </div>
+    </div>
+  )
+}
+
 function Onboarding({ d, live, onPick }) {
   const [appId, setAppId] = useState('NEW-APP')
   const [providers, setProviders] = useState([])
@@ -2934,9 +3071,13 @@ function Onboarding({ d, live, onPick }) {
   const [res, setRes] = useState(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
+  const [lastPayload, setLastPayload] = useState(null)
+  const [altRes, setAltRes] = useState(null)
+  const [altBusy, setAltBusy] = useState(false)
+  const [copied, setCopied] = useState(false)
   const assessWith = async (payload) => {
     if (!live) return
-    setBusy(true); setErr(null)
+    setBusy(true); setErr(null); setAltRes(null); setLastPayload(payload)
     try {
       const r = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload) })
@@ -2945,6 +3086,29 @@ function Onboarding({ d, live, onPick }) {
     } catch (e) { setErr(String(e.message || e)) } finally { setBusy(false) }
   }
   const assess = () => assessWith({ app_id: appId, providers, consumers, ...flags })
+  const assessAlt = async () => {
+    const base = lastPayload || { app_id: appId, providers, consumers, ...flags }
+    const alt = { ...base, pan: false, crn_only: true, detokenizes: false, full_track: false, pin: false }
+    setAltBusy(true)
+    try {
+      const r = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(alt) })
+      if (r.ok) setAltRes(await r.json())
+    } catch (e) { /* noop */ } finally { setAltBusy(false) }
+  }
+  const copyNote = async () => {
+    if (!res) return
+    const lbl = c => c === 'cde' ? 'In scope (CDE)' : c === 'connected' ? 'Connected-to (in scope)' : 'Out of scope'
+    const L = [
+      `PCI-SENTINEL onboarding assessment — ${res.app_id}`,
+      `Verdict: ${lbl(res.category)} · sensitivity tier ${res.sensitivity_tier}/4${res.permanent_cde ? ' · PERMANENT CDE' : ''}`,
+      res.verdict,
+    ]
+    if (res.pan_providers?.length) L.push(`Providers feeding clear PAN: ${res.pan_providers.join(', ')}`)
+    if (res.origins_reaching?.length) L.push(`True PAN origins reaching it (tokenize upstream → receives CRN): ${res.origins_reaching.join(', ')}`)
+    if (res.scope_expansion_count) L.push(`Transitively drags ${res.scope_expansion_count} out-of-scope systems into scope${res.scope_expansion_sample?.length ? ': ' + res.scope_expansion_sample.join(', ') : ''}`)
+    if (res.triggered_requirements?.length) L.push(`Triggered PCI DSS families: ${res.triggered_requirements.join(', ')}`)
+    try { await navigator.clipboard.writeText(L.join('\n')); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch (e) { /* noop */ }
+  }
   // one-click demo scenarios derived from the live analysis — prefill AND assess
   const topSrc = (d.heavy_hitters || [])[0]?.system
   const outNode = useMemo(() => (d.viz?.nodes || []).find(n => !n.in_scope && !n.carries_pan && !n.hidden_pci)?.id, [d])
@@ -3027,10 +3191,51 @@ function Onboarding({ d, live, onPick }) {
                 <span className={'mono text-[12px] px-2.5 py-1 rounded border font-semibold ' + catTone(res.category)}>{catLabel(res.category)}</span>
                 <span className="mono text-[11px] px-2 py-0.5 rounded bg-panel2 text-dim">tier {res.sensitivity_tier} / 4</span>
                 {res.permanent_cde && <span className="mono text-[11px] px-2 py-0.5 rounded bg-panhot/10 text-panhot border border-panhot/30">permanent CDE</span>}
+                <button onClick={copyNote} className="ml-auto mono text-[11px] px-2 py-1 rounded border border-line text-dim hover:text-txt hover:border-pan/60">{copied ? '✓ copied' : '⧉ copy as note'}</button>
               </div>
               <p className="text-sm text-dim mt-3 leading-relaxed">{res.verdict}</p>
               <div className="mt-2"><ReqChips reqs={res.triggered_requirements} /></div>
+              {res.category !== 'out' && !res.permanent_cde && !(lastPayload && lastPayload.crn_only) && (
+                <button onClick={assessAlt} disabled={altBusy}
+                  className="mt-3 text-[11px] px-3 py-1.5 rounded-lg border border-cool/40 text-cool bg-cool/5 hover:bg-cool/10 font-semibold">
+                  {altBusy ? 'computing…' : '↻ What if it were designed CRN-native?'}</button>
+              )}
+              {altRes && (() => {
+                const improved = (res.category === 'cde' && altRes.category !== 'cde') || (res.scope_expansion_count > altRes.scope_expansion_count) || (altRes.sensitivity_tier < res.sensitivity_tier)
+                const lbl = c => c === 'cde' ? 'CDE' : c === 'connected' ? 'connected-to' : 'out of scope'
+                const Box = ({ k, before, after, good }) => (
+                  <div className="flex-1 min-w-[150px]">
+                    <div className="text-[10px] uppercase tracking-wider text-faint">{k}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="mono text-sm text-dim line-through">{before}</span>
+                      <span className="text-faint">→</span>
+                      <span className={'mono text-sm font-bold ' + (good ? 'text-safe' : 'text-txt')}>{after}</span>
+                    </div>
+                  </div>
+                )
+                return (
+                  <div className={'mt-3 rounded-xl p-4 ' + (improved ? 'tint-green' : 'tint-gold')}>
+                    <div className="flex items-center gap-2">
+                      <span className="disp font-bold text-sm">If {res.app_id} were designed CRN-native</span>
+                      <span className="text-faint text-xs">— token-native, no clear PAN of its own</span>
+                      <button onClick={() => setAltRes(null)} className="ml-auto text-faint hover:text-txt text-xs">✕</button>
+                    </div>
+                    {improved ? (<>
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        <Box k="lands" before={lbl(res.category)} after={lbl(altRes.category)} good={altRes.category !== 'cde'} />
+                        <Box k="drags into scope" before={res.scope_expansion_count} after={altRes.scope_expansion_count} good={altRes.scope_expansion_count < res.scope_expansion_count} />
+                        <Box k="sensitivity tier" before={res.sensitivity_tier} after={altRes.sensitivity_tier} good={altRes.sensitivity_tier < res.sensitivity_tier} />
+                      </div>
+                      <p className="text-[11px] text-dim mt-2">Designing it token-native removes its own clear-PAN handling — the clean-stream design choice, decided before a line of code is written.</p>
+                    </>) : (
+                      <p className="text-[11px] text-dim mt-2">CRN-native design alone <b>doesn't</b> change the outcome — clear PAN reaches it from its <b>providers</b>, not its own handling. The fix is upstream: tokenize {(res.origins_reaching || []).slice(0, 6).join(', ') || 'its true-source front'}.</p>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
+
+            <OnboardTopology d={d} res={res} onPick={onPick} />
 
             <div className="grid md:grid-cols-3 gap-3">
               <div className="card p-4">
