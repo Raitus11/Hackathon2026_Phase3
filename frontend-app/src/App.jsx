@@ -3146,19 +3146,55 @@ function BusinessReport({ d, onPick }) {
 }
 
 /* ============================ APP ============================ */
+/* ============================ NAVIGATION (grouped left rail) ============================ */
+/* Presentation only — these drive the sidebar's labels/icons/grouping. The tab KEYS and the
+   setTab routing in App() are unchanged, so behavior is identical to the old horizontal bar. */
+const NavIcon = ({ children }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+)
+const TAB_LABEL = {
+  pipeline: 'Pipeline', overview: 'Overview', business: 'Business View', hidden: 'Hidden Scope',
+  planner: 'Planner', blast: 'Block & Benefit', onboard: 'Onboarding', roadmap: 'Roadmap',
+  graph: 'Flow Graph', heatmap: 'Exposure Map', drill: 'Drill-down', methods: 'Methods', ask: 'Ask',
+}
+const TAB_ICON = {
+  pipeline: <NavIcon><circle cx="5" cy="12" r="2.4" /><circle cx="19" cy="5" r="2.4" /><circle cx="19" cy="19" r="2.4" /><path d="M7.2 11l9.6-5M7.2 13l9.6 5" /></NavIcon>,
+  overview: <NavIcon><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v10h14V10" /></NavIcon>,
+  business: <NavIcon><rect x="3" y="7" width="18" height="13" rx="1.5" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></NavIcon>,
+  hidden: <NavIcon><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="2.6" /><path d="M4 4l16 16" /></NavIcon>,
+  planner: <NavIcon><path d="M4 7h11M4 17h7" /><circle cx="18" cy="7" r="2.3" /><circle cx="14" cy="17" r="2.3" /></NavIcon>,
+  blast: <NavIcon><path d="M4 20V10M10 20V4M16 20v-7M2 20h20" /></NavIcon>,
+  onboard: <NavIcon><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /><path d="M10 16l4-4-4-4M14 12H3" /></NavIcon>,
+  roadmap: <NavIcon><circle cx="6" cy="6" r="2.2" /><circle cx="18" cy="18" r="2.2" /><path d="M6 8.2v6.8a3 3 0 0 0 3 3h6.8" /></NavIcon>,
+  graph: <NavIcon><circle cx="6" cy="6" r="2.2" /><circle cx="18" cy="6" r="2.2" /><circle cx="12" cy="18" r="2.2" /><path d="M7.6 7.4 11 16M16.4 7.4 13 16M8 6h8" /></NavIcon>,
+  heatmap: <NavIcon><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></NavIcon>,
+  drill: <NavIcon><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></NavIcon>,
+  methods: <NavIcon><path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4A2 2 0 0 0 20 18l-5-9V3" /><path d="M8 3h8" /></NavIcon>,
+  ask: <NavIcon><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2Z" /></NavIcon>,
+}
+const NAV_GROUPS = [
+  { label: 'OPERATIONS', icon: <NavIcon><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v10h14V10" /></NavIcon>, tabs: ['pipeline', 'overview', 'business', 'hidden', 'planner', 'blast', 'onboard'] },
+  { label: 'LINEAGE', icon: <NavIcon><path d="M12 3 3 8l9 5 9-5-9-5Z" /><path d="M3 13l9 5 9-5" /></NavIcon>, tabs: ['roadmap', 'graph', 'heatmap', 'drill'] },
+  { label: 'GOVERNANCE', icon: <NavIcon><path d="M12 3 5 6v5c0 4 3 7 7 9 4-2 7-5 7-9V6l-7-3Z" /></NavIcon>, tabs: ['methods', 'ask'] },
+]
+
 export default function App() {
   const { data: d, src, agents, suggested, uploading, error, phase, gate, analyze, approve, reset, clearError } = useData()
   const [tab, setTab] = useState('overview')
   const [sel, setSel] = useState(null)
   const [present, setPresent] = useState(false)
+  const [sideOpen, setSideOpen] = useState(true)
   if (!d) return <div className="h-full flex items-center justify-center text-dim mono">loading analysis…</div>
   const pick = id => { setSel(id); setTab('drill') }
   const showBanner = !['pipeline'].includes(tab)
   return (
-    <div className="min-h-full">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* corporate masthead — brand red band, gold keyline (the page signature) */}
-      <div className="masthead">
-        <div className="max-w-[1280px] mx-auto px-5 py-3 flex items-center gap-4 flex-wrap">
+      <div className="masthead shrink-0">
+        <div className="px-5 py-3 flex items-center gap-4 flex-wrap">
+          <button onClick={() => setSideOpen(o => !o)} aria-label="Toggle navigation" title="Toggle navigation" className="grid place-items-center w-9 h-9 rounded-lg bg-white/15 text-white hover:bg-white/25 transition shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+          </button>
           <div className="disp font-black text-2xl tracking-tight text-white">PCI<span className="text-gold">·</span>SENTINEL</div>
           <div className="text-xs text-white/80 border-l border-white/30 pl-4 leading-tight">Intelligent mapping of interdependencies across PCI systems<br />cardholder-data lineage · scope reduction · clean-stream targeting</div>
           <div className="ml-auto flex items-center gap-2 flex-wrap">
@@ -3179,13 +3215,22 @@ export default function App() {
           </div>
         </div>
       </div>
-      <div className="max-w-[1280px] mx-auto px-5 py-5">
-      <nav className="navbar flex gap-0.5 items-center justify-between mb-5 bg-panel rounded-xl p-1 w-full border border-line shadow-sm overflow-x-auto">
-        {[['pipeline', 'Pipeline'], ['overview', 'Overview'], ['business', 'Business View'], ['hidden', 'Hidden Scope'], ['planner', 'Planner'], ['blast', 'Block & Benefit'], ['onboard', 'Onboarding'], ['roadmap', 'Roadmap'], ['graph', 'Flow Graph'], ['heatmap', 'Exposure Map'], ['drill', 'Drill-down'], ['methods', 'Methods'], ['ask', 'Ask']].map(([k, l]) => (<React.Fragment key={k}>
-          <button data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="tab mono text-[12px] px-2.5 py-2 rounded-lg text-dim whitespace-nowrap">{l}</button>
-          {['hidden', 'roadmap', 'drill'].includes(k) && <span className="w-px h-5 bg-line mx-0.5" aria-hidden="true" />}
-        </React.Fragment>))}
-      </nav>
+      <div className="flex-1 flex min-h-0">
+      {sideOpen && (
+        <aside className="navside shrink-0 overflow-y-auto scroll bg-panel border-r border-line p-3">
+          {NAV_GROUPS.map(g => (
+            <div key={g.label} className="mb-3 last:mb-0">
+              <div className="navgroup flex items-center gap-1.5 px-2 mt-1 mb-1">{g.icon}<span>{g.label}</span></div>
+              {g.tabs.map(k => (
+                <button key={k} data-on={tab === k ? '1' : '0'} onClick={() => setTab(k)} className="navitem" title={TAB_LABEL[k]}>
+                  {TAB_ICON[k]}<span className="truncate">{TAB_LABEL[k]}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </aside>
+      )}
+      <main className="flex-1 min-w-0 overflow-y-auto scroll px-6 py-5">
       {showBanner && <VerdictBanner d={d} onTab={setTab} onPick={pick} />}
       {tab === 'pipeline' && <Pipeline d={d} agents={agents} phase={phase} gate={gate} uploading={uploading} suggested={suggested} onUpload={analyze} onApprove={approve} onReset={reset} />}
       {tab === 'overview' && <Overview d={d} onPick={pick} onTab={setTab} />}
@@ -3201,12 +3246,13 @@ export default function App() {
       {tab === 'drill' && <Drill d={d} selected={sel} onPick={setSel} />}
       {tab === 'methods' && <Methods d={d} onPick={pick} />}
       {tab === 'ask' && <Ask suggested={suggested} live={src === 'live'} />}
-      {present && <PresentMode d={d} onTab={setTab} onClose={() => setPresent(false)} />}
       <footer className="text-[11px] text-faint mt-8 leading-relaxed">
         <b className="text-dim">What this claims:</b> current-state PCI data-flow lineage from BAM (authoritative) + Splunk/survey signals (clearly marked inferred), with cycle resolution via Tarjan SCC condensation and a defensible, reproducible risk model.
         <b className="text-dim"> What it does not:</b> remediate controls, assert business need, or treat inferred signals as ground truth. Card numbers are masked first-6/last-4 on ingest; an unmasked PAN fails the run.
       </footer>
+      </main>
       </div>
+      {present && <PresentMode d={d} onTab={setTab} onClose={() => setPresent(false)} />}
     </div>
   )
 }
