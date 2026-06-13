@@ -1,3 +1,77 @@
+
+> **Hybrid Intelligence:** a deterministic graph engine performs every verifiable computation; the LLM owns the explanation layer that turns those grounded results into language a compliance lead, an auditor, and an engineer can each act on.
+
+## Data inputs — two classes, never conflated
+
+**BAM extracts (DS1–DS4) — authoritative system of record.** Define which systems exist and the documented data-flow relationships between them.
+- **DS1** — PCI systems with upstream/downstream relations
+- **DS2** — all systems upstream → PCI
+- **DS3** — all systems downstream ← PCI
+- **DS4** — any system carrying PCI data
+
+**Supplemental feeds (DS5–DS6) — signals only, never ground truth.** Can surface a candidate BAM missed, but rendered distinctly and never promoted to fact.
+- **DS5** — CDE end-state survey (declared target-state / detokenization)
+- **DS6** — Splunk clear-PAN findings (PAN in logs for systems marked PCI=No in BAM)
+
+## Agentic pipeline — LangGraph StateGraph (checkpointed · resumable · audited per stage)
+
+**Supervisor / Orchestrator (control).** Owns graph state, routing, retries, and the human approval gate — drives every other agent.
+
+### Deterministic graph engine — verifiable, reproducible (8 of 9 agents)
+1. **Ingestion & Sanitiser** — loads CSVs, validates schema, masks PAN first-6/last-4 at the boundary. Nothing unmasked passes downstream.
+2. **Masking-Leak Validator** — Luhn + pattern scan on every cell. The run **FAILS** if any unmasked PAN escapes. *(Safety — hard fail.)*
+3. **Graph Builder** — builds the cardholder-data flow graph as a typed MultiDiGraph, metadata vs inferred edges kept distinct.
+4. **Cycle Resolver** — Tarjan SCC → condensation so lineage is a valid DAG.
+5. **Quant / Scoring** — composite risk score, bounded 0–100, every term named: `R(v) = 100 · (.40·S + .30·R + .20·B + .10·T)`.
+6. **Core Analyst** — the analytical heart: reachability, exclusive-reach sets, clean-stream impact, heavy hitters, hidden PCI (BAM misses).
+7. **Human-in-the-Loop Gate** — the run genuinely pauses for a reviewer to approve, revise, or abort before anything is reported. *(LangGraph INTERRUPT · human.)*
+
+### Explanation layer
+8. **Reporter — the explanation engine.** A ~4,000-system risk graph is useless to the people who have to act on it unless someone can say, in plain language, *which* systems are in scope, *why*, and *what to do first*. That translation is the Reporter's job: it consumes the deterministic engine's grounded results and produces audience-ready lineage, "why-in-scope" reasoning, and prioritized narrative for compliance leads, auditors, and engineers alike. Because every figure it speaks is one the engine already proved, its output is always anchored to the data — and the model sits behind a config-swappable client, so there's **no vendor lock**.
+
+> **Why it matters:** the engine guarantees the numbers are *correct*; the explanation layer makes them *usable*. Most systems make you choose between a black box you can't audit and a spreadsheet no executive will read — PCI-SENTINEL delivers both rigor and legibility, with no risk of a fabricated figure.
+
+## Delivery
+- **FastAPI service** — async, typed Pydantic I/O, OpenAPI docs, fresh-frontier recompute on report endpoints.
+- **React 18 + D3 frontend** — 13 analyst tabs (overview, business view, flow graph, exposure map, planner, drill-down, methods…).
+- **Reports & evidence bundle** — PDF executive report, XLSX charted dashboard, metrics + per-stage audit trail.
+
+## Cross-cutting guarantees
+- **Masking-leak safety** — run FAILS on any unmasked PAN
+- **Per-stage audit log** — every stage emits an audit record
+- **Provenance preserved end-to-end** — metadata vs inferred edges stay distinct
+- **LLM behind a config-swappable client** — no vendor lock
+
+**Legend:** Control · Deterministic engine · Human gate · LLM (narration) · Safety / critical
+
+
+
+
+## How to read this flow
+
+A LangGraph StateGraph. **Solid arrows = the main path;** the two conditional gates (Validate, Human review) can branch to abort or loop back to re-analyze. The run executes left → right, top → bottom.
+
+### Main path
+
+1. **START → Stage 1 · Control.** Initializes graph state, routing, and retries; drives every stage. *(→ run context + audit start.)*
+2. **Stage 2 · Ingest & Sanitise (deterministic).** Loads CSVs, validates schema, masks PAN first-6/last-4 on entry. *(→ masked typed dataset.)*
+3. **Stage 3 · Validate — masking-leak safety gate.** Luhn + pattern scan on every cell. **Conditional:** a clean dataset continues (`clean ✓`); any unmasked PAN branches to **ABORT** (`leak ✗`).
+4. **Stage 4 · Build Graph (deterministic).** Typed MultiDiGraph of PAN flow, metadata vs inferred edges kept distinct. *(→ interdependency graph G.)*
+5. **Stage 5 · Condense to DAG (deterministic).** Tarjan SCC → condensation; acyclicity asserted. *(→ acyclic lineage DAG.)*
+6. **Stage 6 · Score / Quant (deterministic).** Composite risk `R(v) ∈ [0,100]`, four named, bounded factors. *(→ per-system risk scores.)*
+7. **Stage 7 · Analyze / Core (deterministic).** Scope, heavy hitters, clean-stream impact, hidden PCI. *(→ findings + visual contracts.)*
+8. **Stage 8 · Human-in-the-Loop gate.** Run pauses (LangGraph interrupt). **Conditional — decision required:** *Approve* continues (`approve ✓`); *Revise* loops back to Stage 7 to re-run analysis with reviewer feedback; *Abort* halts.
+9. **Stage 9 · Report (LLM narrate) → END.** The LLM explains the computed numbers in plain language for the people who must act on them — never deciding, always anchored to what the engine proved. *(→ PDF · XLSX · UI JSON.)*
+
+### The two branches off the main path
+
+- **Leak ✗ / gate abort ✗ → ABORTED.** Both a masking leak (Stage 3) and a reviewer abort (Stage 8) land here: the run halts safely and **no report is produced**.
+- **Revise ↺.** From the human gate, a "revise" decision re-runs analysis (Stage 7) with the reviewer's feedback before reporting — the human can steer the result, not just rubber-stamp it.
+
+**What the diagram proves:** the safety gate and human gate are *real control flow*, not decoration — the run can genuinely stop or loop. Card data is masked before anything else happens, a leak kills the run, and nothing reaches a report until a human approves it.
+
+
+
 # PCI-SENTINEL — Methodology & Architecture
 
 PCI-SENTINEL maps how cardholder data (PAN) flows across an enterprise's systems, identifies where that data originates, and quantifies what tokenizing each origin would remove from PCI-DSS audit scope. It is built on one principle we call **Hybrid Intelligence**: a deterministic graph engine performs every verifiable computation, and a language model is used only to narrate the numbers that engine has already produced. Nothing the system reports as a fact is invented by an LLM — every score, edge, and recommendation traces back to a rule, a graph operation, or a cited algorithm.
