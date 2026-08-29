@@ -1,1 +1,145 @@
 
+Continuation of the FDIC 370 Wells Fargo restyle. Header, gold rule and tab
+strip are DONE and correct — do not touch _Layout.cshtml's header markup.
+
+The problem: the Kyuubi pages were restyled and the Trino pages were not.
+The app now has two competing design languages. Your job is parity and
+polish, not a redesign.
+
+Same hard rules as before: presentation only, no handler/model-binding/JS/ID/
+route changes, no new dependencies, emit find-and-replace diffs with file
+path and surrounding context, never full-file rewrites.
+
+=== EXTRA TOKENS (add to :root in site.css) ===
+--wf-red-tint:   #FDF2F3   /* KPI accent tile bg, active pagination */
+--wf-header-bg:  #F4F4F5   /* table header row */
+--wf-row-alt:    #FAFAFB   /* zebra */
+--wf-focus:      #0B5CAB   /* focus ring only */
+--space-page:    24px
+
+=== PHASE 1 — AUDIT (report only, change nothing) ===
+Grep the Pages/ and wwwroot/ tree for: btn-primary, btn-secondary,
+btn-warning, bg-primary, bg-dark, bg-info, bg-warning, table-dark,
+text-primary, text-danger, card-header bg-*, and any inline style=
+containing a hex or rgb value. Output a table: file | line | class/value |
+what it renders. Then STOP and wait for "continue".
+
+=== PHASE 2 — SHARED COMPONENT CSS (site.css only) ===
+Write these classes once. No page-level CSS anywhere.
+
+.wf-btn            48px min-width, 8px 16px, radius var(--radius), 14px/600,
+                   no text-transform
+.wf-btn--primary   bg var(--wf-red), white text; hover var(--wf-red-dark)
+.wf-btn--secondary transparent bg, 1px border var(--wf-red),
+                   text var(--wf-red); hover bg var(--wf-red-tint)
+.wf-btn--tertiary  transparent, 1px border var(--wf-border),
+                   text var(--wf-ink)
+All buttons: 2px outline var(--wf-focus) offset 2px on :focus-visible.
+GOLD IS NEVER A BUTTON FILL. Delete any gold button.
+
+.wf-card           bg var(--wf-surface), 1px border var(--wf-border),
+                   radius var(--radius), shadow var(--shadow-card)
+.wf-card__header   14px/600 var(--wf-ink), 12px 16px, 1px bottom border
+                   var(--wf-border), NO colored fill
+.wf-card__body     16px padding
+
+.wf-page-title     22px/600 var(--wf-ink), 0 0 16px, no underline rule,
+                   no coloured banner
+.wf-page-subtitle  13px var(--wf-ink-muted)
+
+.wf-kpi            .wf-card + 3px left border, 16px padding
+.wf-kpi__label     11px/600 var(--wf-ink-muted), uppercase, .06em tracking
+.wf-kpi__value     28px/600 var(--wf-ink)
+.wf-kpi--alert     left border var(--wf-red); value stays var(--wf-ink)
+.wf-kpi--neutral   left border var(--wf-border)
+
+.wf-table          100% width, 13px, border-collapse
+.wf-table thead th bg var(--wf-header-bg), 11px/600 var(--wf-ink-muted),
+                   uppercase, .04em, 10px 12px, 1px bottom border
+                   var(--wf-border). NOT black, NOT red, NOT blue.
+.wf-table td       10px 12px, 1px bottom border var(--wf-border),
+                   colour var(--wf-ink)
+.wf-table tbody tr:nth-child(even)  bg var(--wf-row-alt)
+.wf-table tbody tr:hover            bg var(--wf-red-tint)
+.wf-table .num     text-align right, font-variant-numeric tabular-nums
+.wf-table .mono    ui-monospace, SFMono-Regular, Consolas, monospace, 12px
+
+.wf-pager          flex, 8px gap, 13px, 12px 0
+.wf-pager a        var(--wf-ink-muted), 4px 10px, radius 4px
+.wf-pager .active  bg var(--wf-red), white
+.wf-empty          48px 16px, centred, 14px var(--wf-ink-muted)
+
+STOP and wait for "continue".
+
+=== PHASE 3 — TRINO PAGE PARITY (the big one) ===
+Files: TrinoSqlEditor.cshtml, ControlFailureRecords_trino.cshtml,
+ConsolidatedOutput_Trino.cshtml (+ any Trino partials).
+These still use raw Bootstrap. For each:
+- Delete the full-bleed blue hero banner ("Consolidated Output" / "Control
+  Failure Records" blue block). Replace with .wf-page-title +
+  .wf-page-subtitle. No coloured page banners anywhere in this app.
+- Replace blue .card-header / bg-primary with .wf-card__header (no fill).
+- Replace blue Run / Refresh Data buttons with .wf-btn .wf-btn--primary.
+- Replace table-dark thead with .wf-table.
+- Remove blue link-colour from data cells. Cell values are var(--wf-ink);
+  only genuine navigation links get var(--wf-red).
+After this phase the Trino pages must be visually indistinguishable in
+style from their Kyuubi twins. Same buttons, same cards, same tables.
+STOP and wait for "continue".
+
+=== PHASE 4 — UPLOAD PAGE ===
+File: Pages/Admin/Upload.cshtml.
+Currently the worst page: unaligned fields, unstyled file input, blue
+submit, no container.
+- Wrap content in a max-width 1100px container with var(--space-page).
+- Two .wf-card sections: "Data Parameters", "File Parameters".
+- Inside each, a CSS grid: repeat(auto-fit, minmax(220px, 1fr)), 16px gap.
+  Every field is label-above-input, labels 12px/600 var(--wf-ink-muted),
+  inputs 36px tall, 1px border var(--wf-border), radius var(--radius).
+  All fields on one baseline. No floated or absolutely positioned inputs.
+- File input: wrap in a .wf-file row — bordered box, 36px tall, filename
+  in var(--wf-ink-muted) when empty.
+- Submit button: .wf-btn .wf-btn--primary, right-aligned in a footer row
+  inside the last card, not floating outside it.
+- Do not rename any input name/id or the asp-for bindings.
+STOP and wait for "continue".
+
+=== PHASE 5 — GRIDS AND PAGINATION ===
+- All four data grids use .wf-table.
+- Control Failure Records: CONTROL ID and CHECK REFERENCE are currently
+  red text. Make them var(--wf-ink); CONTROL ID gets font-weight 600.
+  Red text in a grid means "failure", and not every row is one.
+- Right-align + .num on curr_bal, tot_bal, insured_amt, and every count.
+- Apply .mono to unique_acct_id and other opaque identifier columns.
+- Unify all pagination into .wf-pager with identical markup:
+  Prev · numbered pages · Next · "Page X of Y" · Go to. Replace the
+  "<< Prev / Next >> / Page 1 of 1+" variant on the SQL Editor.
+- Style the Trino SQL Editor's DataTables "Show N entries" and "Search"
+  controls to match the token set; do not swap DataTables out.
+- Every "no records" state uses .wf-empty.
+STOP and wait for "continue".
+
+=== PHASE 6 — SPACING, FOOTER, CLEANUP ===
+- There is ~150px of dead space between the tab strip and every page
+  title. Reduce the page container's top padding to var(--space-page).
+- Every page body: max-width 1400px, margin inline auto,
+  padding var(--space-page).
+- Remove duplicated headings: "Control Failure Records" appears as both
+  page title and section header on the same page. Keep the page title;
+  the grid's own header becomes a .wf-card__header or is dropped.
+- Footer: copyright and "Privacy, Security & Legal" must be the same
+  font-size (12px) on the same baseline. The link is var(--wf-red),
+  the rest var(--wf-ink-muted).
+- The environment chip renders as "[ DEV@ - v1.26.1 ]" — there is a stray
+  "@" leaking from Razor. Find and fix the escaping.
+- Final pass: no hardcoded hex outside :root, no Bootstrap colour utility
+  classes remaining. Report anything you could not convert.
+
+=== VERIFICATION (state pass/fail per line at the end) ===
+1. Every button in the app is one of the three .wf-btn variants.
+2. Zero blue pixels anywhere except focus rings.
+3. Gold appears only as the 4px rule under the header.
+4. All four grids have identical header, zebra and hover styling.
+5. Kyuubi and Trino twin pages are visually identical in style.
+6. No coloured full-bleed banners below the header.
+7. No red text inside data cells.
