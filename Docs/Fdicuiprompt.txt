@@ -1,26 +1,53 @@
-FDIC 370 restyle — layout width pass. CSS only. No markup restructuring
-beyond removing the breadcrumb block. Emit find-and-replace diffs.
+FDIC 370 restyle — spacing and Consolidated Output fixes. CSS only except
+where noted. Emit find-and-replace diffs.
 
-=== 1. REMOVE THE BREADCRUMB ===
-Delete the "Home / <Page>" breadcrumb row entirely — the markup in
-_Layout.cshtml (or the partial it lives in) and its CSS rules. It adds a
-row and no information; the active tab already shows location.
-Also delete any now-unused breadcrumb CSS classes.
+=== 1. KILL THE TOP GAP ===
+There is still a large blank band between the tab strip and the page H1 on
+every page. It is coming from stacked sources — find and remove ALL of them,
+don't just adjust one:
+  a. bottom margin/padding on the tab strip container
+  b. top padding on .wf-page (should be 16px, not 40-60px)
+  c. the H1's default browser margin-top (h1 { margin-top: 0 })
+  d. any leftover empty wrapper <div> or <br> where the breadcrumb used to
+     be — check the markup, the row may still exist with zero content
+  e. Bootstrap's .row / .mt-* / .py-* utilities on the page wrapper
+Target: 16px between the bottom border of the tab strip and the top of the
+H1 text. Inspect the computed box model on ControlFailureRecords and report
+which of (a)-(e) were actually contributing.
 
-=== 2. FULL-WIDTH CONTENT ===
-The page container is currently centered and narrow, leaving a large empty
-gutter on the left and right. Replace with a fluid container:
+=== 2. UPLOAD PAGE — USE THE FULL WIDTH ===
+File: Pages/Admin/Upload.cshtml.
+The two cards are still constrained and centered while every other page is
+full-bleed. Remove the max-width / mx-auto / col-* offset on the Upload
+page wrapper so both cards span the same width as the tables on
+ControlFailureRecords, with the same var(--gutter) left and right.
+The field grid inside stays repeat(auto-fit, minmax(220px, 1fr)) — on a wide
+screen this will give 4-5 columns per row, which is correct.
+Left edge of "File Upload" must sit on the same vertical line as
+"Control Failure Records" on the other page.
 
-  --gutter: 24px;
-  .wf-page {
-      width: 100%;
-      max-width: none;      /* remove the max-width / mx-auto */
-      margin: 0;
-      padding: 16px var(--gutter) 32px;
-  }
+=== 3. CONSOLIDATED OUTPUT — ORPHANED "for 2025-12-02" ===
+On ConsolidatedOutput.cshtml the string "for <date>" is rendering on its own
+line, centered, above the filter card, detached from the "Total Records"
+badge it belongs to. The "Total Records: 25+" badge is also pinned to the
+far right edge, miles from its own caption.
+Fix: put the count and the date together in one right-aligned group on the
+same row as the "Consolidated Output Data" section header:
+    Consolidated Output Data              Total records: 25+ · for 2025-12-02
+Use a flex row, space-between, align-items baseline. 13px,
+var(--wf-ink-muted), the number in var(--wf-ink) 600. Drop the dark pill
+badge styling — plain text.
+Do the same on ConsolidatedOutput_Trino.cshtml so "Total Records: 5,766,418"
+moves out of the filter bar and into the same position.
+This may need a small markup move (relocating the span); that is allowed.
+Do not change the Razor expression producing the value.
 
-Remove any Bootstrap .container / .container-fluid wrapper that adds its own
-15px padding and max-width, and any `mx-auto`, `col-md-8 offset-md-2`, or
+=== 4. WHILE YOU'RE THERE ===
+Unique Cust Id values on both Consolidated Output pages are rendering in red.
+That was fixed on Control Failure Records but missed here. Make them
+var(--wf-ink), font-weight 600. Red stays out of data cells.
+
+Report files changed and confirm the tab-strip-to-H1 gap measures 16px.15px padding and max-width, and any `mx-auto`, `col-md-8 offset-md-2`, or
 similar centering on the page-level wrapper. Cards, tables and forms stretch
 to the full available width.
 
