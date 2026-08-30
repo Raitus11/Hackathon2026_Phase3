@@ -1,41 +1,36 @@
-FDIC 370 — the gap between the tab strip and the page H1 is STILL there
-(~60px, identical on all 8 pages). Previous attempts adjusted .wf-page
-padding and did not fix it, which means the space is coming from something
-else. Do not guess again.
+Context: ASP.NET Core 8 Razor Pages app (FDIC370WebApplication). Pages under /Pages:
+ControlFailureRecords.cshtml, ControlFailureRecords_trino.cshtml,
+ControlFailureDetail.cshtml, ControlFailureDetail_trino.cshtml,
+ConsolidatedOutput.cshtml, ConsolidatedOutput_Trino.cshtml.
+Global stylesheet: wwwroot/css/site.css. Wells Fargo theme (red #D71E28, gold accent).
 
-=== STEP 1: DIAGNOSE, CHANGE NOTHING ===
-Open _Layout.cshtml and list, in document order, EVERY element between the
-closing tag of the tab strip <nav>/<ul> and the @RenderBody() call. Include
-empty divs, <br>, leftover breadcrumb wrappers, Bootstrap .row/.container
-wrappers, <main>, <hr>, and anything with a class you don't recognise.
-For each one, state its computed height, margin-top, margin-bottom, padding.
+Task: Drill-down cells in the data grids are currently plain <a> tags with a `title`
+attribute — they look like static text and give no visual affordance until hover, and
+the native tooltip is slow and unthemable. Make drillable cells clearly clickable.
 
-Then do the same for the first elements INSIDE the rendered page, from the
-top of RenderBody down to the H1.
+Requirements:
+1. Add a reusable `.grid-link` CSS class in site.css:
+   - color #D71E28, hover #A31219
+   - 1px dotted bottom border at rest, solid on hover/focus
+   - a "›" chevron via ::after that fades and slides in on hover/focus only
+   - :focus-visible outline 2px #D71E28, offset 2px (keyboard accessible)
+2. Replace the native tooltip with a CSS tooltip driven by a `data-tip` attribute
+   (::before, positioned above the link, dark background, pointer-events: none,
+   z-index above table rows). Keep an aria-label on the anchor for screen readers.
+3. Add `.table-drill tbody tr:hover { background: #FFF7F7; }` and apply the
+   `table-drill` class to the grid tables.
+4. Add a subtle `↳` hint span (aria-hidden) in the <th> of drillable columns only.
+5. Apply `.grid-link` ONLY to columns that actually navigate:
+   - Control ID  -> ControlFailureDetail / ControlFailureDetail_trino
+   - Check Reference -> ControlFailureCheckDetail / _trino
+   - Unique Cust ID -> ConsolidatedOutputDetail / _Trino
+   Leave SOR ID, LOB Name, Unique Acct ID and all other cells unstyled.
+6. Preserve every existing href, route value and query string exactly. Do not change
+   page handlers, models, or data binding.
+7. Keep the Trino and non-Trino page variants consistent — same classes, same markup shape.
 
-Report this as a list before making any change. State explicitly which
-element or elements account for the ~60px.
-
-Likely culprits to check specifically:
-  - an empty <div class="breadcrumb..."> left behind when the breadcrumb
-    content was removed — the wrapper still has padding
-  - <main role="main" class="pb-3"> or similar Bootstrap utility on the
-    layout's main element
-  - .container / .row default padding stacking with .wf-page padding
-  - margin collapse: the H1's margin-top escaping its parent because the
-    parent has no border or padding
-  - a min-height or fixed height on the tab strip container taller than
-    the tabs themselves
-
-=== STEP 2: FIX ONLY WHAT YOU IDENTIFIED ===
-Remove or zero the specific offenders. If it's an empty wrapper, delete the
-markup. If it's margin collapse, set the page container's padding-top and
-h1 { margin-top: 0 } together.
-Do not add negative margins to compensate — find the actual source.
-
-Target: exactly 16px between the bottom edge of the tab strip's bottom
-border and the cap height of the H1 text.
-
-=== STEP 3: VERIFY ===
-Report the measured gap on Upload, SQL Editor and ConsolidatedOutput.
-All three must be 16px.
+Constraints:
+- No new NuGet or npm packages, no Bootstrap version change, no JavaScript.
+- Output as minimal find-and-replace diffs per file, not full file rewrites.
+- Verify no ancestor container has overflow:hidden that would clip the CSS tooltip;
+  if one does, flag it instead of silently changing the layout.
