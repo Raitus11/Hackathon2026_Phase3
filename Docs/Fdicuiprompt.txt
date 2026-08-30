@@ -1,83 +1,88 @@
 Context: ASP.NET Core 8 Razor Pages app (FDIC370WebApplication). Wells Fargo theme.
 Stylesheet: wwwroot/css/site.css.
-Pages to change: /Pages/ControlFailureCheckDetail.cshtml and
-/Pages/ControlFailureCheckDetail_trino.cshtml (keep both byte-identical in markup shape).
+Grid pages: ControlFailureRecords.cshtml, ControlFailureRecords_trino.cshtml,
+ControlFailureDetail.cshtml, ControlFailureDetail_trino.cshtml,
+ControlFailureCheckDetail.cshtml, ControlFailureCheckDetail_trino.cshtml,
+ConsolidatedOutput.cshtml, ConsolidatedOutput_Trino.cshtml,
+SqlEditor.cshtml, TrinoSqlEditor.cshtml.
 
-Task: Professional CSS pass on the check-detail pages. Markup edits limited to adding
-class names, adding empty-value placeholders, and moving the customer-count badge.
-Do not change page handlers, models, bindings, hrefs or query strings.
+=== PART 1: Column headers (all grid pages) ===
 
-1. Define a token block at the top of site.css under :root and use it everywhere
-   below — no raw hex in the new rules:
-   --wf-red #D71E28; --wf-red-dark #A31219; --ink #2b2b2b; --muted #6b7280;
-   --line #e3e3e3; --surface #fff; --surface-alt #fafafa;
-   --danger #C62828; --danger-bg #FDECEC;
-   --warn #B26A00;  --warn-bg #FFF4E5;
-   --ok #1E7A46;    --ok-bg #E8F5EE;
-   --neutral #5A6472; --neutral-bg #F1F3F5;
+Current problems: headers are unstyled bare text with no background or separation
+from the first data row, they scroll away on long grids, and the drill-hint glyph is
+rendering as a stray capital "L" ("CONTROL ID L", "CHECK REFERENCE L",
+"UNIQUE CUST ID L") because the character is mis-encoded.
 
-2. Badges — replace the current ad-hoc styles with one `.badge-pill` base
-   (font-size .72rem, font-weight 600, padding .15rem .5rem, border-radius 10px,
-   line-height 1.4, letter-spacing .02em, vertical-align middle) plus modifiers:
-   `.badge-danger` (danger on danger-bg), `.badge-warn`, `.badge-ok`,
-   `.badge-neutral`. Apply semantically:
-   - "Check Failed"  -> badge-danger
-   - "Resolved"      -> badge-ok
-   - "Pending"       -> badge-warn
-   - "N failure(s)"  -> badge-neutral (it is a count, not a status)
-   - "N customer(s)" -> badge-neutral
-   Stop rendering the Check Reference value ("2.1") as a filled red badge in the
-   Failed Check Records table — render it as plain text in --ink.
+1. Remove the drill-hint glyph entirely. Delete every
+   `<span class="drill-hint">...</span>` from all .cshtml files and delete the
+   `.drill-hint` rule from site.css. The dotted underline on `.grid-link` already
+   signals which columns are drillable — no header marker is needed.
+   Confirm no stray literal characters remain in the <th> text.
 
-3. Reserve saturated red for actual failure state only. Section headings, the
-   "1 failed / 2 total" accounts line and the failure-record counts use --ink with
-   the number in --danger; no red backgrounds or red borders on containers.
+2. Add a shared `.grid-table` class applied to every data table, with a `thead th`
+   rule:
+   - background #F5F6F7, color var(--muted), font-size .72rem,
+     font-weight 600, letter-spacing .06em, text-transform uppercase
+   - padding .6rem .75rem, text-align left, white-space nowrap
+   - border-bottom 2px solid var(--line); no top or side borders
+   - first-child border-top-left-radius 4px, last-child border-top-right-radius 4px
 
-4. Summary strip (Check Reference / Effective Date / Failure Records / Customers
-   Affected): restyle as the same stat-card pattern used on the grid pages —
-   1px --line border, 4px left accent rule, .75rem uppercase --muted label,
-   1.35rem --ink value, equal-width flex cells with 1rem gap.
+3. Make the header row sticky: `.grid-table thead th { position: sticky; top: 0;
+   z-index: 2; }`. Verify no ancestor of the table has `overflow: hidden` or a
+   `transform` that would break sticky — if one does, report it rather than
+   silently removing it.
 
-5. Move the "N customer(s)" badge out of its floating position and place it inline
-   next to the page title, before "Back to Grid". Header row: title left,
-   badge + Back-to-Grid right, aligned on one baseline with align-items: center.
+4. Body cells: `.grid-table tbody td { padding: .55rem .75rem; font-size: .85rem;
+   color: var(--ink); border-bottom: 1px solid var(--line); vertical-align: middle; }`
+   Row hover background #FAFAFA. Remove any zebra striping so the hover state reads
+   clearly.
 
-6. Account accordion:
-   - Header link color --ink at rest, --wf-red on hover/focus, never browser blue,
-     `:visited` stays --ink. Same rule on both page variants.
-   - Expanded panel: remove the full red border; use a 3px left accent rule
-     (--danger for failed accounts, --line for non-failed) plus 1px --line on the
-     other three sides, background --surface-alt, border-radius 4px.
-   - Header row hover background #FAFAFA; remove the pale blue selection highlight.
-   - Chevron: --muted, rotates 180deg on expand, .15s ease transition.
+5. Right-align numeric/amount columns (CURR_BAL, TOT_BAL, INSURED_AMT, Accrued
+   Interest and similar) via a `.num` class on both the th and td, with
+   `font-variant-numeric: tabular-nums`.
 
-7. Label/value definition rows (Customer Information, Account fields):
-   labels .8rem --muted, values .9rem --ink font-weight 500, row padding .45rem 0,
-   1px solid --line bottom border, last row borderless. Keep the existing two-column
-   layout but align the two columns to a shared baseline grid so left and right
-   columns line up row-for-row.
+6. Apply identical header treatment to the SQL Editor and Trino SQL Editor results
+   grids so all grids in the app match.
 
-8. Empty values: render an em dash `&#8212;` wrapped in `<span class="value-empty">`
-   (color --muted, font-style normal) wherever a field is null or whitespace, so
-   Phone, Email, Entity Name, Account Type, Current Balance, Total Balance,
-   Hold Amount, Insured Amount, Debit Amount and ORC Desc are never visually blank.
+=== PART 2: Trino SQL Editor page (TrinoSqlEditor.cshtml) ===
 
-9. "Show All Accounts" toggle: style as a proper switch — 34x18px track,
-   --line off / --wf-red on, white 14px knob, .15s transition, and a
-   :focus-visible outline 2px --wf-red offset 2px. Remove the default blue focus glow.
-   Helper text ("By default, only failed accounts are shown") .75rem --muted.
+7. The results table renders its column header row twice (two identical rows of
+   UNIQUE_CUST_ID (VARCHAR), CUST_GOVT_ID (VARCHAR), ...). Diagnose and fix the root
+   cause — likely one of: DataTables being initialized on a table that already has a
+   server-rendered <thead>, DataTables initialized twice on the same element, or a
+   cloned header from a scroll/fixed-header option. Do not mask it with
+   `display: none` on the second row. Guard against re-initialization
+   (`if (!$.fn.DataTable.isDataTable(selector))`) and ensure the header markup is
+   emitted exactly once by the Razor page.
 
-10. Fix the footer overlapping the content: the copyright/version footer must sit in
-    normal flow after the content, not overlay the table. Add bottom padding to the
-    page container equal to the footer height if the footer is position: fixed;
-    otherwise remove the fixed positioning.
+8. The "Search:" box and the "25 entries per page" selector are rendering below /
+   overlapping the results table instead of above it. Fix the DataTables layout so
+   the controls row sits above the table: length selector left, search box right, on
+   one line with align-items: center and 1rem bottom margin. Use the DataTables
+   `layout` (or `dom`) option rather than repositioning with absolute CSS.
 
-11. Breadcrumb: .8rem, links --muted with --wf-red on hover, current crumb --ink,
-    separators --line.
+9. Style those controls to match the app: inputs and selects with 1px solid
+   var(--line), 3px radius, .4rem .6rem padding, .85rem font-size, and a
+   :focus-visible outline 2px var(--wf-red) offset 2px. Remove the default blue
+   focus glow.
+
+10. The type annotations in the headers ("(VARCHAR)", "(DECIMAL(14,2))") should
+    render as a separate `<span class="col-type">` on its own line beneath the column
+    name: .65rem, var(--muted), text-transform none, letter-spacing normal,
+    font-weight 400.
+
+11. Move the query metadata line (Rows / Columns / Time / State / QueryId) into a
+    bordered strip directly above the Results heading: .78rem, var(--muted), with the
+    State value in var(--ok) when FINISHED and var(--danger) when FAILED. Currently
+    it floats unanchored at the right edge.
 
 Constraints:
-- No new NuGet or npm packages, no JavaScript, no Bootstrap version change.
-- Do not alter any existing .grid-link rules.
+- No new NuGet or npm packages, no Bootstrap or DataTables version change.
+- Preserve all existing hrefs, handlers, query strings, model bindings and the
+  existing .grid-link rules.
+- Keep Trino and non-Trino page variants identical in markup shape.
+- Save all edited .cshtml files as UTF-8; do not introduce any non-ASCII literals in
+  markup — use HTML entities if a symbol is unavoidable.
 - Output minimal find-and-replace diffs per file, not full file rewrites.
-- List any place where an existing inline style or utility class conflicts with the
-  new rules instead of silently overriding with !important.
+- Report any existing inline style or utility class that conflicts with the new rules
+  instead of overriding with !important.
