@@ -1,41 +1,83 @@
 Context: ASP.NET Core 8 Razor Pages app (FDIC370WebApplication). Wells Fargo theme.
-Stylesheet: wwwroot/css/site.css. Grid pages under /Pages:
-ControlFailureRecords.cshtml, ControlFailureRecords_trino.cshtml,
-ControlFailureDetail.cshtml, ControlFailureDetail_trino.cshtml,
-ConsolidatedOutput.cshtml, ConsolidatedOutput_Trino.cshtml.
+Stylesheet: wwwroot/css/site.css.
+Pages to change: /Pages/ControlFailureCheckDetail.cshtml and
+/Pages/ControlFailureCheckDetail_trino.cshtml (keep both byte-identical in markup shape).
 
-Task: Refine the existing `.grid-link` drill-down styling. Current state is too loud —
-every drillable cell renders red at rest, the CSS tooltip is clipped by the table
-wrapper, and the header hint glyph is mojibaked.
+Task: Professional CSS pass on the check-detail pages. Markup edits limited to adding
+class names, adding empty-value placeholders, and moving the customer-count badge.
+Do not change page handlers, models, bindings, hrefs or query strings.
 
-Changes required:
+1. Define a token block at the top of site.css under :root and use it everywhere
+   below — no raw hex in the new rules:
+   --wf-red #D71E28; --wf-red-dark #A31219; --ink #2b2b2b; --muted #6b7280;
+   --line #e3e3e3; --surface #fff; --surface-alt #fafafa;
+   --danger #C62828; --danger-bg #FDECEC;
+   --warn #B26A00;  --warn-bg #FFF4E5;
+   --ok #1E7A46;    --ok-bg #E8F5EE;
+   --neutral #5A6472; --neutral-bg #F1F3F5;
 
-1. Rewrite the `.grid-link` rule in site.css:
-   - Rest state: color #2b2b2b, 1px dotted #bfbfbf bottom border, font-weight 500.
-   - Hover / :focus-visible: color #D71E28, 1px solid #D71E28 bottom border.
-   - Chevron "\203A" via ::after, position: absolute; right: .15rem; opacity 0 -> 1
-     on hover/focus. Give the anchor padding-right: .75rem so the chevron never
-     causes reflow.
-   - transition color and border-color at .12s ease.
-   - `.grid-link:visited` must stay #2b2b2b (no purple).
-   - Keep the existing :focus-visible outline (2px #D71E28, offset 2px).
+2. Badges — replace the current ad-hoc styles with one `.badge-pill` base
+   (font-size .72rem, font-weight 600, padding .15rem .5rem, border-radius 10px,
+   line-height 1.4, letter-spacing .02em, vertical-align middle) plus modifiers:
+   `.badge-danger` (danger on danger-bg), `.badge-warn`, `.badge-ok`,
+   `.badge-neutral`. Apply semantically:
+   - "Check Failed"  -> badge-danger
+   - "Resolved"      -> badge-ok
+   - "Pending"       -> badge-warn
+   - "N failure(s)"  -> badge-neutral (it is a count, not a status)
+   - "N customer(s)" -> badge-neutral
+   Stop rendering the Check Reference value ("2.1") as a filled red badge in the
+   Failed Check Records table — render it as plain text in --ink.
 
-2. Remove the CSS tooltip entirely: delete the `.grid-link[data-tip]:hover::before`
-   rule and strip every `data-tip` attribute from the .cshtml files. Keep the
-   `aria-label` on each anchor. Do not reintroduce the native `title` attribute.
+3. Reserve saturated red for actual failure state only. Section headings, the
+   "1 failed / 2 total" accounts line and the failure-record counts use --ink with
+   the number in --danger; no red backgrounds or red borders on containers.
 
-3. Fix the drillable-column header hint: replace the corrupted glyph with the HTML
-   entity `&#8627;` inside `<span class="drill-hint" aria-hidden="true">`. Verify all
-   affected .cshtml files are saved as UTF-8 with BOM.
+4. Summary strip (Check Reference / Effective Date / Failure Records / Customers
+   Affected): restyle as the same stat-card pattern used on the grid pages —
+   1px --line border, 4px left accent rule, .75rem uppercase --muted label,
+   1.35rem --ink value, equal-width flex cells with 1rem gap.
 
-4. Reduce link density: apply `.grid-link` to Control ID and Check Reference only on
-   the ControlFailureRecords / ControlFailureDetail pages (both Trino and non-Trino).
-   Unique Cust ID stays a drill link only on the ConsolidatedOutput pages. Remove
-   `.grid-link` from Unique Cust ID on the control-failure grids and render it as
-   plain text there.
+5. Move the "N customer(s)" badge out of its floating position and place it inline
+   next to the page title, before "Back to Grid". Header row: title left,
+   badge + Back-to-Grid right, aligned on one baseline with align-items: center.
+
+6. Account accordion:
+   - Header link color --ink at rest, --wf-red on hover/focus, never browser blue,
+     `:visited` stays --ink. Same rule on both page variants.
+   - Expanded panel: remove the full red border; use a 3px left accent rule
+     (--danger for failed accounts, --line for non-failed) plus 1px --line on the
+     other three sides, background --surface-alt, border-radius 4px.
+   - Header row hover background #FAFAFA; remove the pale blue selection highlight.
+   - Chevron: --muted, rotates 180deg on expand, .15s ease transition.
+
+7. Label/value definition rows (Customer Information, Account fields):
+   labels .8rem --muted, values .9rem --ink font-weight 500, row padding .45rem 0,
+   1px solid --line bottom border, last row borderless. Keep the existing two-column
+   layout but align the two columns to a shared baseline grid so left and right
+   columns line up row-for-row.
+
+8. Empty values: render an em dash `&#8212;` wrapped in `<span class="value-empty">`
+   (color --muted, font-style normal) wherever a field is null or whitespace, so
+   Phone, Email, Entity Name, Account Type, Current Balance, Total Balance,
+   Hold Amount, Insured Amount, Debit Amount and ORC Desc are never visually blank.
+
+9. "Show All Accounts" toggle: style as a proper switch — 34x18px track,
+   --line off / --wf-red on, white 14px knob, .15s transition, and a
+   :focus-visible outline 2px --wf-red offset 2px. Remove the default blue focus glow.
+   Helper text ("By default, only failed accounts are shown") .75rem --muted.
+
+10. Fix the footer overlapping the content: the copyright/version footer must sit in
+    normal flow after the content, not overlay the table. Add bottom padding to the
+    page container equal to the footer height if the footer is position: fixed;
+    otherwise remove the fixed positioning.
+
+11. Breadcrumb: .8rem, links --muted with --wf-red on hover, current crumb --ink,
+    separators --line.
 
 Constraints:
-- Preserve every existing href, route value and query string exactly.
-- No new packages, no JavaScript, no Bootstrap version change.
-- Keep Trino and non-Trino page variants byte-identical in markup shape.
+- No new NuGet or npm packages, no JavaScript, no Bootstrap version change.
+- Do not alter any existing .grid-link rules.
 - Output minimal find-and-replace diffs per file, not full file rewrites.
+- List any place where an existing inline style or utility class conflicts with the
+  new rules instead of silently overriding with !important.
