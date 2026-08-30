@@ -1,36 +1,41 @@
-Context: ASP.NET Core 8 Razor Pages app (FDIC370WebApplication). Pages under /Pages:
+Context: ASP.NET Core 8 Razor Pages app (FDIC370WebApplication). Wells Fargo theme.
+Stylesheet: wwwroot/css/site.css. Grid pages under /Pages:
 ControlFailureRecords.cshtml, ControlFailureRecords_trino.cshtml,
 ControlFailureDetail.cshtml, ControlFailureDetail_trino.cshtml,
 ConsolidatedOutput.cshtml, ConsolidatedOutput_Trino.cshtml.
-Global stylesheet: wwwroot/css/site.css. Wells Fargo theme (red #D71E28, gold accent).
 
-Task: Drill-down cells in the data grids are currently plain <a> tags with a `title`
-attribute — they look like static text and give no visual affordance until hover, and
-the native tooltip is slow and unthemable. Make drillable cells clearly clickable.
+Task: Refine the existing `.grid-link` drill-down styling. Current state is too loud —
+every drillable cell renders red at rest, the CSS tooltip is clipped by the table
+wrapper, and the header hint glyph is mojibaked.
 
-Requirements:
-1. Add a reusable `.grid-link` CSS class in site.css:
-   - color #D71E28, hover #A31219
-   - 1px dotted bottom border at rest, solid on hover/focus
-   - a "›" chevron via ::after that fades and slides in on hover/focus only
-   - :focus-visible outline 2px #D71E28, offset 2px (keyboard accessible)
-2. Replace the native tooltip with a CSS tooltip driven by a `data-tip` attribute
-   (::before, positioned above the link, dark background, pointer-events: none,
-   z-index above table rows). Keep an aria-label on the anchor for screen readers.
-3. Add `.table-drill tbody tr:hover { background: #FFF7F7; }` and apply the
-   `table-drill` class to the grid tables.
-4. Add a subtle `↳` hint span (aria-hidden) in the <th> of drillable columns only.
-5. Apply `.grid-link` ONLY to columns that actually navigate:
-   - Control ID  -> ControlFailureDetail / ControlFailureDetail_trino
-   - Check Reference -> ControlFailureCheckDetail / _trino
-   - Unique Cust ID -> ConsolidatedOutputDetail / _Trino
-   Leave SOR ID, LOB Name, Unique Acct ID and all other cells unstyled.
-6. Preserve every existing href, route value and query string exactly. Do not change
-   page handlers, models, or data binding.
-7. Keep the Trino and non-Trino page variants consistent — same classes, same markup shape.
+Changes required:
+
+1. Rewrite the `.grid-link` rule in site.css:
+   - Rest state: color #2b2b2b, 1px dotted #bfbfbf bottom border, font-weight 500.
+   - Hover / :focus-visible: color #D71E28, 1px solid #D71E28 bottom border.
+   - Chevron "\203A" via ::after, position: absolute; right: .15rem; opacity 0 -> 1
+     on hover/focus. Give the anchor padding-right: .75rem so the chevron never
+     causes reflow.
+   - transition color and border-color at .12s ease.
+   - `.grid-link:visited` must stay #2b2b2b (no purple).
+   - Keep the existing :focus-visible outline (2px #D71E28, offset 2px).
+
+2. Remove the CSS tooltip entirely: delete the `.grid-link[data-tip]:hover::before`
+   rule and strip every `data-tip` attribute from the .cshtml files. Keep the
+   `aria-label` on each anchor. Do not reintroduce the native `title` attribute.
+
+3. Fix the drillable-column header hint: replace the corrupted glyph with the HTML
+   entity `&#8627;` inside `<span class="drill-hint" aria-hidden="true">`. Verify all
+   affected .cshtml files are saved as UTF-8 with BOM.
+
+4. Reduce link density: apply `.grid-link` to Control ID and Check Reference only on
+   the ControlFailureRecords / ControlFailureDetail pages (both Trino and non-Trino).
+   Unique Cust ID stays a drill link only on the ConsolidatedOutput pages. Remove
+   `.grid-link` from Unique Cust ID on the control-failure grids and render it as
+   plain text there.
 
 Constraints:
-- No new NuGet or npm packages, no Bootstrap version change, no JavaScript.
-- Output as minimal find-and-replace diffs per file, not full file rewrites.
-- Verify no ancestor container has overflow:hidden that would clip the CSS tooltip;
-  if one does, flag it instead of silently changing the layout.
+- Preserve every existing href, route value and query string exactly.
+- No new packages, no JavaScript, no Bootstrap version change.
+- Keep Trino and non-Trino page variants byte-identical in markup shape.
+- Output minimal find-and-replace diffs per file, not full file rewrites.
