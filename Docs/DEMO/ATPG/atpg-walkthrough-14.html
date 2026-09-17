@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Test Plan Generator (ATPG) — FDIC Team Walkthrough</title>
+<style>
+:root{
+  --wf-red:#D71E28;
+  --wf-red-dark:#A4161C;
+  --wf-gold:#FFCD41;
+  --ink:#000000;
+  --body:#3C3A38;
+  --muted:#6E6A66;
+  --line:#DCD8D3;
+  --panel:#F4F2EF;
+  --term:#1B1A18;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#111010;font-family:"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--body);overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;background:#fff;position:relative;transform-origin:center center;box-shadow:0 24px 80px rgba(0,0,0,.6);overflow:hidden}
+
+.rail{position:absolute;left:0;top:0;bottom:0;width:62px;background:var(--wf-red);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:24px 0;z-index:5}
+.rail .mark{width:26px;height:26px;border:3px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px}
+.rail .section{writing-mode:vertical-rl;transform:rotate(180deg);color:#fff;font-size:12px;letter-spacing:.15em;font-weight:600;opacity:.93;white-space:nowrap}
+.rail .num{color:#fff;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.slide{position:absolute;inset:0;padding:52px 68px 56px 122px;display:none;flex-direction:column}
+.slide.active{display:flex}
+
+h1{font-size:56px;line-height:1.02;letter-spacing:-1.6px;color:var(--ink);font-weight:800;max-width:19ch}
+h2{font-size:34px;line-height:1.08;letter-spacing:-.9px;color:var(--ink);font-weight:800;max-width:28ch}
+h3{font-size:16px;color:var(--ink);font-weight:700}
+.rule{height:5px;width:74px;background:var(--wf-gold);margin:15px 0 22px}
+.rule.tight{margin:12px 0 16px}
+.lede{font-size:18px;line-height:1.48;max-width:76ch}
+.sub{font-size:14.5px;color:var(--muted);line-height:1.48;max-width:78ch}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic}
+
+.cols{display:grid;gap:24px}
+.c2{grid-template-columns:1fr 1fr}
+.c2w{grid-template-columns:1.3fr 1fr}
+.c2n{grid-template-columns:1fr 1.25fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:11px}
+ul.clean li{font-size:16px;line-height:1.42;padding-left:20px;position:relative;max-width:64ch}
+ul.clean li::before{content:"";position:absolute;left:0;top:8px;width:8px;height:8px;background:var(--wf-gold)}
+ul.clean.sm li{font-size:14.5px}
+ul.clean.sm{gap:9px}
+
+ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:9px}
+ol.steps li{counter-increment:s;position:relative;padding-left:34px;font-size:15.5px;line-height:1.4;max-width:66ch}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:23px;height:23px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps.sm li{font-size:14px;padding-left:30px}
+ol.steps.sm{gap:6.5px}
+ol.steps.sm li::before{width:20px;height:20px;font-size:11px}
+
+.term{background:var(--term);color:#EDE9E3;font-family:Consolas,"SF Mono",Menlo,"Courier New",monospace;font-size:14.5px;line-height:1.62;padding:18px 20px;border-left:5px solid var(--wf-gold);overflow-wrap:anywhere;white-space:pre-wrap}
+.term.sm{font-size:12.8px;line-height:1.58;padding:14px 16px}
+.term .flag{color:var(--wf-gold)}
+.term .val{color:#8FD6A0}
+.term .cmt{color:#8E8A85}
+.term .red{color:#FF8A8A}
+code.inl{font-family:Consolas,Menlo,"Courier New",monospace;font-size:.92em;background:var(--panel);padding:2px 5px;color:var(--ink);border-bottom:2px solid var(--line)}
+
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th{text-align:left;font-weight:700;color:var(--ink);padding:7px 11px 7px 0;border-bottom:2px solid var(--ink);font-size:13.5px}
+td{padding:7px 11px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.36}
+td.mono{font-family:Consolas,Menlo,monospace;font-size:13px;color:var(--ink);white-space:nowrap}
+
+.panel{background:var(--panel);padding:18px 20px;border-top:4px solid var(--ink)}
+.panel h3{margin-bottom:8px}
+.panel p,.panel li{font-size:14.5px;line-height:1.44}
+.warn{background:#FDF1F1;border-top-color:var(--wf-red)}
+.warn h3{color:var(--wf-red-dark)}
+.good{background:#F1F7F2;border-top-color:#2E7D4F}
+.good h3{color:#1F5C39}
+.src{font-size:12.5px;color:var(--muted);margin-top:auto;padding-top:14px}
+
+.flow{display:flex;margin-top:4px}
+.node{flex:1;background:#fff;border:2px solid var(--ink);padding:13px 12px;display:flex;flex-direction:column;gap:5px}
+.node+.node{border-left:none}
+.node .tag{font-size:11.5px;font-weight:700;color:var(--wf-red)}
+.node .ttl{font-size:15px;font-weight:700;color:var(--ink);line-height:1.18}
+.node .dsc{font-size:12.5px;color:var(--muted);line-height:1.35}
+.node.hl{background:var(--wf-gold)}
+.node.hl .tag{color:var(--wf-red-dark)}
+.node.hl .dsc{color:#5A4A14}
+
+.pack{border:2px solid var(--ink);display:flex;flex-direction:column}
+.pack .hd{background:var(--ink);color:#fff;padding:9px 14px;font-size:13.5px;font-family:Consolas,Menlo,monospace}
+.pack .row{display:flex;border-bottom:1px solid var(--line)}
+.pack .row:last-child{border-bottom:none}
+.pack .k{width:104px;background:var(--panel);padding:12px 14px;font-weight:700;font-size:14px;color:var(--ink);border-right:1px solid var(--line)}
+.pack .v{padding:12px 14px;font-size:14px;line-height:1.44}
+
+.stepbox{opacity:.2;transition:opacity .18s ease}
+.stepbox.on{opacity:1}
+
+.title-slide{justify-content:center;background:var(--ink)}
+.title-slide h1{color:#fff;font-size:66px;max-width:17ch}
+.title-slide .kicker{color:var(--wf-gold);font-size:16px;font-weight:700;letter-spacing:.14em;margin-bottom:20px}
+.title-slide .meta{color:#B6B1AB;font-size:14.5px;line-height:1.6;margin-top:26px}
+.title-slide .rule{background:var(--wf-red);width:104px;height:6px}
+
+#bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--line);z-index:8}
+#bar i{display:block;height:100%;background:var(--wf-gold);width:0;transition:width .25s ease}
+#foot{position:absolute;right:24px;bottom:17px;font-size:12px;color:var(--muted);z-index:7;font-variant-numeric:tabular-nums}
+#notes{position:fixed;left:0;right:0;bottom:0;background:#0B0A0A;color:#D9D4CE;padding:15px 24px;font-size:14px;line-height:1.5;display:none;z-index:20;border-top:3px solid var(--wf-gold);max-height:34vh;overflow:auto}
+#notes.show{display:block}
+#notes b{color:var(--wf-gold)}
+#help{position:fixed;left:16px;bottom:12px;color:#6A6663;font-size:11.5px;z-index:20}
+:focus-visible{outline:3px solid var(--wf-gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+  <div class="rail">
+    <div class="mark">WF</div>
+    <div class="section" id="railSection">ATPG</div>
+    <div class="num" id="railNum">1</div>
+  </div>
+
+  <!-- 1 -->
+  <section class="slide title-slide" data-section="ATPG" data-notes="ATPG is not a new testing product — it automates the authoring of Ab Initio's own graph unit tests. Twenty minutes, three parts: how the underlying testing works, how to run the generator, and where it breaks. Say up front that part three is the part not written down anywhere.">
+    <div class="kicker">ETL Development Support · FDIC</div>
+    <h1>Agentic Test Plan Generator</h1>
+    <div class="rule"></div>
+    <p class="lede" style="color:#CFCAC4;max-width:60ch">Automated graph unit test generation for our Ab Initio jobs — how the testing works, how to run it, and the cases where it still fails.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide" data-section="WHY" data-notes="Four goals from the Confluence introduction. For the manager, the fourth is the business case — Octane publication and QTE credit. Then land the framing line: ATPG automates the authoring, not the testing. That's why the next three slides are about the framework itself.">
+    <h2>Why ATPG exists</h2>
+    <div class="rule"></div>
+    <div class="cols c2">
+      <ul class="clean">
+        <li><b>Kickstart testing practices.</b> Start with simple tests; evolve toward advanced custom scenarios later.</li>
+        <li><b>Reliable regression coverage.</b> Every job validated automatically so breaking changes surface early.</li>
+      </ul>
+      <ul class="clean">
+        <li><b>Visibility and compliance metrics.</b> Results published to Octane.</li>
+      </ul>
+    </div>
+    <div class="panel" style="margin-top:24px">
+      <p>What ATPG produces is a <strong>standard Ab Initio Graph Unit Test</strong> — the same vendor-documented artifact we could write by hand. It automates the authoring, not the testing. So the next three slides are about the framework itself.</p>
+    </div>
+    <div class="cols c2" style="margin-top:20px">
+      <div class="panel good"><h3>No graph changes</h3><p>Annotations live in the <code class="inl">.tst</code>, never the <code class="inl">.mp</code>.</p></div>
+      <div class="panel good"><h3>Non-destructive</h3><p>No writes to targets, no reads from sources. Safe in any environment.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide" data-section="FOUNDATIONS" data-notes="Core mechanism. Two annotation types placed on flows: input source is where test data enters, test probe is where output is collected and compared. Only the region between them runs; everything outside greys out. This is what the Confluence page means by probes inserted in memory.">
+    <h2>How a graph unit test is built</h2>
+    <div class="rule"></div>
+    <p class="lede" style="margin-bottom:18px">You define the boundaries of a test by placing <strong>test annotations</strong> on the flows. Two kinds.</p>
+    <div class="cols c2">
+      <div class="panel">
+        <h3>Input source</h3>
+        <p>Defines the data used as input. Placed where the test should <strong>begin</strong> — where test data is inserted. Goes on any flow, or on a static lookup file.</p>
+      </div>
+      <div class="panel">
+        <h3>Test probe</h3>
+        <p>Compares data on the flow against the baseline and reports differences. Placed where the test should <strong>end</strong> — where output is collected.</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:24px;background:#fff;border:2px solid var(--ink);border-top-width:4px">
+      <p>The portion of the graph <em>within</em> those boundaries runs during the test. Everything outside appears grey and does not run. Because annotations live in the <code class="inl">.tst</code> file rather than the <code class="inl">.mp</code>, testing requires no change to the graph.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide" data-section="FOUNDATIONS" data-steps="4" data-notes="Space through the four boxes. Emphasise the pass rule: differences not accounted for mean FAIL; no differences, or all accounted for, mean PASS. That phrase 'accounted for' is the hook into ignore-fields and key comparison later.">
+    <h2>How the test executes</h2>
+    <div class="rule tight"></div>
+    <div class="flow" style="margin-top:14px">
+      <div class="node stepbox" data-step="1"><div class="tag">Step 1</div><div class="ttl">Load captured input</div><div class="dsc">Uses captured input data, not the graph's real input datasets or lookup files.</div></div>
+      <div class="node stepbox" data-step="2"><div class="tag">Step 2</div><div class="ttl">Run the bounded region</div><div class="dsc">Only components inside the annotation boundaries execute.</div></div>
+      <div class="node stepbox hl" data-step="3"><div class="tag">Step 3</div><div class="ttl">Collect at the probes</div><div class="dsc">Output written to test-specific files instead of the original targets.</div></div>
+      <div class="node stepbox" data-step="4"><div class="tag">Step 4</div><div class="ttl">Compare to baseline</div><div class="dsc">Each probe's output compared to its baseline to decide PASS or FAIL.</div></div>
+    </div>
+    <div class="cols c2" style="margin-top:26px">
+      <div class="panel">
+        <h3>The pass rule, precisely</h3>
+        <p>Differences that aren't accounted for → <strong>FAIL</strong>. No differences, or all differences accounted for → <strong>PASS</strong>.</p>
+      </div>
+      <div class="panel warn">
+        <h3>What runs during capture is different</h3>
+        <p>Components <strong>upstream</strong> of the input sources <em>do</em> run during capture — they have to, to produce the data being captured. Components downstream of the probes never run.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" data-section="FOUNDATIONS" data-notes="The slide people ask about afterwards. Geoff's words: two files, the input fed to the job each run and the baseline the output must match, compared field for field. Then the fingerprint — that hex string is an SHA of the snapshot contents; the .tst stores only the hash. And the .dml point: tests match on record format as well as data, so a DML change alone can fail a test.">
+    <h2>The baseline and the snapshot</h2>
+    <div class="rule tight"></div>
+    <p class="lede" style="margin-bottom:16px">Capture collects input and output; the data captured at the probes <strong>becomes the baseline</strong>. Both get packed into one file.</p>
+    <div class="pack">
+      <div class="hd">tlk/tlk_audit/tst/example_test_9d3d6148987e.pack.pdf</div>
+      <div class="row"><div class="k">Input</div><div class="v">The data fed to the job on every run. ATPG generates it synthetically to maximise coverage — a three-case <code class="inl">if</code> gets three records, one per case. Stored as <code class="inl">.dat</code> plus <code class="inl">.dml</code>.</div></div>
+      <div class="row"><div class="k">Baseline</div><div class="v">What the output must match on every run, compared <strong>field for field</strong>. Also <code class="inl">.dat</code> plus <code class="inl">.dml</code> — so tests match on <strong>record format as well as data</strong>.</div></div>
+    </div>
+    <div class="cols c3" style="margin-top:22px">
+      <div class="panel"><h3>That hex string</h3><p>An SHA fingerprint of the snapshot contents. The <code class="inl">.tst</code> stores only the hash.</p></div>
+      <div class="panel"><h3>The .pdf suffix</h3><p>Appended so the EME permits check-in. Strip it for a manual single-test run.</p></div>
+      <div class="panel warn"><h3>Pack before check-in</h3><p>Packing writes the fingerprint into the <code class="inl">.tst</code>. Check in first and you'll check in twice.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="Three prerequisites plus the EME. Flag lead time — Octane and Apigee access are not same-day, so anyone planning to run this next sprint should start the requests now. The EME determines the auth token; get it wrong and the run fails at authentication.">
+    <h2>Before anyone can run it</h2>
+    <div class="rule"></div>
+    <ol class="steps">
+      <li><strong>An Octane account.</strong> ValueEdge Octane workspace onboarding checklist and access request. Develop You course MA-0000858 covers the ALM Octane introduction.</li>
+      <li><strong>An Apigee account.</strong> API Portal access as a Consumer, then subscribe in Production to <code class="inl">ResultLogger_Consumer_API</code> and to <code class="inl">testAssets</code>.</li>
+      <li><strong>A key, per user.</strong> Requested from ETL Product Management with user ID, name and email. A more formal process is noted as coming.</li>
+    </ol>
+    <div class="panel warn" style="margin-top:24px">
+      <h3>Specify the EME your application uses</h3>
+      <p>Required to generate the correct authentication token. FDIC runs against <code class="inl">bica</code>.</p>
+      <div class="term sm" style="margin-top:10px">AB_AIR_ROOT : //1aoe-dev-beme.np.wellsfargo.net/abinitio/dev/ped/dev
+AB_AIR_ROOT : //1aoe-dev-eeme.np.wellsfargo.net/abinitio/eme/dev/eapp/eapp_d</div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="Run from a directory you can write to — it drops a tmp.ksh. Always pass -verbose; the Confluence page asks for it explicitly. Arguments can be given in any order.">
+    <h2>The command</h2>
+    <div class="rule tight"></div>
+    <div class="term" style="margin:4px 0 18px">/apps/abi/shared/scripts/run_atpg.ksh <span class="flag">-eme</span> &lt;bica|eapp&gt; <span class="flag">-mcp_key</span> AUTH_KEY <span class="flag">-user</span> MCP_USER <span class="flag">-sandbox</span> SANDBOX_PATH [OPTIONS]</div>
+    <div class="cols c2w">
+      <div>
+        <table>
+          <tr><th style="width:32%">Required</th><th>Meaning</th></tr>
+          <tr><td class="mono">-eme</td><td>Which EME the project uses — <code class="inl">bica</code> for us</td></tr>
+          <tr><td class="mono">-mcp_key</td><td>Auth key, from the admin team</td></tr>
+          <tr><td class="mono">-user</td><td>Your LAN ID</td></tr>
+          <tr><td class="mono">-sandbox</td><td>On-disk location of your project</td></tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr><th style="width:42%">Optional</th><th>Use</th></tr>
+          <tr><td class="mono">-verbose</td><td>Off by default; always turn it on</td></tr>
+          <tr><td class="mono">-substring_filter</td><td>Limit which jobs are tested — matches mp and pset filenames</td></tr>
+          <tr><td class="mono">-ignore_fields</td><td>Fields skipped in comparison. Anything with a changing time or date goes here</td></tr>
+          <tr><td class="mono">-nonoverrideable_params</td><td>Parameters to unset during creation. Rare</td></tr>
+          <tr><td class="mono">-overwrite</td><td>Regenerate tests already in <code class="inl">tst</code></td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:16px">Run it from any unix directory your user can write to — it creates a <code class="inl">tmp.ksh</code> file.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="Our actual invocation against fdic_370, filtered to asn_init_orc_ark. Roughly three minutes per job, so a full sandbox is an overnight run, not something before standup. It continues if a job fails. Say out loud: keys are per user and never go in a deck, a ticket, or a screenshot.">
+    <h2>Our run against FDIC 370</h2>
+    <div class="rule tight"></div>
+    <div class="term" style="margin:4px 0 22px">/apps/abi/shared/scripts/run_atpg.ksh <span class="flag">-eme</span> <span class="val">bica</span> <span class="flag">-mcp_key</span> <span class="red">&lt;YOUR_KEY&gt;</span> <span class="flag">-user</span> <span class="val">u669117</span> \
+  <span class="flag">-sandbox</span> <span class="val">/apps/src/fdic/developers/u669117/home/private_sand/fdic/fdic_370/</span> \
+  <span class="flag">-substring_filter</span> <span class="val">asn_init_orc_ark</span> <span class="flag">-verbose</span>
+
+<span class="cmt"># Keys are per user.</span></div>
+    <div class="cols c2">
+      <div class="panel">
+        <h3>Budget the time</h3>
+        <p>Roughly <strong>three minutes per job</strong> to create the data and the test job. The Confluence guidance is blunt: start it and leave it running overnight.</p>
+      </div>
+      <div class="panel">
+        <h3>One failure won't stop the batch</h3>
+        <p>The script continues if a job fails to run, so a single problem graph doesn't cost you the whole pass.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide" data-section="RUNNING IT" data-steps="2" data-notes="Space once to reveal the MCP column. The point: the MCP server is invisible to you. When something goes wrong you're debugging a black box, which is why -verbose matters and why the ETL group list is the escalation path.">
+    <h2>What happens after you press enter</h2>
+    <div class="rule tight"></div>
+    <div class="cols c2" style="margin-top:10px">
+      <div class="stepbox on" data-step="1">
+        <h3 style="margin-bottom:11px">The script does this</h3>
+        <ol class="steps sm">
+          <li>Contacts the MCP server and fetches a job key</li>
+          <li>Has the MCP server check out the sandbox server-side</li>
+          <li>Has it create a supporting sandbox in the EME, in a <code class="inl">test</code> folder adjacent to yours</li>
+          <li>Finds all graphs in the sandbox on disk</li>
+          <li>Asks the MCP to generate a test for each graph</li>
+          <li>Generates a suite file so all tests run with one command</li>
+          <li>Generates <code class="inl">octane.ksh</code>, saving credentials in the EME</li>
+          <li>Generates <code class="inl">run_test.ksh</code> to run the suite and load results to Octane</li>
+        </ol>
+      </div>
+      <div class="stepbox" data-step="2">
+        <h3 style="margin-bottom:11px;color:var(--wf-red)">The MCP server does this, invisibly</h3>
+        <ol class="steps sm">
+          <li>Examines the job — all inputs, outputs and record formats</li>
+          <li>Builds synthetic test input to maximise code coverage</li>
+          <li>Runs the job on that new input data</li>
+          <li>Saves the output as the ground truth baseline</li>
+          <li>Writes a graph unit test file</li>
+          <li>Packages input and baseline into a snapshot file</li>
+          <li>Checks the snapshot and test file into the EME</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="Everything lands in the sandbox tst directory. The warning that saves pain: run_test.ksh is recreated on every run, so rename it before you edit it.">
+    <h2>What you get back</h2>
+    <div class="rule"></div>
+    <table>
+      <tr><th style="width:19%">Artifact</th><th style="width:42%">Example path</th><th>Purpose</th></tr>
+      <tr><td><strong>Job</strong></td><td class="mono">/tlk/tlk_audit/mp/example_test.mp</td><td>The graph that was tested</td></tr>
+      <tr><td><strong>Test file</strong></td><td class="mono">tst/example_test.tst</td><td>Test definition — annotations and parameters</td></tr>
+      <tr><td><strong>Data file</strong></td><td class="mono">tst/example_test_9d3d…pack.pdf</td><td>Input plus baseline snapshot</td></tr>
+      <tr><td><strong>Suite file</strong></td><td class="mono">tst/suite.txt</td><td>Lists the tests to run</td></tr>
+      <tr><td><strong>Octane file</strong></td><td class="mono">tst/octane.ksh</td><td>Octane parameters; secrets in logonmgr under config <code class="inl">octane</code></td></tr>
+      <tr><td><strong>Run script</strong></td><td class="mono">tst/run_test.ksh</td><td>Unpacks the data and runs the suite</td></tr>
+    </table>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="Three execution paths plus coverage. On the middle path: Ab Initio says the snapshot unpacks automatically from the command line — our extra copy step exists because of the .pdf suffix, not because unpacking is normally manual. For CI/CD the middle-six must be ABTEST. On coverage, note the version gap.">
+    <h2>Running the tests</h2>
+    <div class="rule tight"></div>
+    <div class="cols c2" style="margin-top:8px">
+      <div>
+        <h3 style="margin-bottom:8px">Whole suite, into Octane</h3>
+        <div class="term sm">run_test.ksh &lt;sandbox&gt;</div>
+        <p class="sub" style="margin-top:8px">Runs the suite and submits results to Octane.</p>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px">A single test, no Octane</h3>
+        <div class="term sm">air sandbox test snapshot list &lt;tst&gt;
+cp …pack.pdf $AI_TEST_DATA_ARCHIVE/…pack
+air test snapshot unpack &lt;tst&gt;
+air test run &lt;.tst&gt;</div>
+      </div>
+    </div>
+    <h3 style="margin:22px 0 8px">Checking code coverage — how much of the transform the generated data actually exercised</h3>
+    <div class="term" style="margin-bottom:12px">air sandbox test run &lt;tst file&gt; <span class="flag">-code-coverage</span> <span class="flag">-verbose</span></div>
+    <p class="sub"><code class="inl">-code-coverage</code> is documented in the air Command Reference alongside <code class="inl">-junit</code>, <code class="inl">-capture-inputs</code>, <code class="inl">-unpack</code> / <code class="inl">-no-unpack</code> and <code class="inl">-suite</code>.</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-section="RUNNING IT" data-notes="This slide turns a red test into a diagnosis. Walk the numbers: field differences, added, deleted, changed, then baseline versus output record counts. Then the two canonical causes. Update Baseline overwrites the previous baseline — a deliberate decision, not a way to make red go away.">
+    <h2>Reading a failure</h2>
+    <div class="rule tight"></div>
+    <div class="cols c2n" style="margin-top:6px">
+      <div>
+        <div class="term sm">Name: Events_Keyed_by_dt_id
+  Output-to-baseline
+  field differences:   2 [View]
+  Added records:       2 [View]
+  Deleted records:     0
+  Changed records:     0
+  ------
+  Baseline records:   20
+  Output records:     22
+[Go to test probe] [Update baseline]</div>
+        <p class="sub" style="margin-top:9px">Failure detail from the Test Manager or Unit Test Editor.</p>
+      </div>
+      <div>
+        <h3 style="margin-bottom:11px">The two causes you'll actually hit</h3>
+        <ul class="clean sm">
+          <li><b>Record order changed.</b> Same records, different sequence from the baseline. Fix: train the test to compare on a <strong>key</strong> rather than position.</li>
+          <li><b>A volatile field.</b> A timestamp or date differs between run and baseline. Fix: <strong>ignore that field</strong> — which is what <code class="inl">-ignore_fields</code> does at generation time.</li>
+        </ul>
+        <div class="panel" style="margin-top:16px">
+          <h3>If the new output is genuinely correct</h3>
+          <p>Right-click the failing probe → <strong>Test Results &gt; Update Baseline</strong>. The previous baseline is overwritten.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" data-section="LIMITS" data-notes="Tone shift — this is the part not on the Confluence page, from a direct conversation with Geoff on 2 September. Read the pattern out loud: every case here is a graph where the logic is not in the graph. ATPG reasons about graph internals, so if the work happens in SQL or the database, there's nothing to analyse.">
+    <h2>Known cases where generation fails</h2>
+    <div class="rule tight"></div>
+    <div class="cols c2">
+      <ul class="clean">
+        <li><b>Plans.</b> Not supported.</li>
+        <li><b>Database-only graphs</b> where all logic sits inside a single run-sql component.</li>
+      </ul>
+      <ul class="clean">
+        <li><b>Two-component graphs</b> with no internal logic.</li>
+        <li><b>Graphs using join-with-db</b> where the logic lives in the database.</li>
+      </ul>
+    </div>
+    <div class="panel warn" style="margin-top:22px">
+      <h3>Plus the honest one</h3>
+      <p>The tool is <strong>still being upgraded and fails to analyse some graphs it should analyse</strong>. Those get fixed as time is allocated.</p>
+    </div>
+    <p class="lede" style="margin-top:20px"><strong>The pattern:</strong> ATPG reasons about logic expressed in the graph. Where the logic has been pushed into SQL or the database, there's nothing for it to see.</p>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" data-section="NEXT" data-notes="Close on actions, not summary. Ask for two decisions in the room: who owns the first full pass, and whether we record our generation rate as a data point back to the ETL team. Then hand to the principal engineer on ignore_fields — our FDIC outputs have date columns and we need a policy, not case-by-case guesswork.">
+    <h2>Where to go and what's next</h2>
+    <div class="rule"></div>
+    <div class="cols c2">
+      <div>
+        <h3 style="margin-bottom:11px">Getting help</h3>
+        <ul class="clean sm">
+          <li><b>ATPG support</b> — ETL Product Management group list</li>
+          <li><b>Graph unit testing help</b> — ticket on the ATPG Issue Register</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div id="foot"><span id="cur">1</span> / <span id="tot">14</span></div>
+  <div id="bar"><i id="barfill"></i></div>
+</div></div>
+
+<div id="notes"></div>
+<div id="help">← → navigate · N speaker notes · F fullscreen</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage');
+  var i = 0, step = 1;
+  document.getElementById('tot').textContent = slides.length;
+
+  function stepsOn(s){ return parseInt(s.getAttribute('data-steps') || '1', 10); }
+
+  function paintSteps(){
+    var boxes = slides[i].querySelectorAll('.stepbox');
+    if(!boxes.length) return;
+    Array.prototype.forEach.call(boxes, function(b){
+      b.classList.toggle('on', parseInt(b.getAttribute('data-step'),10) <= step);
+    });
+  }
+
+  function render(){
+    slides.forEach(function(s,n){ s.classList.toggle('active', n===i); });
+    var s = slides[i];
+    document.getElementById('railSection').textContent = s.getAttribute('data-section') || '';
+    document.getElementById('railNum').textContent = i+1;
+    document.getElementById('cur').textContent = i+1;
+    document.getElementById('barfill').style.width = ((i+1)/slides.length*100) + '%';
+    document.getElementById('notes').innerHTML = '<b>Slide ' + (i+1) + '</b> — ' + (s.getAttribute('data-notes')||'');
+    paintSteps();
+  }
+
+  function next(){
+    if(step < stepsOn(slides[i])){ step++; paintSteps(); return; }
+    if(i < slides.length-1){ i++; step = 1; render(); }
+  }
+  function prev(){
+    if(step > 1){ step--; paintSteps(); return; }
+    if(i > 0){ i--; step = stepsOn(slides[i]); render(); }
+  }
+  function fit(){
+    stage.style.transform = 'scale(' + Math.min(window.innerWidth/1280, window.innerHeight/720) * 0.96 + ')';
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ i=0; step=1; render(); }
+    else if(e.key==='End'){ i=slides.length-1; step=stepsOn(slides[i]); render(); }
+    else if(e.key==='n'||e.key==='N'){ document.getElementById('notes').classList.toggle('show'); }
+    else if(e.key==='f'||e.key==='F'){
+      if(!document.fullscreenElement){ document.documentElement.requestFullscreen(); }
+      else { document.exitFullscreen(); }
+    }
+  });
+  stage.addEventListener('click', function(e){
+    if(e.clientX < window.innerWidth*0.25){ prev(); } else { next(); }
+  });
+  window.addEventListener('resize', fit);
+  fit(); render();
+})();
+</script>
+</body>
+</html>
