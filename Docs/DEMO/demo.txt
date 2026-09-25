@@ -1,1 +1,61 @@
+Rewrite LLM_USAGE_JUSTIFICATION.md from scratch. It is a Tachyon production key request for IntelliAI, which will run enterprise-wide IBM MQ migration to NGDC on ~6.5M MQ config records (the hackathon used 50K). Reviewers are architecture and AI governance. Be precise: no adjectives without numbers, no claims the code doesn't support.
 
+HARD RULES
+- Separate CURRENT STATE (what the code does today) from TARGET STATE (what we will build). Never present target as current.
+- Every current-state claim must cite file + function. If you can't find it in code, don't claim it.
+- Every number is either measured, derived from a stated formula, or marked TBD with the exact method to measure it. No invented numbers.
+- No raw record ever goes to the LLM. The LLM operates only on deduplicated signatures, communities and candidate findings produced deterministically.
+
+PART A: AUDIT CURRENT PROMPTS (prompts.py)
+For each prompt, table: name | call site | input | output schema | weaknesses.
+Check for: missing MQ domain context, no explicit decision criteria, no few-shot examples, no confidence/abstain field, no evidence field referencing input IDs, silent truncation ("... and N more"), no output validation, no prompt version.
+State plainly that the current LLM role is shallow: which prompts only narrate results the rules already produced.
+
+PART B: TARGET LLM USAGE AT 6.5M SCALE
+Pattern for all roles: the deterministic stage reduces rows to units, the LLM processes units in batches, a validator checks every output, and low confidence goes to a human queue.
+For each role give: unit of work | est. unit count formula | batch size | reasoning or classification | input fields | output schema | validator | fallback | why rules alone fail.
+
+Roles:
+1. Ownership inference (classification): map queues/channels to owning app where metadata is missing or conflicting. Unit = distinct naming-pattern cluster (deterministic tokenisation), not row. Cache by signature hash.
+2. Queue purpose/criticality classification (classification): payment/PCI, batch, request-reply, pub-sub, dead/test. Inputs: name tokens, attributes (DEFPSIST, MAXDEPTH, TRIGGER, USAGE), connected apps. Unit = distinct queue signature.
+3. Anomaly triage (reasoning + classification): deterministic detectors emit candidates (orphans, zero-traffic, cycles, stale channels, non-standard attributes). LLM labels each retire / migrate / investigate with evidence. Unit = candidate.
+4. Community architecture review (reasoning): one call per community, chunked. Hierarchical map-reduce: community → domain → enterprise summary. No truncation; if a community exceeds the budget, split it.
+5. Migration wave reasoning (reasoning): the deterministic dependency solver produces feasible waves; the LLM resolves trade-offs and ties and writes the rationale. The solver re-validates.
+6. Config remediation (reasoning): propose target attribute/MQSC deltas for non-standard objects. The validator enforces MQSC syntax and WF policy rules; an invalid proposal is rejected, never auto-applied.
+7. Documentation generation: ADRs, wave runbooks, change-record text per wave.
+8. Human feedback interpreter and chat: with a hard turn limit and token cap per session.
+Drop or merge any hackathon role that only restates deterministic output.
+
+PART C: PROMPT ENGINEERING STANDARD
+Define the template every target prompt must follow: role, MQ domain context block, explicit decision criteria, 3-5 few-shot examples, strict JSON schema with confidence (0-1), evidence (list of input IDs), and abstain option. Also a version ID and max output tokens.
+Rewrite ONE prompt fully (queue classification) as the reference example.
+
+PART D: VOLUME AND COST MODEL
+Variables: D = distinct signatures, C = communities, A = anomaly candidates, W = waves, B = batch size, cache hit rate h.
+Formula: total calls per full run, tokens in/out per call type, total tokens per run.
+Table: hackathon (measured) vs production (estimate with formula; TBD values listed with measurement method).
+Add runs per month (initial full run, re-runs per wave, chat) and monthly token estimate. Leave rate as <Tachyon rate> if unknown.
+
+PART E: QUALITY EVIDENCE PLAN
+Build a labelled golden set (e.g. 500 queues, 100 anomalies) reviewed by MQ SMEs.
+Metrics: precision/recall per classification role, LLM vs rules-only, abstain rate, validator rejection rate.
+Acceptance thresholds per role before production use. Include hackathon results if any exist in the repo; otherwise mark TBD.
+
+PART F: GOVERNANCE
+Exact fields sent to the LLM and their data classification. Confirm: no message payload, no PII, no credentials.
+Also cover: prompt/response audit logging and retention, GuardRails behaviour (note past 424 false positives and the mitigation), rate-limit/circuit breaker, deterministic fallback per role, human approval before any MQSC is executed.
+
+PART G: MODEL ROUTING
+Use exact model IDs from the Tachyon catalogue (leave <model-id> if unknown; do not guess versions).
+Assign heavy reasoning model to roles 4, 5, 6. Assign cheaper model to 1, 2, 3, 7. Justify by task type and volume, not marketing claims.
+
+PART H: DIAGRAMS (mermaid)
+1. Reduction funnel: 6.5M rows → distinct objects → signatures/communities/candidates → batched LLM calls, with formulas on edges.
+2. Per-call flow: unit → cache check → prompt vN → Tachyon → schema validation → policy validator → confidence gate → accept / human queue / fallback.
+3. End-to-end pipeline with deterministic nodes and LLM nodes visually distinct.
+4. Model routing: role → model tier.
+
+PART I: ONE-PAGE SUMMARY FOR APPROVAL BOARD
+Five points maximum, each with a number or a formula.
+
+Output: the full markdown. Then list every TBD, with how to measure it.
