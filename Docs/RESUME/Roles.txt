@@ -1,1 +1,21 @@
 
+	•	Technical lead for a 9-engineer team delivering regulatory reporting platforms in COO Technology (RegOps). I own sprint planning, roadmap, release management and Scrum ceremonies.
+	•	Escalation point for the Scrum Master and the team. I make the technical decisions and clear blockers in code, build, deployment and environments.
+	•	Coach and mentor engineers through code and design reviews, pairing and onboarding, and make sure solutions follow the agreed technical direction.
+	•	Keep every release aligned with the Banking Platform Architecture, NFRs, SDLC standards and security controls (DAST, Liquibase, CDE).
+	•	Drive application modernization toward the target architecture: cloud readiness on OpenShift, NGDC and data platform migration.
+	•	Lead the FDIC data and ETL work: PySpark/Airflow pipelines, Hive/Trino/Iceberg, and the Ab Initio → PySpark migration strategy.
+	•	Stay hands-on in .NET 8/C#, React/Angular and Python, and handle production support and incident triage.
+	•	Work with Product Owners, architects, platform/DevOps and LOB stakeholders on priorities, and explain technical and data trade-offs to senior leaders.
+
+Achievements
+
+	•	Won the Wells Fargo IBM MQ Intelligent Hackathon. I led and architected the 4-person team. We built a 10-agent LangGraph pipeline on Tachyon (Gemini 2.5 Pro) that analyzes ~13,000 MQ configuration rows and generates target topology, MQSC scripts and migration plans. I presented it to the CTO and CIO.
+	•	Took the hackathon solution toward production for the NGDC MQ migration, scaling from ~50K to ~65 lakh records. The live OpenShift demo migrated 7 apps with zero message loss.
+	•	Led the ROCO OpenShift migration, NGDC transformation and Preferred Server migration, which moved the platform onto the strategic infrastructure.
+	•	Led the MORS rebuild on React/Web API, replacing the legacy UI and service layer.
+	•	Coordinated the ROCA PCF and UCD migrations and led delivery of the Insider Survey module.
+	•	Built the Medallion module for NASA and led the Bootstrap upgrade.
+	•	Built a Trino/Kyuubi SQL Editor in the FDIC370 web application on OpenShift. Server-side pagination handles JOIN results of up to 5 million rows. I also fixed an OCP native-dependency failure by moving to pure HTTP clients.
+	•	Ran the contractor-to-FTE knowledge transfer on FDIC, starting with the riskiest undocumented processes to cut key-person dependency.
+	•	Started the AI-assisted Ab Initio → PySpark migration for ~300 complex graphs using Devin and Claude. Management is targeting 1 year against the initial 2–3 year manual estimate.
